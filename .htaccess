@@ -1,0 +1,17 @@
+# supress php errors
+php_flag display_startup_errors off
+php_flag display_errors on
+php_flag html_errors off
+
+Options -MultiViews
+
+RewriteEngine On
+
+# bottom line: we're going to simply pop the rest off and parse it in PHP.
+RewriteRule ^css/(.*)$ css/$1 [L,QSA]
+RewriteRule ^data/(.*)$ data/$1 [L,QSA]
+RewriteRule ^lib/(.*)$ lib/$1 [L,QSA]
+RewriteRule ^images/(.*)$ images/$1 [L,QSA]
+RewriteRule ^js/(.*)$ js/$1 [L,QSA]
+RewriteRule ^tests/(.*)$ tests/$1 [L,QSA]
+RewriteRule ^(.*)$ index.php?qs=$1 [L,QSA]

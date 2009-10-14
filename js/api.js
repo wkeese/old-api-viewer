@@ -1,0 +1,117 @@
+dojo.require("dojo.parser");
+dojo.require("dojo.data.ItemFileReadStore");
+dojo.require("dijit.layout.BorderContainer");
+dojo.require("dijit.layout.AccordionContainer");
+dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.layout.ContentPane");
+dojo.require("dijit.Tree");
+
+if(currentVersion === undefined){
+	//	fallback.
+	var currentVersion = "1.3";
+}
+
+paneOnLoad = function(data){
+	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
+		link.onclick = function(e){
+			dojo.stopEvent(e);
+			var tmp = this.href.split("/");
+			var version = tmp[3];
+			var page = tmp.slice(4).join(".");
+			addTabPane(page, version);
+			return false;
+		};
+	});
+
+	var privateOn = false, inheritedOn = true;
+	//	hide the private members.
+	dojo.query("div.private", this.domNode).style("display", "none");
+
+	//	set up the buttons in the toolbar.
+	dojo.query("div.jsdoc-toolbar span.trans-icon", this.domNode).forEach(function(node){
+		if(dojo.hasClass(node, "jsdoc-private")){
+			dojo.addClass(node, "off");
+			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
+				privateOn = !privateOn;
+				dojo[(privateOn ? "removeClass" : "addClass")](node, "off");
+				dojo.query("div.private", this.domNode).forEach(function(n){
+					var state = (privateOn ? "" : "none");
+					dojo.style(n, "display", state);
+				});
+			}));
+		} else {
+			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
+				inheritedOn = !inheritedOn;
+				dojo[(inheritedOn ? "removeClass" : "addClass")](node, "off");
+				dojo.query("div.inherited", this.domNode).forEach(function(n){
+					var state = (inheritedOn ? "" : "none");
+					if(!(!privateOn && dojo.hasClass(n, "private"))){
+						dojo.style(n, "display", state);
+					}
+				});
+			}));
+		}
+	});
+
+	//	set the title
+	var w = dijit.byId("content").selectedChildWidget;
+	document.title = w.title + " - The Dojo Toolkit";
+	
+	//	finally set the content of the printBlock.
+	dojo.byId("printBlock").innerHTML = w.domNode.innerHTML;
+};
+
+addTabPane = function(page, version){
+	var p = dijit.byId("content");
+	var url = "/lib/item.php?p=" + page.split(".").join("/") + "&v=" + (version || currentVersion);
+	var title = page.split("/").join(".");
+
+	//	get the children and make sure we haven't opened this yet.
+	var c = p.getChildren();
+	for(var i=0; i<c.length; i++){
+		if(c[i].title == title){
+			p.selectChild(c[i]);
+			return;
+		}
+	}
+	var pane = new dijit.layout.ContentPane({ 
+		href: url, 
+		title: title, 
+		closable: true,
+		onLoad: dojo.hitch(pane, paneOnLoad)
+	});
+	p.addChild(pane);
+	p.selectChild(pane);
+};
+
+dojo.addOnLoad(function(){
+	if(dijit.byId("initialPagePane")){
+		paneOnLoad.apply(dijit.byId("initialPagePane"));
+	}
+
+	var w = dijit.byId("content");
+	if(w){
+		dojo.subscribe(w.id + "-selectChild", w, function(arr){
+			document.title = this.selectedChildWidget.title + " - The Dojo Toolkit";
+			dojo.byId("printBlock").innerHTML = this.selectedChildWidget.domNode.innerHTML;
+		});
+	}
+
+	var s = dojo.byId("versionSelector");
+	s.onchange = dojo.hitch(s, function(e){
+		var v = this.options[this.selectedIndex].value;
+		if(v.length){
+			// switch to the current version and reload the tree.
+			currentVersion = v;
+			//	TODO: reload the trees.
+		} else {
+			//	revert the selection.
+			for(var i=0, l=this.options.length; i<l; i++){
+				if(this.options[i].value == currentVersion){
+					this.selectedIndex = i;
+					break;
+				}
+			}
+		}
+	});
+});
