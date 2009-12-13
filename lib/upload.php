@@ -32,6 +32,12 @@ if(isset($_POST["dir"])){
 		} else {
 			if(!file_exists($dataDir . $version)){
 				mkdir($dataDir . $version, 0700);
+				mkdir($dataDir . $version . '/cache', 0700);
+			} else {
+				//	clear the cache
+				$files = glob($dataDir . $version . '/cache/*');
+				$files = array_filter($files, 'is_file');
+				array_map('unlink', $files);
 			}
 
 			$api = new DOMDocument();

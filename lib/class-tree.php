@@ -28,14 +28,23 @@ function sorter($a, $b){
 EOM;
 	//	go grab the right XML file.  Note that we can load this directly, since the stylesheet
 	//	shouldn't contain any variables.
-	$f = dirname(__FILE__) . "/../data/" . $version . "/objects.xml";
+	$data_dir = dirname(__FILE__) . '/../data/' . $version . '/';
+	$f = $data_dir . "objects.xml";
 	if(!file_exists($f)){
-		$f = dirname(__FILE__) . "/../data/" . $defVersion . "/objects.xml";
+		$data_dir = dirname(__FILE__) . '/../data/' . $defVersion . '/';
+		$f = $data_dir . "objects.xml";
 	}
 	if(!file_exists($f)){
 		echo "API data does not exist for the default version: " . $defVersion . "<br/>";
 		exit();
 	}
+
+	//	check the cache first
+	if(file_exists($data_dir . 'cache/class-tree.json')){
+		echo file_get_contents($data_dir . 'cache/class-tree.json');
+		exit();		
+	}
+
 	$xml = new DOMDocument();
 	$xml->load($f);
 
@@ -144,5 +153,6 @@ EOM;
 	}
 
 	$str = str_replace('{{{items}}}', json_encode($fin), $str);
+	file_put_contents($data_dir . 'cache/class-tree.json', $str);
 	echo $str;
 ?>

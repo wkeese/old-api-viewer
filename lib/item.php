@@ -114,6 +114,12 @@
 		exit();
 	}
 
+	//	test to see if this has been cached first.
+	if(file_exists($data_dir . 'cache/' . $page . '.html')){
+		echo file_get_contents($data_dir . 'cache/' . $page . '.html');
+		exit();
+	}
+
 	//	the main details document.
 	$xml = new DOMDocument();
 	$xml->load($f);
@@ -762,5 +768,9 @@
 	$s .= '</div>';	// jsdoc-field-list.
 	$s .= '</div>';	// jsdoc-children.
 	$details .= '</div></div>';
+
+	//	if we got here, we're not cached so do that now.
+	file_put_contents($data_dir . 'cache/' . $page . '.html', $s . $details);
+	
 	echo $s . $details;
 ?>

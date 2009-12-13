@@ -49,14 +49,23 @@ function sorter($a, $b){
 }
 EOM;
 
-	$f = dirname(__FILE__) . "/../data/" . $version . "/resources.xml";
+	$data_dir = dirname(__FILE__) . '/../data/' . $version . '/';
+	$f = $data_dir . "resources.xml";
 	if(!file_exists($f)){
-		$f = dirname(__FILE__) . "/../data/" . $defVersion . "/resources.xml";
+		$data_dir = dirname(__FILE__) . '/../data/' . $defVersion . '/';
+		$f = $data_dir . "resources.xml";
 	}
 	if(!file_exists($f)){
 		echo "API data does not exist for the default version: " . $defVersion . "<br/>";
 		exit();
 	}
+
+	//	check the cache first
+	if(file_exists($data_dir . 'cache/module-tree.json')){
+		echo file_get_contents($data_dir . 'cache/module-tree.json');
+		exit();		
+	}
+
 	$xml = new DOMDocument();
 	$xml->load($f);
 
@@ -194,5 +203,6 @@ EOM;
 	}
 
 	$str = str_replace('{{{items}}}', json_encode($ret), $str);
+	file_put_contents($data_dir . 'cache/module-tree.json', $str);
 	echo $str;
 ?>

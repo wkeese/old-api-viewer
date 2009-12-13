@@ -344,3 +344,6 @@ table.jsdoc-parameters td {
 	background-color: #fff;
 }
 
+div.jsdoc-fields div.jsdoc-example {
+	margin-top: 1em;
+}
