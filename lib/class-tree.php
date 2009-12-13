@@ -13,7 +13,7 @@ function sorter($a, $b){
 	return (strtolower($a["_reference"]) > strtolower($b["_reference"])) ? 1 : -1;
 }
 
-	$defVersion = "1.3";
+	$defVersion = "1.4";
 	$version = $defVersion;
 	if(array_key_exists("v", $_GET)){
 		$version = $_GET["v"];
@@ -70,57 +70,46 @@ EOM;
 		$name_parts = explode(".", $name);
 		$short_name = array_pop($name_parts);
 
-		//	attempt to filter out any objects like "domNode".
-		$test = false;
-		foreach($keys as $key){
-			if(strpos($name, $key)===0){
-				$test = true;
-				break;
+		if ($type=="Function" && $classlike=="true") {
+			$val = array(
+				"id"=>$name,  /* "object-" . $counter++, */
+				"name"=>$short_name,
+				"fullname"=>$name,
+				"type"=>"constructor"
+			);
+		} else {
+			$val = array(
+				"id"=>$name,  /* "object-" . $counter++, */
+				"name"=>$short_name,
+				"fullname"=>$name,
+				"type"=>(strlen($type) ? strtolower($type): "object")
+			);
+		} 
+
+		if(isset($val)){
+			/*
+			if(strpos($short_name, "_") === 0){
+				unset($val);
+				continue; 
 			}
-		}
-
-		if($test){
-			if ($type=="Function" && $classlike=="true") {
-				$val = array(
-					"id"=>$name,  /* "object-" . $counter++, */
-					"name"=>$short_name,
-					"fullname"=>$name,
-					"type"=>"constructor"
-				);
-			} else {
-				$val = array(
-					"id"=>$name,  /* "object-" . $counter++, */
-					"name"=>$short_name,
-					"fullname"=>$name,
-					"type"=>"object"
-				);
-			} 
-
-			if(isset($val)){
-				/*
-				if(strpos($short_name, "_") === 0){
-					unset($val);
-					continue; 
-				}
-				 */
-				if(count($name_parts)){
-					$finder = implode(".", $name_parts);
-					foreach($ret as &$obj){
-						if($obj["fullname"] == $finder){
-							if(!array_key_exists("children", $obj)){
-								$obj["children"] = array();
-							}
-							$obj["children"][] = array(
-								"_reference"=>$val["id"]
-							);
-							$obj["type"] = "namespace";
-							break;
+			 */
+			if(count($name_parts)){
+				$finder = implode(".", $name_parts);
+				foreach($ret as &$obj){
+					if($obj["fullname"] == $finder){
+						if(!array_key_exists("children", $obj)){
+							$obj["children"] = array();
 						}
+						$obj["children"][] = array(
+							"_reference"=>$val["id"]
+						);
+					//	$obj["type"] = "namespace";
+						break;
 					}
 				}
-				$ret[] = $val;
-				unset($val);
 			}
+			$ret[] = $val;
+			unset($val);
 		}
 	}
 

@@ -49,6 +49,15 @@ if(!$has_version){
 		<link rel="stylesheet" href="/css/jsdoc-print.css" type="text/css" media="print" />
 		<script type="text/javascript">djConfig={isDebug:false};</script>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js"></script>
+		<!-- SyntaxHighlighter -->
+		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shCore.js"><</script>
+<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
+<!--
+	<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushPlain.js"><</script>
+-->
+		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
+		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shCore.css" type="text/css" />
+		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="keywords" content="The Dojo Toolkit, dojo, JavaScript Framework" />
@@ -77,6 +86,9 @@ if(!$has_version){
 		<div id="loader"><div id="loaderInner"></div></div>
 		<div id="printBlock"></div>
 		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="/lib/class-tree.php?v=<?php echo $version; ?>"></div>
+<!--
+		<div dojoType="dojo.data.ItemFileReadStore" jsId="moduleStore" url="/lib/module-tree.php?v=<?php echo $version; ?>"></div>
+-->
 		<div id="main" dojoType="dijit.layout.BorderContainer" liveSplitters="false">
 			<div id="head" dojoType="dijit.layout.ContentPane" region="top">
 				<div class="innerBox">
@@ -109,29 +121,56 @@ foreach($versions as $v){
 }
 						?></select>
 					</div>
-					<div class="dijitAccordionTitle-selected">By Object</div>
 				</div>
-				<div dojoType="dijit.layout.ContentPane" region="center">
-					<div id="namespaceTree" dojoType="dijit.Tree" store="classStore" query="{type:'root'}">
-						<script type="dojo/method" event="getIconClass" args="item, opened">
-							if(!item){ return "objectIcon16"; }
-							if(item == this.model.root) {
-								return "namespaceIcon16";
-							} else {
-								if(classStore.getValue(item, "type") == "root"){
-									if(classStore.getValue(item, "name") == "djConfig"){
-										return "objectIcon16";
-									}
+				<div dojoType="dijit.layout.AccordionContainer" region="center">
+					<div dojoType="dijit.layout.ContentPane" title="By Object" selected="true">
+						<div id="namespaceTree" dojoType="dijit.Tree" store="classStore" query="{type:'root'}">
+							<script type="dojo/method" event="getIconClass" args="item, opened">
+								if(!item){ return "objectIcon16"; }
+								if(item == this.model.root) {
 									return "namespaceIcon16";
 								} else {
-									return classStore.getValue(item, "type") + "Icon16";
+									if(classStore.getValue(item, "type") == "root"){
+										if(classStore.getValue(item, "name") == "djConfig"){
+											return "objectIcon16";
+										}
+										return "namespaceIcon16";
+									} else {
+										return classStore.getValue(item, "type") + "Icon16";
+									}
 								}
-							}
-						</script>
-						<script type="dojo/method" event="onClick" args="item">
-							addTabPane(classStore.getValue(item, "fullname"), currentVersion);
-						</script>
+							</script>
+							<script type="dojo/method" event="onClick" args="item">
+								addTabPane(classStore.getValue(item, "fullname"), currentVersion);
+							</script>
+						</div>
 					</div>
+<!--
+					<div dojoType="dijit.layout.ContentPane" title="By Resource">
+						<div id="moduleTree" dojoType="dijit.Tree" store="moduleStore" query="{type:'root'}">
+							<script type="dojo/method" event="getIconClass" args="item, opened">
+								if(!item || (moduleStore.getValue(item, "type") == "folder" || moduleStore.getValue(item, "type") == "root")){
+									return opened ? "dijitFolderOpened":"dijitFolderClosed"; 
+								}
+								else if(moduleStore.getValue(item, "type") == "file"){
+									return "dijitLeaf";
+								} 
+								else if (!moduleStore.getValue(item, "type").length){
+									return "objectIcon16";
+								}
+								else {
+									return moduleStore.getValue(item, "type").toLowerCase() + "Icon16";
+								}
+							</script>
+								<script type="dojo/method" event="onClick" args="item">
+								var type = moduleStore.getValue(item, "type");
+								if(type != "folder" && type != "root" && type != "file"){
+									addTabPane(moduleStore.getValue(item, "name"), currentVersion);
+								}
+							</script>
+						</div>
+					</div>
+-->
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="bottom" style="height:18px;background-color:#f2f2f2;border-top:1px solid #dedede;padding:0 2px 4px 48px;position:relative;overflow:hidden;">
 					<span style="position:absolute;top:5px;left:3px;font-size:11px;">Legend: </span>

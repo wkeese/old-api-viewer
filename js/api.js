@@ -5,6 +5,8 @@ dojo.require("dijit.layout.AccordionContainer");
 dojo.require("dijit.layout.TabContainer");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.Tree");
+dojo.require("dojo.fx.easing");
+dojo.require("dojox.fx.scroll");
 
 if(currentVersion === undefined){
 	//	fallback.
@@ -22,6 +24,28 @@ paneOnLoad = function(data){
 			return false;
 		};
 	});
+
+	var context = this.domNode;
+	dojo.query("a.inline-link", this.domNode).forEach(function(link){
+		link.onclick = function(e){
+			dojo.stopEvent(e);
+			var target = dojo.query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
+			if(target.length){
+				//	FIXME: for some reason this is not scrolling to where you'd expect it to.
+				var anim = dojox.fx.smoothScroll({
+					node: target[0],
+					win: context,
+					duration: 600
+				}).play();
+			}
+			return false;
+		};
+	});
+
+	//	if SyntaxHighlighter is present, run it in the content
+	if(SyntaxHighlighter){
+		SyntaxHighlighter.highlight();
+	}
 
 	var privateOn = false, inheritedOn = true;
 	//	hide the private members.
@@ -78,6 +102,7 @@ addTabPane = function(page, version){
 		href: url, 
 		title: title, 
 		closable: true,
+		parseOnLoad: false,
 		onLoad: dojo.hitch(pane, paneOnLoad)
 	});
 	p.addChild(pane);

@@ -1,5 +1,5 @@
 <?php
-	$defVersion = "1.3";
+	$defVersion = "1.4";
 	$dataDir = dirname(__FILE__) . "/data/";
 	$defPage = "";
 	$modules = array(
@@ -7,5 +7,5 @@
 		"dijit"=>-1, 
 		"dojox"=>-1, 
 		"djConfig"=>-1
-	);
+	 );
 ?>

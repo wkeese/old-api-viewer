@@ -1,10 +1,12 @@
 <?php
 	include(dirname(__FILE__) . "/../config.php");
 	include("markdown/markdown.php");
-	include("geshi/geshi.php");
-	function icon_url($type, $size=24){
+//	include("geshi/geshi.php");
+	function icon_url($type, $size=16){
 		$img = "object";
 		switch($type){
+			case 'Namespace':
+			case 'namespace': $img='namespace'; break;
 			case 'Constructor': $img='constructor'; break;
 			case 'Node':
 			case 'DOMNode':
@@ -49,6 +51,38 @@
 		return Markdown(implode("\n", $fixed));
 	}
 
+	function format_example($text){
+		//	do this for SyntaxHighlighter use.
+		$s = ""; // */ "\n<!--\n" . $text . "\n-->\n";
+		//	insert an additional tab if the first character is a tab.
+		if(strpos($text, "\t")===0){
+			$text = "\t" . $text;
+		}
+		$lines = explode("\n", "\n" . $text);
+		$isCode = false;
+		foreach($lines as &$line){
+			if(strpos($line, "\t")===0){
+				$line = substr($line, 1);	//	always pull off the first tab.
+			}
+			if(strpos($line, "\t")===0){
+				if(!$isCode){
+					$isCode = true;
+					$line = '<pre class="brush: js;">' . "\n" . $line;
+				}
+			} else {
+				if($isCode){
+					$isCode = false;
+					$line .= '</pre>';
+				}
+			}
+		}
+		if($isCode){
+			//	probably we never saw the last line, or the last line was code.
+			$lines[] = '</pre>';
+		}
+		return $s . implode("\n", $lines);
+	}
+
 	//	begin the real work.
 	if(!isset($version)){ $version = $defVersion; }
 	if(!isset($page)){ $page = "dojo"; }
@@ -66,17 +100,23 @@
 	}
 
 	//	load up the doc.
-	$f = dirname(__FILE__) . "/../data/" . $version . "/details.xml";
+	$provides = "provides.xml";
+	$resources = "resources.xml";
+	$details = "details.xml";
+	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
+	$f = $data_dir . $details;
 	if(!file_exists($f)){
-		$f = dirname(__FILE__) . "/../data/" . $defVersion . "/details.xml";
+		$data_dir = dirname(__FILE__) . "/../data/" . $defVersion . "/";
+		$f = $data_dir . $details;
 	}
 	if(!file_exists($f)){
 		echo "API data does not exist for the default version: " . $defVersion . "<br/>";
 		exit();
 	}
+
+	//	the main details document.
 	$xml = new DOMDocument();
 	$xml->load($f);
-
 	$xpath = new DOMXPath($xml);
 
 	//	get our context.
@@ -88,10 +128,40 @@
 		exit();
 	}
 
+	//	if we have a context, we can get provides and resources, so do that now.
+	$show_require = true;
+	$provide = $page;
+	$p_xml = new DOMDocument();
+	$p_xml->load($data_dir . $provides);
+	$p_xpath = new DOMXPath($p_xml);
+	$prov = $p_xpath->query('//object[@location="' . $page . '"]/provides/provide');
+	if($prov->length > 1){
+		$show_require = false;
+	}
+	else if($prov->length == 1) {
+		$provide = $prov->item(0)->nodeValue;
+	}
+
+	$show_resource = true;
+	$resource = "";
+	$r_xml = new DOMDocument();
+	$r_xml->load($data_dir . $resources);
+	$r_xpath = new DOMXPath($r_xml);
+	$resr = $r_xpath->query('//object[@location="' . $page . '"]/resources/resource');
+	if($resr->length > 1){
+		$show_resource = false;
+	} else if($resr->length == 1) {
+		$resource = $resr->item(0)->nodeValue;
+	}
+
 	//	figure out a few things first.
 	$is_constructor = ($context->getAttribute("type")=="Function" && $context->getAttribute("classlike")=="true");
 	$nl = $xpath->query('//object[starts-with(@location, "' . $page . '.") and not(starts-with(substring-after(@location, "' . $page . '."), "_"))]');
 	$is_namespace = ($nl->length > 0);
+	$type = $context->getAttribute("type");
+	if(!strlen($type)){ $type = 'Object'; }
+	if($is_constructor){ $type = 'Constructor'; }
+//	if($is_namespace){ $type = 'Namespace'; }
 
 	//	start up the output process.
 	$s = '<div class="jsdoc-toolbar">'
@@ -105,15 +175,9 @@
 
 	//	page heading.
 	$s .= '<h1 class="jsdoc-title">'
-		.'<img class="trans-icon" border="0" width="36" height="36" src="';
-	if($is_namespace){
-		$s .= '/images/icons/36x36/namespace.png';
-	} else if ($is_constructor){
-		$s .= '/images/icons/36x36/constructor.png';
-	} else {
-		$s .= '/images/icons/36x36/object.png';
-	}
-	$s .= '" />' . $context->getAttribute("location") . '</h1>';
+		.'<img class="trans-icon" border="0" width="36" height="36" src="'
+		. icon_url($type, 36)
+		. '" />' . $context->getAttribute("location") . '</h1>';
 
 	//	breadcrumbs and prototype chain
 	$protos = array();
@@ -122,7 +186,7 @@
 	while($node && $node->getAttribute("superclass")){
 		$sc = $node->getAttribute("superclass");
 		$bc[] = $sc;
-		$protos[$sc] = $node;
+		$protos[$sc] = &$node;
 		$node = $xpath->query('//object[@location="' . $sc . '"]')->item(0);
 	}
 	$bc = array_reverse($bc);
@@ -142,9 +206,12 @@
 	//	require
 	if($page == "dojo"){
 		$s .= '<div class="jsdoc-require">&lt;script src="path/to/dojo.js"&gt;&lt;/script&gt;</div>';
-	} else {
-		//	TODO: we don't really know this from the XML, we're just kind of assuming.
-		$s .= '<div class="jsdoc-require">dojo.require("' . $page . '");</div>';
+	} else if($show_require) {
+		$s .= '<div class="jsdoc-require">dojo.require("' . $provide . '");</div>';
+	}
+
+	if($show_resource){
+		$s .= '<div class="jsdoc-prototype">Defined in ' . $resource . '</div>';
 	}
 
 	//	description.  XML doesn't have summary for some reason.
@@ -162,12 +229,9 @@
 			. '<h2>Examples:</h2>';
 		$counter = 1;
 		foreach($examples as $example){
-			$g = new GeSHi($example->nodeValue, 'javascript');
-			$g->enable_line_numbers(GESHI_NORMAL_LINE_NUMBERS);
-			$g->enable_classes();
 			$s .= '<div class="jsdoc-example">'
 				. '<h3>Example ' . $counter++ . '</h3>'
-				. $g->parse_code()
+				. format_example($example->nodeValue)
 				. '</div>';
 		}
 		$s .= '</div>';
@@ -182,10 +246,13 @@
 	$methods = array();
 
 	//	start with getting the mixins.
-	$nl = $xpath->query("mixins[not(@scope)]/mixin[@scope='prototype']|mixins[@scope='prototype']/mixin[@scope='instance']", $context);
+	$nl = $xpath->query("mixins/mixin[@scope='instance']", $context);
 	foreach($nl as $m){
 		//	again, this is ugly.
-		$mixins[$m->getAttribute("location")] = $m;
+		$m_test = $xpath->query("//object[@location='" . $m->getAttribute("location") . "']");
+		if($m_test->length){
+			$mixins[$m->getAttribute("location")] = $m_test->item(0);
+		}
 	}
 
 	//	output the mixin list
@@ -212,6 +279,7 @@
 		$nl = $xpath->query("properties/property", $node);
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
+			$private = $n->getAttribute("private");
 			if(array_key_exists($nm, $props)){
 				//	next one up in the chain overrides the original.
 				$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -221,7 +289,7 @@
 				$props[$nm] = array(
 					"name"=>$nm,
 					"scope"=>$n->getAttribute("scope"),
-					"visibility"=>($n->getAttribute("private")=="true"?"private":"public"),
+					"visibility"=>($private=="true"?"private":"public"),
 					"type"=>$n->getAttribute("type"),
 					"defines"=>array($location),
 					"override"=>false
@@ -231,7 +299,7 @@
 			if($n->getElementsByTagName("summary")->length){
 				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 				if(strlen($desc)){
-					$props[$nm]["description"] = $desc;
+					$props[$nm]["summary"] = $desc;
 				}
 			}
 			if($n->getElementsByTagName("description")->length){
@@ -246,6 +314,7 @@
 		$nl = $xpath->query("methods/method[not(@constructor)]", $node);
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
+			$private = $n->getAttribute("private");
 			if(array_key_exists($nm, $methods)){
 				//	next one up in the chain overrides the original.
 				$methods[$nm]["scope"] = $n->getAttribute("scope");
@@ -254,7 +323,7 @@
 				$methods[$nm] = array(
 					"name"=>$nm,
 					"scope"=>$n->getAttribute("scope"),
-					"visibility"=>($n->getAttribute("private")=="true"?"private":"public"),
+					"visibility"=>($private=="true"?"private":"public"),
 					"parameters"=>array(),
 					"return-types"=>array(),
 					"defines"=>array($location),
@@ -265,13 +334,28 @@
 			if($n->getElementsByTagName("summary")->length){
 				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 				if(strlen($desc)){
-					$props[$nm]["description"] = $desc;
+					$methods[$nm]["summary"] = $desc;
 				}
 			}
 			if($n->getElementsByTagName("description")->length){
 				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 				if(strlen($desc)){
 					$methods[$nm]["description"] = do_markdown($desc);
+				}
+			}
+			$ex = $n->getElementsByTagName("example");
+			if($ex->length){
+				if(!array_key_exists("examples", $methods[$nm])){
+					$methods[$nm]["examples"] = array();
+				}
+				foreach($ex as $example){
+					$methods[$nm]["examples"][] = format_example($example->nodeValue);
+				}
+			}
+			if($n->getElementsByTagName("return-description")->length){
+				$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
+				if(strlen($desc)){
+					$methods[$nm]["return-description"] = $desc;
 				}
 			}
 
@@ -306,12 +390,6 @@
 						"type"=>$ret->getAttribute("type"),
 						"description"=>""
 					);
-					if($ret->getElementsByTagName("description")->length){
-						$desc = trim($ret->getElementsByTagName("description")->item(0)->nodeValue);
-						if(strlen($desc)){
-							$item["description"] = do_markdown($desc);
-						}
-					}
 					$methods[$nm]["return-types"][] = $item;
 				}
 			}
@@ -322,6 +400,7 @@
 	$nl = $xpath->query("properties/property", $context);
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
+		$private = $n->getAttribute("private");
 		if(array_key_exists($nm, $props)){
 			//	next one up in the chain overrides the original.
 			$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -331,7 +410,7 @@
 			$props[$nm] = array(
 				"name"=>$nm,
 				"scope"=>$n->getAttribute("scope"),
-				"visibility"=>($n->getAttribute("private")=="true"?"private":"public"),
+				"visibility"=>($private=="true"?"private":"public"),
 				"type"=>$n->getAttribute("type"),
 				"defines"=>array(),
 				"override"=>false
@@ -341,7 +420,7 @@
 		if($n->getElementsByTagName("summary")->length){
 			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 			if(strlen($desc)){
-				$props[$nm]["description"] = $desc;
+				$props[$nm]["summary"] = $desc;
 			}
 		}
 		if($n->getElementsByTagName("description")->length){
@@ -356,6 +435,7 @@
 	$nl = $xpath->query("methods/method[not(@constructor)]", $context);
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
+		$private = $n->getAttribute("private");
 		if(array_key_exists($nm, $methods)){
 			//	next one up in the chain overrides the original.
 			$methods[$nm]["scope"] = $n->getAttribute("scope");
@@ -364,7 +444,7 @@
 			$methods[$nm] = array(
 				"name"=>$nm,
 				"scope"=>$n->getAttribute("scope"),
-				"visibility"=>($n->getAttribute("private")=="true"?"private":"public"),
+				"visibility"=>($private=="true"?"private":"public"),
 				"parameters"=>array(),
 				"return-types"=>array(),
 				"defines"=>array(),
@@ -375,13 +455,29 @@
 		if($n->getElementsByTagName("summary")->length){
 			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 			if(strlen($desc)){
-				$props[$nm]["description"] = $desc;
+				$methods[$nm]["summary"] = $desc;
 			}
 		}
 		if($n->getElementsByTagName("description")->length){
 			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 			if(strlen($desc)){
 				$methods[$nm]["description"] = do_markdown($desc);
+			}
+		}
+		if($n->getElementsByTagName("return-description")->length){
+			$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$methods[$nm]["return-description"] = $desc;
+			}
+		}
+
+		$ex = $n->getElementsByTagName("example");
+		if($ex->length){
+			if(!array_key_exists("examples", $methods[$nm])){
+				$methods[$nm]["examples"] = array();
+			}
+			foreach($ex as $example){
+				$methods[$nm]["examples"][] = format_example($example->nodeValue);
 			}
 		}
 
@@ -416,12 +512,6 @@
 					"type"=>$ret->getAttribute("type"),
 					"description"=>""
 				);
-				if($ret->getElementsByTagName("description")->length){
-					$desc = trim($ret->getElementsByTagName("description")->item(0)->nodeValue);
-					if(strlen($desc)){
-						$item["description"] = do_markdown($desc);
-					}
-				}
 				$methods[$nm]["return-types"][] = $item;
 			}
 		}
@@ -433,9 +523,13 @@
 	//	mostly because of the flat structure and the full locations.
 	$s .= '<div class="jsdoc-children">';
 	$s .= '<div class="jsdoc-field-list">';
+	$details = '<div class="jsdoc-children">'
+		. '<div class="jsdoc-fields">';
+	$field_counter = 0;
 	if(count($props) || count($methods)){
 		if(count($props)){
 			$s .= '<h2>Properties</h2>';
+			$details .= '<h2>Properties</h2>';
 			ksort($props);
 			foreach($props as $name=>$prop){
 				$s .= '<div class="jsdoc-field '
@@ -444,14 +538,26 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url($prop) . '" width="24" height="24" border="0" />'
+					. '<img class="trans-icon" src="' . icon_url($prop["type"]) . '" border="0" />'
 					. '</span>'
+					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
-					. '</div>';	//	jsdoc-title
+					. '</a>';
+				$details .= '<div class="jsdoc-field '
+					. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
+					. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
+					. ($field_counter % 2 == 0 ? ' even':' odd')
+					. '">'
+					. '<div class="jsdoc-title">'
+					. '<span>'
+					. '<img class="trans-icon" src="' . icon_url($prop["type"]) . '" border="0" />'
+					. '</span>'
+					. '<a name="' . $name . '"></a>'
+					. $name
+					. '</div>';
+
 				//	inheritance list.
 				if(isset($prop["defines"]) && count($prop["defines"])){
-					$s .= '<div class="jsdoc-inheritance">'
-						. ($prop["override"] ? "Overrides ":"Defined by ");
 					$tmp = array();
 					foreach($prop["defines"] as $def){
 						$tmp[] = '<a class="jsdoc-link" href="/' . $version . '/' . implode("/", explode(".", $def)) . '">'
@@ -459,17 +565,30 @@
 							. '</a>';
 					}
 
-					$s .= implode(",", $tmp) . '</div>';	//	jsdoc-inheritance
+					$s .= '<span class="jsdoc-inheritance">'
+						. ($prop["override"] ? "Overrides ":"Defined by ")
+						. implode(", ", $tmp)
+						. '</span>';
+					$details .= '<div class="jsdoc-inheritance">'
+						. ($prop["override"] ? "Overrides ":"Defined by ")
+						. implode(", ", $tmp)
+						. '</div>';
 				}
 				if(array_key_exists("description", $prop)){
-					$s .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
+					$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
+				} else if(array_key_exists("summary", $prop)){
+					$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
 				}
-				$s .= '</div>';	//	jsdoc-field
+				$s .= '</div>'	//	jsdoc-title
+					. '</div>';	//	jsdoc-field
+				$details .= '</div>';	//	jsdoc-field
+				$field_counter++;
 			}
 		}
 
 		if(count($methods)){
 			$s .= '<h2>Methods</h2>';
+			$details .= '<h2>Methods</h2>';
 			ksort($methods);
 			foreach($methods as $name=>$method){
 				$s .= '<div class="jsdoc-field '
@@ -478,12 +597,25 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url('Function') . '" width="24" height="24" border="0" />'
+					. '<img class="trans-icon" src="' . icon_url('Function') . '" border="0" />'
 					. '</span>'
-					. $name;
+					. '<a class="inline-link" href="#' . $name . '">'
+					. $name
+					. '</a>';
+				$details .= '<div class="jsdoc-field '
+					. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
+					. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
+					. ($field_counter % 2 == 0 ? ' even':' odd')
+					. '">'
+					. '<div class="jsdoc-title">'
+					. '<span>'
+					. '<img class="trans-icon" src="' . icon_url('Function') . '" border="0" />'
+					. '</span>'
+					. '<a name="' . $name . '"></a>'
+					. $name
+					. '</div>';
 				if(count($method["parameters"])){
 					$tmp = array();
-					$s .= '<span class="parameters">(';
 					foreach($method["parameters"] as $p){
 						$tmp[] = $p["name"] 
 							. '<span class="jsdoc-comment-type">:'
@@ -491,28 +623,27 @@
 							. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '?' : (($p["usage"] == "one-or-more") ? '...' : '')) : '')
 							. '</span>';
 					}
-					$s .= implode(', ', $tmp)
+					$s .= '<span class="parameters">('
+						. implode(', ', $tmp)
 						. ')</span>';
 				} else {
 					$s .= '<span class="parameters">()</span>';
 				}
 
 				if(count($method["return-types"])){
-					$s .= '<span class="jsdoc-return-type">:';
 					$tmp = array();
 					foreach($method["return-types"] as $rt){
 						$tmp[] = $rt["type"];
 					}
-					$s .= implode("|", $tmp) . '</span>';
+					$s .= '<span class="jsdoc-return-type">:'
+						. implode("|", $tmp) 
+						. '</span>';
 				} else {
 					$s .= '<span class="jsdoc-return-type">:void</span>';
 				}
 
-				$s .= '</div>';	//	jsdoc-title
 				//	inheritance list.
 				if(isset($prop["defines"]) && count($method["defines"])){
-					$s .= '<div class="jsdoc-inheritance">'
-						. ($method["override"] ? "Overrides ":"Defined by ");
 					$tmp = array();
 					foreach($method["defines"] as $def){
 						$tmp[] = '<a class="jsdoc-link" href="/' . $version . '/' . implode("/", explode(".", $def)) . '">'
@@ -520,12 +651,85 @@
 							. '</a>';
 					}
 
-					$s .= implode(",", $tmp) . '</div>';	//	jsdoc-inheritance
+					$s .= '<span class="jsdoc-inheritance">'
+						. ($method["override"] ? "Overrides ":"Defined by ")
+						. implode(", ", $tmp) 
+						. '</span>';	//	jsdoc-inheritance
+					$details .= '<div class="jsdoc-inheritance">'
+						. ($method["override"] ? "Overrides ":"Defined by ")
+						. implode(", ", $tmp) 
+						. '</div>';	//	jsdoc-inheritance
 				}
+
+				if(count($method["return-types"])){
+					$tmp = array();
+					foreach($method["return-types"] as $rt){
+						$tmp[] = $rt["type"];
+					}
+					$details .= '<div class="jsdoc-return-type">Returns '
+						. '<strong>'
+						. implode("|", $tmp)
+						. '</strong>';
+					if(array_key_exists("return-description", $method)){
+						$details .= ': <span class="jsdoc-return-description">'
+							. $method["return-description"]
+							. '</span>';
+					}
+					$details .= '</div>';
+				} 
+				else if(array_key_exists("return-description", $method)){
+					$details .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
+						. $method["return-description"]
+						. '</div></div>';
+				}
+
 				if(array_key_exists("description", $method)){
-					$s .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
+					$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
+				} else if(array_key_exists("summary", $method)){
+					$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 				}
-				$s .= '</div>';	//	jsdoc-field
+				$s .= '</div>'	//	jsdoc-title
+					. '</div>';	//	jsdoc-field
+
+				if(count($method["parameters"])){
+					$tmp_details = array();
+					foreach($method["parameters"] as $p){
+						$tmp_details[] = '<tr>'
+							. '<td class="jsdoc-param-name">'
+							. $p["name"]
+							. '</td>'
+							. '<td class="jsdoc-param-type">'
+							. $p["type"]
+							. '</td>'
+							. '<td class="jsdoc-param-description">'
+							. $p["description"]
+							. '</td>'
+							. '</tr>';
+					}
+					$details .= '<table class="jsdoc-parameters">'
+						. '<tr>'
+						. '<th>Parameter</th>'
+						. '<th>Type</th>'
+						. '<th>Description</th>'
+						. '</tr>'
+						. implode('', $tmp_details)
+						. '</table>';
+				}
+
+				if(array_key_exists("examples", $method)){
+					$details .= '<div class="jsdoc-examples">';
+					$counter = 1;
+					foreach($method["examples"] as $example){
+						$details .= '<div class="jsdoc-example">'
+							. '<div><strong>Example ' . $counter++ . '</strong></div>'
+							. $example
+							. '</div>';
+					}
+					$details .= '</div>';
+				}
+
+				$details .= '</div>';	//	jsdoc-field
+				$field_counter++;
 			}
 		}
 	}
@@ -545,7 +749,7 @@
 			} else {
 				$s .= icon_url($child->getAttribute("type"));
 			}
-			$s .= '" width="24" height="24" border="0" />'
+			$s .= '" border="0" />'
 				. '</span>'
 				. '<a class="jsdoc-link" href="/' . $version . '/' . implode("/", explode(".", $child->getAttribute("location"))) . '">'
 				. $child->getAttribute("location")
@@ -557,6 +761,6 @@
 
 	$s .= '</div>';	// jsdoc-field-list.
 	$s .= '</div>';	// jsdoc-children.
-
-	echo $s;
+	$details .= '</div></div>';
+	echo $s . $details;
 ?>

@@ -235,18 +235,23 @@ h1.jsdoc-title img {
 
 div.jsdoc-prototype,
 div.jsdoc-mixins,
-div.jsdoc-inheritance {
+.jsdoc-inheritance {
 	font-size: 0.8em;
 }
 div.jsdoc-prototype a,
 div.jsdoc-mixins a,
-div.jsdoc-inheritance a {
+.jsdoc-inheritance a {
 	text-decoration: none;
 }
 div.jsdoc-prototype a:hover,
 div.jsdoc-mixins a:hover,
-div.jsdoc-inheritance a:hover {
+.jsdoc-inheritance a:hover {
 	text-decoration: underline;
+}
+span.jsdoc-inheritance {
+	display: inline-block;
+	margin-left: 1.5em;
+	font-weight: normal;
 }
 div.jsdoc-require,
 span.jsdoc-comment-type,
@@ -270,29 +275,72 @@ div.jsdoc-children {
 	padding-bottom: 1.5em;
 }
 
-div.jsdoc-children div.jsdoc-field-list h2 {
-	font-weight: normal;
-	font-size: 1.5em;
-	background-color: #f2f2f2;
+div.jsdoc-children div.jsdoc-field-list h2,
+div.jsdoc-children div.jsdoc-fields h2 {
+	font-size: 1.25em;
 	border-bottom: 1px solid #e5e3cf;
 	margin: 1.5em -5px 0.5em -5px;
 	padding: 0.25em;
 }
+div.jsdoc-children div.jsdoc-fields h2 {
+	font-weight: normal;
+	font-size: 1.5em;
+	background-color: #f2f2f2;
+}
 
 div.jsdoc-children div.jsdoc-field-list div.jsdoc-field {
-	margin: 1em 0;
+	margin: 0.5em 0;
 	clear: both;
 }
+div.jsdoc-children div.jsdoc-fields div.jsdoc-field {
+	padding: 1em 0;
+	clear: both;
+	border-bottom: 1px dotted #ccc;
+}
+div.jsdoc-children div.odd {
+	background-color: #f8f8f8;
+}
 
-div.jsdoc-children div.jsdoc-field-list div.jsdoc-field div.jsdoc-title {
+div.jsdoc-field div.jsdoc-title {
 	font-weight: bold;
 }
-div.jsdoc-children div.jsdoc-field-list div.jsdoc-field div.jsdoc-title span img {
+
+div.jsdoc-field div.jsdoc-title span img {
 	float: left;
 	padding-right: 4px;
 }
 
-div.jsdoc-children div.jsdoc-field-list div.jsdoc-field div.jsdoc-summary {
+div.jsdoc-field div.jsdoc-return-type {
+	font-size: 0.95em;
+	margin-bottom: 1em;
+	padding: 0.25em;
+}
+div.jsdoc-field .jsdoc-return-description {
+	font-style: italic;
+}
+div.jsdoc-field div.jsdoc-summary {
 	padding-left: 28px;
 	margin: 0.25em 0 1em 0;
 }
+
+table.jsdoc-parameters {
+	font-size: 1em;
+	width: auto;
+	margin: 1em;
+	border-collapse: collapse;
+}
+table.jsdoc-parameters th,
+table.jsdoc-parameters td {
+	padding: 0.25em 0.5em;
+	text-align: left;
+	vertical-align: top;
+	border: 1px solid #999;
+}
+table.jsdoc-parameters th {
+	background-color: #eee;
+	font-weight: bold;
+}
+table.jsdoc-parameters td {
+	background-color: #fff;
+}
+
