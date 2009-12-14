@@ -60,10 +60,7 @@ $th = isset($theme) ? $theme : $default_theme;
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js"></script>
 		<!-- SyntaxHighlighter -->
 		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shCore.js"><</script>
-<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
-<!--
-	<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushPlain.js"><</script>
--->
+		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
 		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
 		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shCore.css" type="text/css" />
 		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
@@ -191,9 +188,12 @@ foreach($versions as $v){
 	//*
 	echo '<div id="initialPagePane" dojoType="dijit.layout.ContentPane" title="'
 		. implode(".", explode("/", $page))
-		. '" closable="true" selected="true">';
-	include("lib/item.php");
-	echo '				</div>';
+		. '" closable="true" selected="true" href="/lib/item.php?v='
+		. $version
+		. '&p='
+		. $page
+		. '">'
+		. '</div>';
 	 // */
 } ?>
 			</div>
