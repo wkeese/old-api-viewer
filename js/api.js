@@ -113,7 +113,7 @@ dojo.addOnLoad(function(){
 	var w = dijit.byId("content");
 	if(w){
 		dojo.subscribe(w.id + "-selectChild", w, function(arr){
-			document.title = this.selectedChildWidget.title + " - The Dojo Toolkit";
+			document.title = this.selectedChildWidget.title + " - " + (siteName || "The Dojo Toolkit");
 			dojo.byId("printBlock").innerHTML = this.selectedChildWidget.domNode.innerHTML;
 		});
 	}
