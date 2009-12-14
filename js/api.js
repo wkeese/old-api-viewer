@@ -79,7 +79,7 @@ paneOnLoad = function(data){
 
 	//	set the title
 	var w = dijit.byId("content").selectedChildWidget;
-	document.title = w.title + " - The Dojo Toolkit";
+	document.title = w.title + " - " + (siteName || "The Dojo Toolkit");
 	
 	//	finally set the content of the printBlock.
 	dojo.byId("printBlock").innerHTML = w.domNode.innerHTML;
