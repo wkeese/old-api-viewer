@@ -188,7 +188,7 @@ foreach($versions as $v){
 	//*
 	echo '<div id="initialPagePane" dojoType="dijit.layout.ContentPane" title="'
 		. implode(".", explode("/", $page))
-		. '" closable="true" selected="true" href="/lib/item.php?v='
+		. '" closable="true" selected="true" onLoad="paneOnLoad" href="/lib/item.php?v='
 		. $version
 		. '&p='
 		. $page

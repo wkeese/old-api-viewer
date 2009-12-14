@@ -110,10 +110,6 @@ addTabPane = function(page, version){
 };
 
 dojo.addOnLoad(function(){
-	if(dijit.byId("initialPagePane")){
-		paneOnLoad.apply(dijit.byId("initialPagePane"));
-	}
-
 	var w = dijit.byId("content");
 	if(w){
 		dojo.subscribe(w.id + "-selectChild", w, function(arr){
