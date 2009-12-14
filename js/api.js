@@ -87,7 +87,7 @@ paneOnLoad = function(data){
 
 addTabPane = function(page, version){
 	var p = dijit.byId("content");
-	var url = "/lib/item.php?p=" + page.split(".").join("/") + "&v=" + (version || currentVersion);
+	var url = baseUrl + "lib/item.php?p=" + page.split(".").join("/") + "&v=" + (version || currentVersion);
 	var title = page.split("/").join(".");
 
 	//	get the children and make sure we haven't opened this yet.

@@ -73,6 +73,7 @@ $th = isset($theme) ? $theme : $default_theme;
 		<meta name="company" content="Dojo Foundation" />
 
 		<script type="text/javascript">
+			var baseUrl = "/";
 			dojo.addOnLoad(function(){
 				dojo.parser.parse(document.body);
 <?php if($is_page){ ?>
