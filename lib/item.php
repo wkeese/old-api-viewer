@@ -192,7 +192,7 @@
 	while($node && $node->getAttribute("superclass")){
 		$sc = $node->getAttribute("superclass");
 		$bc[] = $sc;
-		$protos[$sc] = &$node;
+		$protos[$sc] = $node;
 		$node = $xpath->query('//object[@location="' . $sc . '"]')->item(0);
 	}
 	$bc = array_reverse($bc);
@@ -377,10 +377,10 @@
 						"usage"=>$param->getAttribute("usage"),
 						"description"=>""
 					);
-					if($param->getElementsByTagName("description")->length){
-						$desc = trim($param->getElementsByTagName("description")->item(0)->nodeValue);
+					if($param->getElementsByTagName("summary")->length){
+						$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
 						if(strlen($desc)){
-							$item["description"] = do_markdown($desc);
+							$item["description"] = $desc;
 						}
 					}
 					$methods[$nm]["parameters"][] = $item;
@@ -499,10 +499,10 @@
 					"usage"=>$param->getAttribute("usage"),
 					"description"=>""
 				);
-				if($param->getElementsByTagName("description")->length){
-					$desc = trim($param->getElementsByTagName("description")->item(0)->nodeValue);
+				if($param->getElementsByTagName("summary")->length){
+					$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
 					if(strlen($desc)){
-						$item["description"] = do_markdown($desc);
+						$item["description"] = $desc;
 					}
 				}
 				$methods[$nm]["parameters"][] = $item;
@@ -623,11 +623,12 @@
 				if(count($method["parameters"])){
 					$tmp = array();
 					foreach($method["parameters"] as $p){
-						$tmp[] = $p["name"] 
-							. '<span class="jsdoc-comment-type">:'
-							. (strlen($p["type"]) ? $p["type"] : 'Object')
-							. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '?' : (($p["usage"] == "one-or-more") ? '...' : '')) : '')
-							. '</span>';
+	//					$tmp[] = '<span class="jsdoc-comment-type">/*'
+	//						. (strlen($p["type"]) ? $p["type"] : 'Object')
+	//						. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '?' : (($p["usage"] == "one-or-more") ? '...' : '')) : '')
+	//						. '*/</span>'
+	//						. $p["name"];
+						$tmp[] = $p["name"];
 					}
 					$s .= '<span class="parameters">('
 						. implode(', ', $tmp)
@@ -641,11 +642,12 @@
 					foreach($method["return-types"] as $rt){
 						$tmp[] = $rt["type"];
 					}
-					$s .= '<span class="jsdoc-return-type">:'
+					/*
+					$s .= ' &rArr; <span class="jsdoc-return-type">'
 						. implode("|", $tmp) 
 						. '</span>';
-				} else {
-					$s .= '<span class="jsdoc-return-type">:void</span>';
+					*/
+					$s .= '<span style="font-size: 0.9em;"> returns ' . implode("|", $tmp) . '</span>';
 				}
 
 				//	inheritance list.

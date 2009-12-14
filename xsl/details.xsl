@@ -178,6 +178,11 @@
 			<xsl:attribute name="usage">
 				<xsl:value-of select="@usage" />
 			</xsl:attribute>
+			<xsl:if test="summary">
+				<xsl:element name="summary">
+					<xsl:value-of select="./summary/text()" />
+				</xsl:element>
+			</xsl:if>
 		</xsl:element>
 	</xsl:template>
 
