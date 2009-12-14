@@ -40,6 +40,12 @@ if(!$has_version){
 	$version = $versions[count($versions)-1];
 }
 
+//	get the theme from the config file.
+if(!isset($default_theme)){
+	$default_theme = "dtk";
+}
+$th = isset($theme) ? $theme : $default_theme;
+
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -47,6 +53,9 @@ if(!$has_version){
 		<meta http-equiv="X-UA-Compatible" content="chrome=1"/> 
 		<link rel="stylesheet" href="/css/jsdoc.css" type="text/css" media="all" />
 		<link rel="stylesheet" href="/css/jsdoc-print.css" type="text/css" media="print" />
+<?php if(file_exists("themes/" . $th . "/" . $th . ".css")){ ?>
+<link rel="stylesheet" href="/themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
+<?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js"></script>
 		<!-- SyntaxHighlighter -->
@@ -91,25 +100,7 @@ if(!$has_version){
 -->
 		<div id="main" dojoType="dijit.layout.BorderContainer" liveSplitters="false">
 			<div id="head" dojoType="dijit.layout.ContentPane" region="top">
-				<div class="innerBox">
-					<div class="logo"><a href="/"><img alt="Dojo Toolkit" src="/images/logo.png" /></a></div>
-					<div class="navi">
-						<ul id="nav">
-							<li class="home"><a href="/">Home</a></li>
-							<li class="download"><a href="/download/">Download</a></li>
-							<li class="docs"><a href="http://doc-staging.dojocampus.org/">Documentation</a></li>
-							<li class="community"><a href="/community/">Community</a></li>
-							<li class="about"><a href="/about/">About</a></li>
-							<!--<li class="more"><a href="#">More</a></li>-->
-						</ul>
-						 <div class="search">
-							<div class="input">
-								<input type="text" value="search"/>
-							</div>
-						</div>
-
-					</div>
-				</div>
+<?php include("themes/" . $th . "/header.php"); ?>
 			</div>
 			<div dojoType="dijit.layout.BorderContainer" minSize="20" style="width:300px;" id="navigation" region="leading" splitter="true" gutters="false">
 				<div dojoType="dijit.layout.ContentPane" title="Search" region="top">
@@ -207,9 +198,7 @@ foreach($versions as $v){
 } ?>
 			</div>
 			<div id="foot" dojoType="dijit.layout.ContentPane" region="bottom">
-				<div class="innerBox">
-					<span class="redundant">&copy;</span> The Dojo Foundation, All Rights Reserved.
-				</div>
+<?php include("themes/" . $th . "/footer.php"); ?>
 			</div>
 		</div>
 	</body>
