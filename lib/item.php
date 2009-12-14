@@ -1,7 +1,8 @@
 <?php
 	include(dirname(__FILE__) . "/../config.php");
 	include("markdown/markdown.php");
-//	include("geshi/geshi.php");
+	//	include("geshi/geshi.php");
+
 	function icon_url($type, $size=16){
 		$img = "object";
 		switch($type){
@@ -26,7 +27,7 @@
 			case 'String':    $img='string'; break;
 			default:      $img='object'; break;
 		}
-		return '/css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
+		return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 	}
 
 	function do_markdown($text){
@@ -178,14 +179,14 @@
 	    . $version . '/' . implode("/", explode(".", $page))
 		. '">Permalink</a></span>'	
 		. '<label>View options: </label>'
-		. '<span class="trans-icon jsdoc-private"><img src="/css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
-		. '<span class="trans-icon jsdoc-inherited"><img src="/css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>'
+		. '<span class="trans-icon jsdoc-private"><img src="' . $_base_url . 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
+		. '<span class="trans-icon jsdoc-inherited"><img src="' . $_base_url . 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>'
 		. '</div>';
 
 	//	page heading.
 	$s .= '<h1 class="jsdoc-title">'
 		.'<img class="trans-icon" border="0" width="36" height="36" src="'
-		. icon_url($type, 36)
+		. $_base_url . icon_url($type, 36)
 		. '" />' . $context->getAttribute("location") . '</h1>';
 
 	//	breadcrumbs and prototype chain
@@ -547,7 +548,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url($prop["type"]) . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" border="0" />'
 					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
@@ -559,7 +560,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url($prop["type"]) . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" border="0" />'
 					. '</span>'
 					. '<a name="' . $name . '"></a>'
 					. $name
@@ -606,7 +607,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url('Function') . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" border="0" />'
 					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
@@ -618,7 +619,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . icon_url('Function') . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" border="0" />'
 					. '</span>'
 					. '<a name="' . $name . '"></a>'
 					. $name
@@ -756,9 +757,9 @@
 				. '<img class="trans-icon" src="'; 
 
 			if($child->getAttribute("type") == "Function" && $child->getAttribute("classlike") == "true"){
-				$s .= icon_url("Constructor");
+				$s .= $_base_url . icon_url("Constructor");
 			} else {
-				$s .= icon_url($child->getAttribute("type"));
+				$s .= $_base_url . icon_url($child->getAttribute("type"));
 			}
 			$s .= '" border="0" />'
 				. '</span>'

@@ -1,4 +1,5 @@
 <?php
+	$_base_url = "/";
 	$defVersion = "1.4";
 	$dataDir = dirname(__FILE__) . "/data/";
 	$defPage = "";
