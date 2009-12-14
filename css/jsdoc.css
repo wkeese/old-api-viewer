@@ -22,7 +22,7 @@ html, body { height: 100%; width: 100%; padding: 0; border: 0; }
 	height: 32px;
 	margin-top: -16px;
 	margin-left: -16px;
-	background-image: url('/images/loader_lg.gif');
+	background-image: url('/css/images/loader_lg.gif');
 	background-repeat: no-repeat;
 }
 #printBlock { display: none; }
@@ -131,58 +131,58 @@ hr.spacer { border:0; background-color:#ededed; width:80%; height:1px; }
 	height: 24px;
 	margin-top: -12px;
 	margin-left: -12px;
-	background-image: url("/images/loader_md.gif");
+	background-image: url("/css/images/loader_md.gif");
 	/* small loader image */
 	/*
 	width: 16px;
 	height: 16px;
 	margin-top: -8px;
 	margin-left: -8px;
-	background-image: url("/images/loader_sm.gif");
+	background-image: url("/css/images/loader_sm.gif");
 	*/
 }
 
-.arrayIcon16{ background-image:url('/images/icons/16x16/array.png'); }
-.booleanIcon16{ background-image:url('/images/icons/16x16/boolean.png'); }
-.constructorIcon16{ background-image:url('/images/icons/16x16/constructor.png'); }
-.dateIcon16{ background-image:url('/images/icons/16x16/date.png'); }
-.domnodeIcon16{ background-image:url('/images/icons/16x16/domnode.png'); }
-.errorIcon16{ background-image:url('/images/icons/16x16/error.png'); }
-.functionIcon16{ background-image:url('/images/icons/16x16/function.png'); }
-.namespaceIcon16{ background-image:url('/images/icons/16x16/namespace.png'); }
-.numberIcon16{ background-image:url('/images/icons/16x16/number.png'); }
-.objectIcon16{ background-image:url('/images/icons/16x16/object.png'); }
-.regexpIcon16{ background-image:url('/images/icons/16x16/regexp.png'); }
-.singletonIcon16{ background-image:url('/images/icons/16x16/singleton.png'); }
-.stringIcon16{ background-image:url('/images/icons/16x16/string.png'); }
+.arrayIcon16{ background-image:url('/css/icons/16x16/array.png'); }
+.booleanIcon16{ background-image:url('/css/icons/16x16/boolean.png'); }
+.constructorIcon16{ background-image:url('/css/icons/16x16/constructor.png'); }
+.dateIcon16{ background-image:url('/css/icons/16x16/date.png'); }
+.domnodeIcon16{ background-image:url('/css/icons/16x16/domnode.png'); }
+.errorIcon16{ background-image:url('/css/icons/16x16/error.png'); }
+.functionIcon16{ background-image:url('/css/icons/16x16/function.png'); }
+.namespaceIcon16{ background-image:url('/css/icons/16x16/namespace.png'); }
+.numberIcon16{ background-image:url('/css/icons/16x16/number.png'); }
+.objectIcon16{ background-image:url('/css/icons/16x16/object.png'); }
+.regexpIcon16{ background-image:url('/css/icons/16x16/regexp.png'); }
+.singletonIcon16{ background-image:url('/css/icons/16x16/singleton.png'); }
+.stringIcon16{ background-image:url('/css/icons/16x16/string.png'); }
 
-.arrayIcon24{ background-image:url('/images/icons/24x24/array.png'); }
-.booleanIcon24{ background-image:url('/images/icons/24x24/boolean.png'); }
-.constructorIcon24{ background-image:url('/images/icons/24x24/constructor.png'); }
-.dateIcon24{ background-image:url('/images/icons/24x24/date.png'); }
-.domnodeIcon24{ background-image:url('/images/icons/24x24/domnode.png'); }
-.errorIcon24{ background-image:url('/images/icons/24x24/error.png'); }
-.functionIcon24{ background-image:url('/images/icons/24x24/function.png'); }
-.namespaceIcon24{ background-image:url('/images/icons/24x24/namespace.png'); }
-.numberIcon24{ background-image:url('/images/icons/24x24/number.png'); }
-.objectIcon24{ background-image:url('/images/icons/24x24/object.png'); }
-.regexpIcon24{ background-image:url('/images/icons/24x24/regexp.png'); }
-.singletonIcon24{ background-image:url('/images/icons/24x24/singleton.png'); }
-.stringIcon24{ background-image:url('/images/icons/24x24/string.png'); }
+.arrayIcon24{ background-image:url('/css/icons/24x24/array.png'); }
+.booleanIcon24{ background-image:url('/css/icons/24x24/boolean.png'); }
+.constructorIcon24{ background-image:url('/css/icons/24x24/constructor.png'); }
+.dateIcon24{ background-image:url('/css/icons/24x24/date.png'); }
+.domnodeIcon24{ background-image:url('/css/icons/24x24/domnode.png'); }
+.errorIcon24{ background-image:url('/css/icons/24x24/error.png'); }
+.functionIcon24{ background-image:url('/css/icons/24x24/function.png'); }
+.namespaceIcon24{ background-image:url('/css/icons/24x24/namespace.png'); }
+.numberIcon24{ background-image:url('/css/icons/24x24/number.png'); }
+.objectIcon24{ background-image:url('/css/icons/24x24/object.png'); }
+.regexpIcon24{ background-image:url('/css/icons/24x24/regexp.png'); }
+.singletonIcon24{ background-image:url('/css/icons/24x24/singleton.png'); }
+.stringIcon24{ background-image:url('/css/icons/24x24/string.png'); }
 
-.arrayIcon36{ background-image:url('/images/icons/36x36/array.png'); }
-.booleanIcon36{ background-image:url('/images/icons/36x36/boolean.png'); }
-.constructorIcon36{ background-image:url('/images/icons/36x36/constructor.png'); }
-.dateIcon36{ background-image:url('/images/icons/36x36/date.png'); }
-.domnodeIcon36{ background-image:url('/images/icons/36x36/domnode.png'); }
-.errorIcon36{ background-image:url('/images/icons/36x36/error.png'); }
-.functionIcon36{ background-image:url('/images/icons/36x36/function.png'); }
-.namespaceIcon36{ background-image:url('/images/icons/36x36/namespace.png'); }
-.numberIcon36{ background-image:url('/images/icons/36x36/number.png'); }
-.objectIcon36{ background-image:url('/images/icons/36x36/object.png'); }
-.regexpIcon36{ background-image:url('/images/icons/36x36/regexp.png'); }
-.singletonIcon36{ background-image:url('/images/icons/36x36/singleton.png'); }
-.stringIcon36{ background-image:url('/images/icons/36x36/string.png'); }
+.arrayIcon36{ background-image:url('/css/icons/36x36/array.png'); }
+.booleanIcon36{ background-image:url('/css/icons/36x36/boolean.png'); }
+.constructorIcon36{ background-image:url('/css/icons/36x36/constructor.png'); }
+.dateIcon36{ background-image:url('/css/icons/36x36/date.png'); }
+.domnodeIcon36{ background-image:url('/css/icons/36x36/domnode.png'); }
+.errorIcon36{ background-image:url('/css/icons/36x36/error.png'); }
+.functionIcon36{ background-image:url('/css/icons/36x36/function.png'); }
+.namespaceIcon36{ background-image:url('/css/icons/36x36/namespace.png'); }
+.numberIcon36{ background-image:url('/css/icons/36x36/number.png'); }
+.objectIcon36{ background-image:url('/css/icons/36x36/object.png'); }
+.regexpIcon36{ background-image:url('/css/icons/36x36/regexp.png'); }
+.singletonIcon36{ background-image:url('/css/icons/36x36/singleton.png'); }
+.stringIcon36{ background-image:url('/css/icons/36x36/string.png'); }
 
 /* jsdoc styling */
 a { color: #47a; }

@@ -26,7 +26,7 @@
 			case 'String':    $img='string'; break;
 			default:      $img='object'; break;
 		}
-		return '/images/icons/' . $size . 'x' . $size . '/' . $img . '.png';
+		return '/css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 	}
 
 	function do_markdown($text){
@@ -120,6 +120,9 @@
 		exit();
 	}
 
+	//	start the timer.
+	$_start = microtime(true);
+
 	//	the main details document.
 	$xml = new DOMDocument();
 	$xml->load($f);
@@ -175,8 +178,8 @@
 	    . $version . '/' . implode("/", explode(".", $page))
 		. '">Permalink</a></span>'	
 		. '<label>View options: </label>'
-		. '<span class="trans-icon jsdoc-private"><img src="/images/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
-		. '<span class="trans-icon jsdoc-inherited"><img src="/images/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>'
+		. '<span class="trans-icon jsdoc-private"><img src="/css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
+		. '<span class="trans-icon jsdoc-inherited"><img src="/css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>'
 		. '</div>';
 
 	//	page heading.
@@ -770,9 +773,20 @@
 	$s .= '</div>';	// jsdoc-field-list.
 	$s .= '</div>';	// jsdoc-children.
 	$details .= '</div></div>';
+	$_total = round(microtime(true) - $_start, 3);
 
 	//	if we got here, we're not cached so do that now.
-	file_put_contents($data_dir . 'cache/' . $page . '.html', $s . $details);
+	file_put_contents(
+		$data_dir . 'cache/' . $page . '.html', 
+		$s . $details . "\n<!-- generation time: " . $_total . "s. -->\n"
+	);
 	
 	echo $s . $details;
+
+	//	end timer.
+	echo '<div style="text-align:right;font-size:0.85em;">'
+		. 'Generation time: '
+		. $_total
+		. 's.'
+		. '</div>';
 ?>
