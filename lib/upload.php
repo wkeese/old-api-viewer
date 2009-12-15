@@ -108,11 +108,11 @@ if(isset($_POST["dir"])){
 	<form action="upload.php" method="post" enctype="multipart/form-data">
 		<div>
 			<label for="dir">API version: </label>
-			<input type="text" name="dir" id="dir" value="" />
+			<input type="text" name="dir" id="dir" value="<?php echo (isset($_POST['dir'])?$_POST['dir']:''); ?>" />
 		</div>
 		<div>
 			<label>URL for api.xml: </label>
-			<input type="text" name="api" value="" />
+			<input type="text" name="api" value="<?php echo (isset($_POST['api'])?$_POST['api']:''); ?>" />
 		</div>
 		<div><input type="submit" value="Run the transforms." /></div>
 		<div>(Note this may take a while, so be patient.)</div>
