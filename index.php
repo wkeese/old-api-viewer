@@ -74,6 +74,7 @@ $th = isset($theme) ? $theme : $default_theme;
 
 		<script type="text/javascript">
 			var baseUrl = "/";
+			var siteName = 'The Dojo Toolkit';
 			dojo.addOnLoad(function(){
 				dojo.parser.parse(document.body);
 <?php if($is_page){ ?>
