@@ -230,6 +230,12 @@
 		$s .= '<div class="jsdoc-full-summary">'
 			. do_markdown($desc->nodeValue)
 			. "</div>";
+	} else {
+		$desc = $xpath->query("summary/text()", $context)->item(0);
+		if($desc){
+			$s .= '<div class="jsdoc-full-summary">'
+				. do_markdown($desc->nodeValue)
+				. "</div>";
 	}
 
 	//	examples.
