@@ -46,6 +46,14 @@ if(!isset($default_theme)){
 }
 $th = isset($theme) ? $theme : $default_theme;
 
+//	check to clear the cache or not
+if(isset($_GET["clearcache"])){
+	//	we don't really care what the value is, we just want to know it's there.
+	$files = glob("data/" . $version . '/cache/*');
+	$files = array_filter($files, 'is_file');
+	array_map('unlink', $files);
+}
+
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
