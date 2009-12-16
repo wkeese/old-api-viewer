@@ -236,6 +236,7 @@
 			$s .= '<div class="jsdoc-full-summary">'
 				. do_markdown($desc->nodeValue)
 				. "</div>";
+		}
 	}
 
 	//	examples.
