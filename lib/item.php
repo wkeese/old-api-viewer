@@ -187,7 +187,7 @@
 	$s .= '<h1 class="jsdoc-title">'
 		.'<img class="trans-icon" border="0" width="36" height="36" src="'
 		. $_base_url . icon_url($type, 36)
-		. '" />' . $context->getAttribute("location") 
+		. '" alt="' . $type . '" />' . $context->getAttribute("location") 
 		. ' <span style="font-size:11px;color:#999;">(version ' . $version . ')</span>'
 		. '</h1>';
 
@@ -557,7 +557,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" alt="' . $prop["type"] . '" border="0" />'
 					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
@@ -569,7 +569,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" alt="' . $prop["type"] . '" border="0" />'
 					. '</span>'
 					. '<a name="' . $name . '"></a>'
 					. $name
@@ -616,7 +616,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" alt="Function" border="0" />'
 					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
@@ -628,7 +628,7 @@
 					. '">'
 					. '<div class="jsdoc-title">'
 					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" border="0" />'
+					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" alt="Function" border="0" />'
 					. '</span>'
 					. '<a name="' . $name . '"></a>'
 					. $name
@@ -767,10 +767,12 @@
 
 			if($child->getAttribute("type") == "Function" && $child->getAttribute("classlike") == "true"){
 				$s .= $_base_url . icon_url("Constructor");
+				$alt = "Constructor";
 			} else {
 				$s .= $_base_url . icon_url($child->getAttribute("type"));
+				$alt = $child->getAttribute("type");
 			}
-			$s .= '" border="0" />'
+			$s .= '" alt="' . $alt . '" border="0" />'
 				. '</span>'
 				. '<a class="jsdoc-link" href="/' . $version . '/' . implode("/", explode(".", $child->getAttribute("location"))) . '">'
 				. $child->getAttribute("location")
