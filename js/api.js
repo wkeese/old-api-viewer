@@ -13,6 +13,7 @@ if(currentVersion === undefined){
 	var currentVersion = "1.3";
 }
 
+var classTree, classStore;
 paneOnLoad = function(data){
 	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
 		link.onclick = function(e){
@@ -109,6 +110,65 @@ addTabPane = function(page, version){
 	p.selectChild(pane);
 };
 
+buildTree = function(){
+	//	handle changing the tree versions.
+	if(classTree){
+		classTree.destroyRecursive();
+	}
+
+	//	load the class tree data.
+	classStore = new dojo.data.ItemFileReadStore({
+		url: '/lib/class-tree.php?v=' + currentVersion
+	});
+
+	classTree = new dijit.Tree({
+		store: classStore,
+		query: { type: 'root' },
+		getIconClass: function(item, opened){
+			if(!item){ return "objectIcon16"; }
+			if(item == this.model.root) {
+				return "namespaceIcon16";
+			} else {
+				if(classStore.getValue(item, "type") == "root"){
+					if(classStore.getValue(item, "name") == "djConfig"){
+						return "objectIcon16";
+					}
+					return "namespaceIcon16";
+				} else {
+					return classStore.getValue(item, "type") + "Icon16";
+				}
+			}
+		},
+		onClick: function(item){
+			addTabPane(classStore.getValue(item, 'fullname'), currentVersion);
+		}
+	});
+	dijit.byId("classTreePane").domNode.appendChild(classTree.domNode);
+};
+
+versionChange = function(e){
+	var cv = currentVersion, v = this.options[this.selectedIndex].value;
+	if(v.length){
+		// switch to the current version and reload the tree.
+		currentVersion = v;
+		//	TODO: reload the trees.
+	} else {
+		//	revert the selection.
+		for(var i=0, l=this.options.length; i<l; i++){
+			if(this.options[i].value == currentVersion){
+				this.selectedIndex = i;
+				v = this.options[this.selectedIndex].value;
+				break;
+			}
+		}
+	}
+
+	//	if we reverted, bug out.
+	if(cv == v){ return; }
+	currentVersion = v;
+	buildTree();
+};
+
 dojo.addOnLoad(function(){
 	var w = dijit.byId("content");
 	if(w){
@@ -119,20 +179,7 @@ dojo.addOnLoad(function(){
 	}
 
 	var s = dojo.byId("versionSelector");
-	s.onchange = dojo.hitch(s, function(e){
-		var v = this.options[this.selectedIndex].value;
-		if(v.length){
-			// switch to the current version and reload the tree.
-			currentVersion = v;
-			//	TODO: reload the trees.
-		} else {
-			//	revert the selection.
-			for(var i=0, l=this.options.length; i<l; i++){
-				if(this.options[i].value == currentVersion){
-					this.selectedIndex = i;
-					break;
-				}
-			}
-		}
-	});
+	s.onchange = dojo.hitch(s, versionChange);
+
+	buildTree();
 });

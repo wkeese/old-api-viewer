@@ -101,8 +101,8 @@ if(isset($_GET["clearcache"])){
 	<body class="nihilo">
 		<div id="loader"><div id="loaderInner"></div></div>
 		<div id="printBlock"></div>
-		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="/lib/class-tree.php?v=<?php echo $version; ?>"></div>
 <!--
+		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="/lib/class-tree.php?v=<?php echo $version; ?>"></div>
 		<div dojoType="dojo.data.ItemFileReadStore" jsId="moduleStore" url="/lib/module-tree.php?v=<?php echo $version; ?>"></div>
 -->
 		<div id="main" dojoType="dijit.layout.BorderContainer" liveSplitters="false">
@@ -121,28 +121,7 @@ foreach($versions as $v){
 					</div>
 				</div>
 				<div dojoType="dijit.layout.AccordionContainer" region="center">
-					<div dojoType="dijit.layout.ContentPane" title="By Object" selected="true">
-						<div id="namespaceTree" dojoType="dijit.Tree" store="classStore" query="{type:'root'}">
-							<script type="dojo/method" event="getIconClass" args="item, opened">
-								if(!item){ return "objectIcon16"; }
-								if(item == this.model.root) {
-									return "namespaceIcon16";
-								} else {
-									if(classStore.getValue(item, "type") == "root"){
-										if(classStore.getValue(item, "name") == "djConfig"){
-											return "objectIcon16";
-										}
-										return "namespaceIcon16";
-									} else {
-										return classStore.getValue(item, "type") + "Icon16";
-									}
-								}
-							</script>
-							<script type="dojo/method" event="onClick" args="item">
-								addTabPane(classStore.getValue(item, "fullname"), currentVersion);
-							</script>
-						</div>
-					</div>
+					<div id="classTreePane" dojoType="dijit.layout.ContentPane" title="By Object" selected="true"></div>
 <!--
 					<div dojoType="dijit.layout.ContentPane" title="By Resource">
 						<div id="moduleTree" dojoType="dijit.Tree" store="moduleStore" query="{type:'root'}">

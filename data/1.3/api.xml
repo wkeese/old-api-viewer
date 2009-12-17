@@ -22179,10 +22179,7 @@
 			</method>
 		</methods>
 	</object>
-	<object location="dojox.data.jsonPathStore" type="Function" classlike="true" superclass="//              The jsonPathStore implements dojo.data.read, write, notify, and identity api's.  It is a local (in memory) store
-	//		and can take a javascript object with any arbitrary format and attach to it to provide a dojo.data interface to that object
-	//		data.  It uses jsonPath as the query language to search agains this store.
-	null">
+	<object location="dojox.data.jsonPathStore" type="Function" classlike="true" superclass="//              The jsonPathStore implements dojo.data.read, write, notify, and identity api's.  It is a local (in memory) store  //  and can take a javascript object with any arbitrary format and attach to it to provide a dojo.data interface to that object  //  data.  It uses jsonPath as the query language to search agains this store.  null">
 		<description>jsonPathStore constructor, instantiate a new jsonPathStore
 	Takes a single optional parameter in the form of a Javascript object
 	containing one or more of the following properties.
@@ -44120,26 +44117,7 @@
 			<method name="isInserted" scope="prototype"/>
 			<method name="create" scope="prototype">
 				<parameters>
-					<parameter name="/*nodeRef*/){
-		if(this.node &amp;&amp; this.isInserted()) return this.node;
-		var h= &quot;90px&quot;; 
-		var el = document.createElement(this.tag);
-		if(this.style){
-			el.className = this.style;
-			el.style.height = h;
-		}else{
-			with(el.style) {
-				position = &quot;relative&quot;;
-				border = &quot;1px dashed #F60&quot;;
-				margin = &quot;2px&quot;;
-				height = h;
-			}
-		}
-		this.node = el;
-		return el;
-	},
-	
-	destroy : function(" type="NodenodeRef" usage="required"/>
+					<parameter name="/*nodeRef*/){   if(this.node &amp;&amp; this.isInserted()) return this.node;   var h= &quot;90px&quot;;    var el = document.createElement(this.tag);   if(this.style){    el.className = this.style;    el.style.height = h;   }else{    with(el.style) {     position = &quot;relative&quot;;     border = &quot;1px dashed #F60&quot;;     margin = &quot;2px&quot;;     height = h;    }   }   this.node = el;   return el;  },    destroy : function(" type="NodenodeRef" usage="required"/>
 				</parameters>
 			</method>
 			<method name="destroy" scope="prototype"/>
