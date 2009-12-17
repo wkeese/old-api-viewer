@@ -118,7 +118,7 @@ buildTree = function(){
 
 	//	load the class tree data.
 	classStore = new dojo.data.ItemFileReadStore({
-		url: '/lib/class-tree.php?v=' + currentVersion
+		url: baseUrl + 'lib/class-tree.php?v=' + currentVersion
 	});
 
 	classTree = new dijit.Tree({
