@@ -187,7 +187,9 @@
 	$s .= '<h1 class="jsdoc-title">'
 		.'<img class="trans-icon" border="0" width="36" height="36" src="'
 		. $_base_url . icon_url($type, 36)
-		. '" />' . $context->getAttribute("location") . '</h1>';
+		. '" />' . $context->getAttribute("location") 
+		. ' <span style="font-size:11px;color:#999;">(version ' . $version . ')</span>'
+		. '</h1>';
 
 	//	breadcrumbs and prototype chain
 	$protos = array();
