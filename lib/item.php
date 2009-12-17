@@ -230,13 +230,13 @@
 	$desc = $xpath->query("description/text()", $context)->item(0);
 	if($desc){
 		$s .= '<div class="jsdoc-full-summary">'
-			. do_markdown(htmlentities($desc->nodeValue))
+			. do_markdown($desc->nodeValue)
 			. "</div>";
 	} else {
 		$desc = $xpath->query("summary/text()", $context)->item(0);
 		if($desc){
 			$s .= '<div class="jsdoc-full-summary">'
-				. do_markdown(htmlentities($desc->nodeValue))
+				. do_markdown($desc->nodeValue)
 				. "</div>";
 		}
 	}
@@ -324,7 +324,7 @@
 			if($n->getElementsByTagName("description")->length){
 				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 				if(strlen($desc)){
-					$props[$nm]["description"] = do_markdown(htmlentities($desc));
+					$props[$nm]["description"] = do_markdown($desc);
 				}
 			}
 		}
@@ -359,7 +359,7 @@
 			if($n->getElementsByTagName("description")->length){
 				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 				if(strlen($desc)){
-					$methods[$nm]["description"] = do_markdown(htmlentities($desc));
+					$methods[$nm]["description"] = do_markdown($desc);
 				}
 			}
 			$ex = $n->getElementsByTagName("example");
@@ -445,7 +445,7 @@
 		if($n->getElementsByTagName("description")->length){
 			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 			if(strlen($desc)){
-				$props[$nm]["description"] = do_markdown(htmlentities($desc));
+				$props[$nm]["description"] = do_markdown($desc);
 			}
 		}
 	}
@@ -480,7 +480,7 @@
 		if($n->getElementsByTagName("description")->length){
 			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
 			if(strlen($desc)){
-				$methods[$nm]["description"] = do_markdown(htmlentities($desc));
+				$methods[$nm]["description"] = do_markdown($desc);
 			}
 		}
 		if($n->getElementsByTagName("return-description")->length){
