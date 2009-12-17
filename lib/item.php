@@ -719,7 +719,7 @@
 				if(count($method["parameters"])){
 					$tmp_details = array();
 					foreach($method["parameters"] as $p){
-						$tmp_details[] = '<tr>'
+						$pstr = '<tr>'
 							. '<td class="jsdoc-param-name">'
 							. $p["name"]
 							. '</td>'
@@ -727,9 +727,43 @@
 							. $p["type"]
 							. '</td>'
 							. '<td class="jsdoc-param-description">'
-							. $p["description"]
-							. '</td>'
+							. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
+							. $p["description"];
+
+						$tester = array_pop(explode(".", $p["type"]));
+						if(strpos($tester, "__")===0){
+							//	try to find the object in question, and if found list out the props.
+							$pconfig = $xpath->query("//object[@location='" . $p["type"] . "']");
+							if($pconfig->length){
+								$p_param = array();
+								$p_nodes = $pconfig->item(0)->getElementsByTagName("property");
+								foreach($p_nodes as $p_node){
+									$summary = $p_node->getElementsByTagName("summary");
+									$p_param[] = '<tr>'
+										. '<td class="jsdoc-param-name">'
+										. $p_node->getAttribute("name")
+										. '</td>'
+										. '<td class="jsdoc-param-type">'
+										. $p_node->getAttribute("type")
+										. '</td>'
+										. '<td class="jsdoc-param-description">'
+										. ($summary->length ? $summary->item(0)->nodeValue : '&nbsp;')
+										. '</td>'
+										. '</tr>';
+								}
+								$pstr .= '<table class="jsdoc-parameters" style="margin-left:0;margin-right:0;margin-bottom:0;">'
+									. '<tr>'
+									. '<th>Parameter</th>'
+									. '<th>Type</th>'
+									. '<th>Description</th>'
+									. '</tr>'
+									. implode('', $p_param)
+									. '</table>';
+							}
+						}
+						$pstr .= '</td>'
 							. '</tr>';
+						$tmp_details[] = $pstr;
 					}
 					$details .= '<table class="jsdoc-parameters">'
 						. '<tr>'
