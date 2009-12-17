@@ -59,6 +59,21 @@ hr.spacer { border:0; background-color:#ededed; width:80%; height:1px; }
 	*/
 }
 
+h2.jsdoc-summary-heading {
+	cursor: pointer;
+}
+h2.jsdoc-summary-heading span {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	background-image: url("icons/16x16/collapse-sprite.png");
+	background-repeat: no-repeat;
+	background-position: -16px 0;
+}
+h2.jsdoc-summary-heading span.closed {
+	background-position: 0 0;
+}
+
 .arrayIcon16{ background-image:url('icons/16x16/array.png'); }
 .booleanIcon16{ background-image:url('icons/16x16/boolean.png'); }
 .constructorIcon16{ background-image:url('icons/16x16/constructor.png'); }

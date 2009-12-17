@@ -547,7 +547,8 @@
 	$field_counter = 0;
 	if(count($props) || count($methods)){
 		if(count($props)){
-			$s .= '<h2>Properties</h2>';
+			$s .= '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
+				. '<div class="jsdoc-summary-list">';
 			$details .= '<h2>Properties</h2>';
 			ksort($props);
 			foreach($props as $name=>$prop){
@@ -603,10 +604,13 @@
 				$details .= '</div>';	//	jsdoc-field
 				$field_counter++;
 			}
+
+			$s .= '</div>';	//	property-summary
 		}
 
 		if(count($methods)){
-			$s .= '<h2>Methods</h2>';
+			$s .= '<h2 class="jsdoc-summary-heading">Method Summary <span class="jsdoc-summary-toggle"></span></h2>'
+				. '<div class="jsdoc-summary-list">';
 			$details .= '<h2>Methods</h2>';
 			ksort($methods);
 			foreach($methods as $name=>$method){
@@ -752,13 +756,15 @@
 				$details .= '</div>';	//	jsdoc-field
 				$field_counter++;
 			}
+			$s .= '</div>';	//	method-summary
 		}
 	}
 
 	//	child objects: put up a list of any child objects that are attached to this particular one.
 	$children = $xpath->query('//object[starts-with(@location, "' . $page . '.")]');
 	if($children->length){
-		$s .= '<h2>Attached Objects</h2>';
+		$s .= '<h2 class="jsdoc-summary-heading">Attached Objects <span class="jsdoc-summary-toggle"></span></h2>'
+			. '<div class="jsdoc-summary-list">';
 		foreach($children as $child){
 			$s .= '<div class="jsdoc-field">'
 				. '<div class="jsdoc-title">'
@@ -780,6 +786,7 @@
 				. '</div>'	//	jsdoc-title
 				. '</div>';	//	jsdoc-field
 		}
+		$s .= '</div>';
 	}
 
 	$s .= '</div>';	// jsdoc-field-list.

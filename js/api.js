@@ -15,6 +15,7 @@ if(currentVersion === undefined){
 
 var classTree, classStore;
 paneOnLoad = function(data){
+	var context = this.domNode;
 	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
 		link.onclick = function(e){
 			dojo.stopEvent(e);
@@ -26,7 +27,6 @@ paneOnLoad = function(data){
 		};
 	});
 
-	var context = this.domNode;
 	dojo.query("a.inline-link", this.domNode).forEach(function(link){
 		link.onclick = function(e){
 			dojo.stopEvent(e);
@@ -51,6 +51,19 @@ paneOnLoad = function(data){
 	var privateOn = false, inheritedOn = true;
 	//	hide the private members.
 	dojo.query("div.private", this.domNode).style("display", "none");
+
+	//	make the summary sections collapsable.
+	dojo.query("h2.jsdoc-summary-heading", this.domNode).connect("onclick", function(e){
+		var d = e.target.nextSibling;
+		while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
+		if(d){
+			var dsp = dojo.style(d, "display");
+			dojo.style(d, "display", (dsp=="none"?"":"none"));
+			dojo.query("span", e.target).forEach(function(item){
+				dojo[(dsp=="none"?"removeClass":"addClass")](item, "closed");
+			});
+		}
+	});
 
 	//	set up the buttons in the toolbar.
 	dojo.query("div.jsdoc-toolbar span.trans-icon", this.domNode).forEach(function(node){
