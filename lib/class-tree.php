@@ -96,12 +96,10 @@ EOM;
 		} 
 
 		if(isset($val)){
-			/*
-			if(strpos($short_name, "_") === 0){
+			if(isset($filter_privates) && $filter_privates && strpos($short_name, "_") === 0){
 				unset($val);
 				continue; 
 			}
-			 */
 			if(count($name_parts)){
 				$finder = implode(".", $name_parts);
 				foreach($ret as &$obj){

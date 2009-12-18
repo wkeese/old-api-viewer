@@ -298,7 +298,10 @@
 		$nl = $xpath->query("properties/property", $node);
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
-			$private = $n->getAttribute("private");
+			$private = $n->getAttribute("private") == "true";
+			if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+				$private = true;
+			}
 			if(array_key_exists($nm, $props)){
 				//	next one up in the chain overrides the original.
 				$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -308,7 +311,7 @@
 				$props[$nm] = array(
 					"name"=>$nm,
 					"scope"=>$n->getAttribute("scope"),
-					"visibility"=>($private=="true"?"private":"public"),
+					"visibility"=>($private == true ? "private" : "public"),
 					"type"=>$n->getAttribute("type"),
 					"defines"=>array($location),
 					"override"=>false
@@ -333,7 +336,10 @@
 		$nl = $xpath->query("methods/method[not(@constructor)]", $node);
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
-			$private = $n->getAttribute("private");
+			$private = $n->getAttribute("private") == "true";
+			if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+				$private = true;
+			}
 			if(array_key_exists($nm, $methods)){
 				//	next one up in the chain overrides the original.
 				$methods[$nm]["scope"] = $n->getAttribute("scope");
@@ -419,7 +425,11 @@
 	$nl = $xpath->query("properties/property", $context);
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
-		$private = $n->getAttribute("private");
+		$private = $n->getAttribute("private") == "true";
+		if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+			$private = true;
+		}
+
 		if(array_key_exists($nm, $props)){
 			//	next one up in the chain overrides the original.
 			$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -454,7 +464,11 @@
 	$nl = $xpath->query("methods/method[not(@constructor)]", $context);
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
-		$private = $n->getAttribute("private");
+		$private = $n->getAttribute("private") == "true";
+		if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+			$private = true;
+		}
+
 		if(array_key_exists($nm, $methods)){
 			//	next one up in the chain overrides the original.
 			$methods[$nm]["scope"] = $n->getAttribute("scope");

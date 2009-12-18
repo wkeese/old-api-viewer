@@ -6,6 +6,7 @@ $_site_name = "The Dojo Toolkit";
 	$defPage = "";
 	$default_theme = "dtk";
 	$theme = "dtk";
+	$filter_privates = true;
 	$modules = array(
 		"dojo"=>-1, 
 		"dijit"=>-1, 
