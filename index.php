@@ -1,14 +1,34 @@
 <?php
 //	set up all our variables.
 include("config.php");
+
+//	find out what versions of the docs we have; if the given version isn't available, switch to the most recent.
+$d = dir($dataDir);
+$versions = array();
+$has_version = false;
+while(($entry = $d->read()) !== false){
+	if(!(strpos($entry, ".")===0) && file_exists("data/".$entry."/api.xml")){
+		$versions[] = $entry;
+	}
+}
+$d->close();
+sort($versions);
+
 $parts = array();
 $is_page = false;
 if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	$r = $_GET["qs"];
 	$r = str_replace("jsdoc/", "", $r);
 	$parts = explode("/", $r);
-	$db = $parts;
-	$version = array_shift($parts);
+
+	//	check if the version exists
+	$version = $parts[0];
+	if(in_array($version, $versions)){
+		array_shift($parts);
+	} else {
+		$version = $defVersion;
+	}
+
 	if(count($parts)){
 		if(count($parts)>1){
 			$page = implode("/", $parts);
@@ -22,20 +42,13 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	$version = $defVersion;
 }
 
-//	find out what versions of the docs we have; if the given version isn't available, switch to the most recent.
-$d = dir($dataDir);
-$versions = array();
-$has_version = false;
-while(($entry = $d->read()) !== false){
-	if(!(strpos($entry, ".")===0) && file_exists("data/".$entry."/api.xml")){
-		$versions[] = $entry;
-		if($entry == $version){
-			$has_version = true;
-		}
+//	check if the version passed is available.
+foreach($versions as $entry){
+	if($entry == $version){
+		$has_version = true;
+		break;
 	}
 }
-$d->close();
-sort($versions);
 if(!$has_version){
 	$version = $versions[count($versions)-1];
 }
