@@ -67,15 +67,26 @@ paneOnLoad = function(data){
 	dojo.query("div.private, li.private", this.domNode).style("display", "none");
 
 	//	make the summary sections collapsable.
-	dojo.query("h2.jsdoc-summary-heading", this.domNode).connect("onclick", function(e){
-		var d = e.target.nextSibling;
+	dojo.query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
+		dojo.connect(item, "onclick", function(e){
+			var d = e.target.nextSibling;
+			while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
+			if(d){
+				var dsp = dojo.style(d, "display");
+				dojo.style(d, "display", (dsp=="none"?"":"none"));
+				dojo.query("span.jsdoc-summary-toggle", e.target).forEach(function(item){
+					dojo[(dsp=="none"?"removeClass":"addClass")](item, "closed");
+				});
+			}
+		});
+
+		dojo.query("span.jsdoc-summary-toggle", item).addClass("closed");
+
+		//	probably should replace this with next or something.
+		var d = item.nextSibling;
 		while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
 		if(d){
-			var dsp = dojo.style(d, "display");
-			dojo.style(d, "display", (dsp=="none"?"":"none"));
-			dojo.query("span", e.target).forEach(function(item){
-				dojo[(dsp=="none"?"removeClass":"addClass")](item, "closed");
-			});
+			dojo.style(d, "display", "none");
 		}
 	});
 

@@ -66,6 +66,8 @@
 			//	 pull off the preceding tab.
 			$s = $line;
 			if(strpos($line, "\t")===0){ $s = substr($s, 1); }
+
+			//	deal with the munging of lists in the markdown.
 			if(preg_match('/(\t)*\*/', $s)){
 				if(!$b){
 					$b = true;
@@ -74,9 +76,11 @@
 			} else {
 				$b = false;
 			}
+
 			$fixed[] = $s;
 		}
-		return Markdown(implode("\n", $fixed));
+		$str = Markdown(implode("\n", $fixed));
+		return $str;
 	}
 
 	function format_example($text){
