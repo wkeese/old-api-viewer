@@ -229,7 +229,7 @@ div.jsdoc-children div.jsdoc-fields div.jsdoc-field {
 	clear: both;
 	border-bottom: 1px dotted #ccc;
 }
-div.jsdoc-children div.odd {
+div.jsdoc-children .odd {
 	background-color: #f8f8f8;
 }
 
@@ -278,4 +278,28 @@ table.jsdoc-parameters td {
 
 div.jsdoc-fields div.jsdoc-example {
 	margin-top: 1em;
+}
+
+/* A redo of the summary lists as UL/LI elements */
+div.jsdoc-summary-list ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+div.jsdoc-summary-list ul li {
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	margin: 0.5em 0;
+}
+div.jsdoc-summary-list ul li a {
+	font-weight: bold;
+}
+div.jsdoc-summary-list ul li span {
+	font-size: 0.9em;
+}
+div.jsdoc-summary-list ul li span.parameters {
+	font-size: 1em;
+}
+div.jsdoc-summary-list ul li span.jsdoc-returns {
+	font-weight: bold;
 }

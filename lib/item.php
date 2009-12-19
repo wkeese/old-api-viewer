@@ -3,6 +3,33 @@
 	include("markdown/markdown.php");
 	//	include("geshi/geshi.php");
 
+	function convert_type($type){
+		$base = 'object';
+		switch($type){
+			case 'Namespace':
+			case 'namespace': $base='namespace'; break;
+			case 'Constructor': $base='constructor'; break;
+			case 'Node':
+			case 'DOMNode':
+			case 'DomNode':   $base='domnode'; break;
+			case 'Array':   $base='array'; break;
+			case 'Boolean':   $base='boolean'; break;
+			case 'Date':    $base='date'; break; 
+			case 'Error':     $base='error'; break;
+			case 'Function':  $base='function'; break;
+			case 'Integer':
+			case 'Float':
+			case 'int':
+			case 'Double':
+			case 'integer':
+			case 'Number':    $base='number'; break;   
+			case 'RegExp':    $base='regexp'; break;
+			case 'String':    $base='string'; break;
+			default:      $base='object'; break;
+		}
+		return $base;
+	}
+
 	function icon_url($type, $size=16){
 		$img = "object";
 		switch($type){
@@ -567,18 +594,16 @@
 	if(count($props) || count($methods) || count($events)){
 		if(count($props)){
 			$s .= '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
-				. '<div class="jsdoc-summary-list">';
+				. '<div class="jsdoc-summary-list">'
+				. '<ul>';
 			$details .= '<h2>Properties</h2>';
 			ksort($props);
 			foreach($props as $name=>$prop){
-				$s .= '<div class="jsdoc-field '
+				$s .= '<li class="' . convert_type($prop["type"]) . 'Icon16 '
 					. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 					. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
+					. ($field_counter % 2 == 0 ? ' even':' odd')
 					. '">'
-					. '<div class="jsdoc-title">'
-					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url($prop["type"]) . '" alt="' . $prop["type"] . '" border="0" />'
-					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
 					. '</a>';
@@ -603,11 +628,12 @@
 							. $def
 							. '</a>';
 					}
-
+				/*
 					$s .= '<span class="jsdoc-inheritance">'
 						. ($prop["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp)
 						. '</span>';
+				*/
 					$details .= '<div class="jsdoc-inheritance">'
 						. ($prop["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp)
@@ -618,29 +644,29 @@
 				} else if(array_key_exists("summary", $prop)){
 					$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
 				}
-				$s .= '</div>'	//	jsdoc-title
-					. '</div>';	//	jsdoc-field
+				if(array_key_exists("summary", $prop)){
+					$s .= ' <span>' . $prop["summary"] . '</span>';
+				}
+				$s .= '</li>';	//	jsdoc-title
 				$details .= '</div>';	//	jsdoc-field
 				$field_counter++;
 			}
 
-			$s .= '</div>';	//	property-summary
+			$s .= '</ul></div>';	//	property-summary
 		}
 
 		if(count($methods)){
 			$s .= '<h2 class="jsdoc-summary-heading">Method Summary <span class="jsdoc-summary-toggle"></span></h2>'
-				. '<div class="jsdoc-summary-list">';
+				. '<div class="jsdoc-summary-list">'
+				. '<ul>';
 			$details .= '<h2>Methods</h2>';
 			ksort($methods);
 			foreach($methods as $name=>$method){
-				$s .= '<div class="jsdoc-field '
+				$s .= '<li class="functionIcon16 '
 					. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 					. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
+					. ($field_counter % 2 == 0 ? ' even':' odd')
 					. '">'
-					. '<div class="jsdoc-title">'
-					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" alt="Function" border="0" />'
-					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
 					. '</a>';
@@ -683,7 +709,7 @@
 						. implode("|", $tmp) 
 						. '</span>';
 					*/
-					$s .= '<span style="font-size: 0.9em;"> returns ' . implode("|", $tmp) . '</span>';
+					$s .= '<span class="jsdoc-returns"> returns ' . implode("|", $tmp) . '</span>';
 				}
 
 				//	inheritance list.
@@ -694,11 +720,12 @@
 							. $def
 							. '</a>';
 					}
-
+/*
 					$s .= '<span class="jsdoc-inheritance">'
 						. ($method["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp) 
 						. '</span>';	//	jsdoc-inheritance
+*/
 					$details .= '<div class="jsdoc-inheritance">'
 						. ($method["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp) 
@@ -732,8 +759,10 @@
 				} else if(array_key_exists("summary", $method)){
 					$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 				}
-				$s .= '</div>'	//	jsdoc-title
-					. '</div>';	//	jsdoc-field
+				if(array_key_exists("summary", $method)){
+					$s .= ' <span>' . $method["summary"] . '</span>';
+				}
+				$s .= '</li>';	//	jsdoc-title
 
 				if(count($method["parameters"])){
 					$tmp_details = array();
@@ -809,23 +838,21 @@
 				$details .= '</div>';	//	jsdoc-field
 				$field_counter++;
 			}
-			$s .= '</div>';	//	method-summary
+			$s .= '</ul></div>';	//	method-summary
 		}
 
 		if(count($events)){
 			$s .= '<h2 class="jsdoc-summary-heading">Event Summary <span class="jsdoc-summary-toggle"></span></h2>'
-				. '<div class="jsdoc-summary-list">';
+				. '<div class="jsdoc-summary-list">'
+				. '<ul>';
 			$details .= '<h2>Events</h2>';
 			ksort($events);
 			foreach($events as $name=>$method){
-				$s .= '<div class="jsdoc-field '
+				$s .= '<li class="functionIcon16 '
 					. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 					. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
+					. ($field_counter % 2 == 0 ? ' even':' odd')
 					. '">'
-					. '<div class="jsdoc-title">'
-					. '<span>'
-					. '<img class="trans-icon" src="' . $_base_url . icon_url('Function') . '" alt="Function" border="0" />'
-					. '</span>'
 					. '<a class="inline-link" href="#' . $name . '">'
 					. $name
 					. '</a>';
@@ -868,7 +895,7 @@
 						. implode("|", $tmp) 
 						. '</span>';
 					*/
-					$s .= '<span style="font-size: 0.9em;"> returns ' . implode("|", $tmp) . '</span>';
+					$s .= '<span class="jsdoc-returns"> returns ' . implode("|", $tmp) . '</span>';
 				}
 
 				//	inheritance list.
@@ -879,11 +906,12 @@
 							. $def
 							. '</a>';
 					}
-
+/*
 					$s .= '<span class="jsdoc-inheritance">'
 						. ($method["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp) 
 						. '</span>';	//	jsdoc-inheritance
+*/
 					$details .= '<div class="jsdoc-inheritance">'
 						. ($method["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp) 
@@ -917,8 +945,10 @@
 				} else if(array_key_exists("summary", $method)){
 					$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 				}
-				$s .= '</div>'	//	jsdoc-title
-					. '</div>';	//	jsdoc-field
+				if(array_key_exists("summary", $method)){
+					$s .= ' <span>' . $method["summary"] . '</span>';
+				}
+				$s .= '</li>';	//	jsdoc-title
 
 				if(count($method["parameters"])){
 					$tmp_details = array();
@@ -994,7 +1024,7 @@
 				$details .= '</div>';	//	jsdoc-field
 				$field_counter++;
 			}
-			$s .= '</div>';	//	method-summary
+			$s .= '</ul></div>';	//	method-summary
 		}
 	}
 

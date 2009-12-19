@@ -64,7 +64,7 @@ paneOnLoad = function(data){
 
 	var privateOn = false, inheritedOn = true;
 	//	hide the private members.
-	dojo.query("div.private", this.domNode).style("display", "none");
+	dojo.query("div.private, li.private", this.domNode).style("display", "none");
 
 	//	make the summary sections collapsable.
 	dojo.query("h2.jsdoc-summary-heading", this.domNode).connect("onclick", function(e){
@@ -86,7 +86,7 @@ paneOnLoad = function(data){
 			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
 				privateOn = !privateOn;
 				dojo[(privateOn ? "removeClass" : "addClass")](node, "off");
-				dojo.query("div.private", this.domNode).forEach(function(n){
+				dojo.query("div.private, li.private", this.domNode).forEach(function(n){
 					var state = (privateOn ? "" : "none");
 					dojo.style(n, "display", state);
 				});
@@ -95,7 +95,7 @@ paneOnLoad = function(data){
 			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
 				inheritedOn = !inheritedOn;
 				dojo[(inheritedOn ? "removeClass" : "addClass")](node, "off");
-				dojo.query("div.inherited", this.domNode).forEach(function(n){
+				dojo.query("div.inherited, li.inherited", this.domNode).forEach(function(n){
 					var state = (inheritedOn ? "" : "none");
 					if(!(!privateOn && dojo.hasClass(n, "private"))){
 						dojo.style(n, "display", state);
