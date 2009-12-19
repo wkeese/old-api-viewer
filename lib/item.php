@@ -174,14 +174,7 @@
 //	if($is_namespace){ $type = 'Namespace'; }
 
 	//	start up the output process.
-	$s = '<div class="jsdoc-toolbar">'
-		. '<span class="jsdoc-permalink"><a class="jsdoc-link" href="/'
-	    . $version . '/' . implode("/", explode(".", $page))
-		. '">Permalink</a></span>'	
-		. '<label>View options: </label>'
-		. '<span class="trans-icon jsdoc-private"><img src="' . $_base_url . 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
-		. '<span class="trans-icon jsdoc-inherited"><img src="' . $_base_url . 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>'
-		. '</div>';
+	$s = '<div class="jsdoc-permalink" style="display:none;">' . $version . '/' . implode('/', explode(".", $page)) . '</div>';
 
 	//	page heading.
 	$s .= '<h1 class="jsdoc-title">'

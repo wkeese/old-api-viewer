@@ -43,6 +43,20 @@ paneOnLoad = function(data){
 		};
 	});
 
+	//	build the toolbar.
+	var link = null, perm = dojo.query("div.jsdoc-permalink", context);
+	if(perm.length){
+		link = perm[0].innerHTML;
+	}
+	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + link + '">Permalink</a></span>' : '')
+		+ '<label>View options: </label>'
+		+ '<span class="trans-icon jsdoc-private"><img src="' + baseUrl + 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
+		+ '<span class="trans-icon jsdoc-inherited"><img src="' + baseUrl + 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>';
+	var toolbar = dojo.create("div", {
+		className: "jsdoc-toolbar",
+		innerHTML: tbc		
+	}, this.domNode, "first");
+
 	//	if SyntaxHighlighter is present, run it in the content
 	if(SyntaxHighlighter){
 		SyntaxHighlighter.highlight();

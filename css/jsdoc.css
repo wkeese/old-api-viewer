@@ -118,13 +118,13 @@ h2.jsdoc-summary-heading span.closed {
 
 /* jsdoc styling */
 a { color: #47a; }
+
 div.jsdoc-toolbar {
 	margin: -5px -5px 0 -5px;
 	padding: 4px 4px 0 4px;
 	background-color: #f2f2f2;
 	border-bottom: 1px solid #e5e3cf;
 	height: 28px;
-	position: relative;
 }
 div.jsdoc-toolbar span.jsdoc-permalink {
 	position: absolute;
@@ -157,7 +157,7 @@ div.jsdoc-toolbar span.off {
 
 h1.jsdoc-title{ 
 	font-size: 2.5em;
-	margin: 0.35em 0;
+	margin: 36px 0 0.35em 0;
 	font-weight: normal;
 }
 h1.jsdoc-title img {
