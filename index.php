@@ -134,6 +134,17 @@ foreach($versions as $v){
 					</div>
 				</div>
 				<div dojoType="dijit.layout.AccordionContainer" region="center">
+					<div id="searchPane" dojoType="dijit.layout.ContentPane" title="Search">
+						<div>
+							<label for="searchText">Type in the word(s) to search for:</label>
+						</div>
+						<div>
+							<input type="text" name="searchText" id="searchText" value="" />
+						</div>
+						<div>
+							...results go here...
+						</div>
+					</div>
 					<div id="classTreePane" dojoType="dijit.layout.ContentPane" title="By Object" selected="true"></div>
 <!--
 					<div dojoType="dijit.layout.ContentPane" title="By Resource">
@@ -181,10 +192,7 @@ foreach($versions as $v){
 			</div>
 			<div id="content" dojoType="dijit.layout.TabContainer" region="center" tabStrip="true">
 				<div id="baseTab" dojoType="dijit.layout.ContentPane" title="Welcome">
-					<h1>Welcome to the Dojo Toolkit API Console</h1>
-					<p>
-					The request was for: <strong><?php echo $page; ?></strong> (version: <?php echo $version; ?>)
-					</p>
+<?php include("themes/" . $th . "/index.php"); ?>
 				</div>
 <?php if($is_page && strlen($page)){
 	//*
