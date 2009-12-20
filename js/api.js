@@ -6,7 +6,7 @@ dojo.require("dijit.layout.TabContainer");
 dojo.require("dijit.layout.ContentPane");
 dojo.require("dijit.Tree");
 dojo.require("dojo.fx.easing");
-dojo.require("dojox.fx.scroll");
+dojo.require("dojox.fx._core");
 
 if(currentVersion === undefined){
 	//	fallback.
@@ -14,6 +14,30 @@ if(currentVersion === undefined){
 }
 
 var classTree, classStore;
+function smoothScroll(args){
+	//	NB: this is basically dojox.fx.smoothScroll, but for some reason smoothScroll uses target.x/y instead
+	//	of left/top.  dojo.coords is returning a different y than the top for some reason.  Maybe position will
+	//	be better post 1.3.
+	if(!args.target){ 
+		args.target = dojo.coords(args.node, true);
+	}
+	var _anim = function(val){
+		args.win.scrollLeft = val[0];
+		args.win.scrollTop = val[1];
+	};
+
+	var anim = new dojo._Animation(dojo.mixin({
+		beforeBegin: function(){
+			if(this.curve){ delete this.curve; }
+			var current = { x: args.win.scrollLeft, y: args.win.scrollTop };
+			anim.curve = new dojox.fx._Line([ current.x, current.y ], [ args.target.l, args.target.t - 12 ]);
+			console.log(anim.curve);
+		},
+		onAnimate: _anim
+	}, args));
+	return anim;
+}
+
 paneOnLoad = function(data){
 	var context = this.domNode;
 	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
@@ -32,8 +56,7 @@ paneOnLoad = function(data){
 			dojo.stopEvent(e);
 			var target = dojo.query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
 			if(target.length){
-				//	FIXME: for some reason this is not scrolling to where you'd expect it to.
-				var anim = dojox.fx.smoothScroll({
+				var anim = smoothScroll({
 					node: target[0],
 					win: context,
 					duration: 600
