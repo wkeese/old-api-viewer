@@ -78,7 +78,7 @@ if(isset($_GET["clearcache"])){
 <link rel="stylesheet" href="/themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/dojo.xd.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"></script>
 		<!-- SyntaxHighlighter -->
 		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shCore.js"><</script>
 		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>

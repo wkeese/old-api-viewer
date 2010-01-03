@@ -1,5 +1,5 @@
-@import "http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dojo/resources/dojo.css";
-@import "http://ajax.googleapis.com/ajax/libs/dojo/1.3.2/dijit/themes/nihilo/nihilo.css";
+@import "http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/resources/dojo.css";
+@import "http://ajax.googleapis.com/ajax/libs/dojo/1.4/dijit/themes/nihilo/nihilo.css";
 html, body { 
 	height: 100%; width: 100%; padding: 0; border: 0;
 	font-family: "Myriad Pro", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
