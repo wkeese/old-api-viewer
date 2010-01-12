@@ -2,7 +2,7 @@
 @import "http://ajax.googleapis.com/ajax/libs/dojo/1.4/dijit/themes/nihilo/nihilo.css";
 html, body { 
 	height: 100%; width: 100%; padding: 0; border: 0;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+	font-family: Helvetica, Arial, sans-serif !important;
 }
 #main { height: 100%; width: 100%; border: 0; }
 #header { margin: 0px; }
