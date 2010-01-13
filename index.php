@@ -94,7 +94,7 @@ if(isset($_GET["clearcache"])){
 		<meta name="company" content="Dojo Foundation" />
 
 		<script type="text/javascript">
-			var baseUrl = "/";
+			var baseUrl = "<?php echo $_base_url; ?>";
 			var siteName = 'The Dojo Toolkit';
 			dojo.addOnLoad(function(){
 				dojo.parser.parse(document.body);
