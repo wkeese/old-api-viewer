@@ -799,7 +799,7 @@
 										. $p_node->getAttribute("type")
 										. '</td>'
 										. '<td class="jsdoc-param-description">'
-										. ($summary->length ? $summary->item(0)->nodeValue : '&nbsp;')
+										. ($summary->length ? do_markdown(trim($summary->item(0)->nodeValue)) : '&nbsp;')
 										. '</td>'
 										. '</tr>';
 								}
@@ -985,7 +985,7 @@
 										. $p_node->getAttribute("type")
 										. '</td>'
 										. '<td class="jsdoc-param-description">'
-										. ($summary->length ? $summary->item(0)->nodeValue : '&nbsp;')
+										. ($summary->length ? do_markdown(trim($summary->item(0)->nodeValue)) : '&nbsp;')
 										. '</td>'
 										. '</tr>';
 								}
