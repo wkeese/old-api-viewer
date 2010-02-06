@@ -1,16 +1,16 @@
 <?php
-$_base_url = "/";
+$_base_url = "http://" . $_SERVER["HTTP_HOST"] . "/";
 $_site_name = "The Dojo Toolkit";
-	$defVersion = "1.4";
-	$dataDir = dirname(__FILE__) . "/data/";
-	$defPage = "";
-	$default_theme = "dtk";
-	$theme = "dtk";
-	$filter_privates = true;
-	$modules = array(
-		"dojo"=>-1, 
-		"dijit"=>-1, 
-		"dojox"=>-1, 
-		"djConfig"=>-1
-	 );
+$defVersion = "1.4";
+$dataDir = dirname(__FILE__) . "/data/";
+$defPage = "";
+$default_theme = "dtk";
+$theme = "dtk";
+$filter_privates = true;
+$modules = array(
+	"dojo"=>-1, 
+	"dijit"=>-1, 
+	"dojox"=>-1, 
+	"djConfig"=>-1
+ );
 ?>

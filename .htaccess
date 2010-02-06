@@ -7,6 +7,10 @@ Options -MultiViews
 
 RewriteEngine On
 
+# convert static/rest-like requests
+RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
+RewriteRule ^json/([0-9.]+)/class-tree\.json$ lib/class-tree.php?v=$1 [L,QSA]
+
 # bottom line: we're going to simply pop the rest off and parse it in PHP.
 RewriteRule ^css/(.*)$ css/$1 [L,QSA]
 RewriteRule ^data/(.*)$ data/$1 [L,QSA]
