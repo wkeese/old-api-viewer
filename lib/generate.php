@@ -126,7 +126,7 @@ function is_method($item){
 }
 
 //	Generate an HTML representation of a particular object
-function generate_object_html($page, $version, $base_url = "", $suffix = "", $docs = array()){
+function generate_object_html($page, $version, $base_url = "", $suffix = "", $versioned = true, $docs = array()){
 	//	$page:
 	//		The object to render, i.e. "dojox.charting.Chart2D"
 	//	$version:
@@ -188,6 +188,11 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 		$r_xpath = $docs["r_xpath"];
 	}
 
+	//	check if we're to build links versioned and if so, add that to the base url.
+	if($versioned){
+		$base_url .= $version . '/';
+	}
+
 	//	get our context.
 	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
 	if(!$context){
@@ -226,7 +231,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 //	if($is_namespace){ $type = 'Namespace'; }
 
 	//	start up the output process.
-	$s = '<div class="jsdoc-permalink" style="display:none;">' . $base_url . $version . '/' . implode('/', explode(".", $page)) . $suffix . '</div>';
+	$s = '<div class="jsdoc-permalink" style="display:none;">' . $base_url . implode('/', explode(".", $page)) . $suffix . '</div>';
 
 	//	page heading.
 	$s .= '<h1 class="jsdoc-title ' . convert_type($type) . 'Icon36">'
@@ -251,7 +256,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 		$s .= ' &raquo; ';
 		if($p != $page){
 			$name = implode("/", explode(".", $p));
-			$s .= '<a class="jsdoc-link" href="' . $base_url . $version . '/' . $name . $suffix . '">' . $p . '</a>';
+			$s .= '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $p . '</a>';
 		} else {
 			$s .= $p;
 		}
@@ -639,7 +644,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 				if(isset($prop["defines"]) && count($prop["defines"])){
 					$tmp = array();
 					foreach($prop["defines"] as $def){
-						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $version . '/' . implode("/", explode(".", $def)) . $suffix . '">'
+						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
 							. $def
 							. '</a>';
 					}
@@ -730,7 +735,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 				if(isset($prop["defines"]) && count($method["defines"])){
 					$tmp = array();
 					foreach($method["defines"] as $def){
-						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $version . '/' . implode("/", explode(".", $def)) . $suffix . '">'
+						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
 							. $def
 							. '</a>';
 					}
@@ -915,7 +920,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 				if(isset($prop["defines"]) && count($method["defines"])){
 					$tmp = array();
 					foreach($method["defines"] as $def){
-						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $version . '/' . implode("/", explode(".", $def)) . $suffix . '">'
+						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
 							. $def
 							. '</a>';
 					}
@@ -1057,7 +1062,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $do
 				$s .= convert_type($child->getAttribute("type"));
 			}
 			$s .= '">'
-				. '<a class="jsdoc-link" href="' . $base_url . $version . '/' . implode("/", explode(".", $child->getAttribute("location"))) . $suffix . '">'
+				. '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $child->getAttribute("location"))) . $suffix . '">'
 				. $child->getAttribute("location")
 				. '</a>'
 				. '</span>'

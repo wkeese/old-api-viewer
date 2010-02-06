@@ -1,5 +1,18 @@
 <?php
 //	use the given XSL stylesheets to generate the smaller XML files for more efficient usage.
+function remove_dir($path){
+	$dir = new DirectoryIterator($path);
+	foreach($dir as $f){
+		if($f->isFile() || $f->isSymlink()){
+			unlink($f->getPathName());
+		}
+		else if(!$f->isDot() && $f->isDir()){
+			remove_dir($f->getPathName());
+		}
+	}
+	rmdir($path);
+}
+
 if(isset($_POST["dir"])){
 	//	generate it.
 	$logger = array();
@@ -35,9 +48,11 @@ if(isset($_POST["dir"])){
 				mkdir($dataDir . $version . '/cache', 0700);
 			} else {
 				//	clear the cache
-				$files = glob($dataDir . $version . '/cache/*');
-				$files = array_filter($files, 'is_file');
+				$f = glob($dataDir . $version . '/cache/*');
+				$files = array_filter($f, 'is_file');
 				array_map('unlink', $files);
+				$dirs = array_filter($f, 'is_dir');
+				array_map('remove_dir', $dirs);	
 			}
 
 			$api = new DOMDocument();

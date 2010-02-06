@@ -187,9 +187,9 @@ $tree = generate_object_tree($version, $roots, true, array(
 	"xml"=>$docs["o_xml"],
 	"xpath"=>$docs["o_xpath"]
 ));
+
 print "==== GENERATING NAVIGATION TREES ====\n";
 flush();
-
 $html_trees = array();
 foreach($args as $arg){
 	$html_trees[$arg] = generate_object_tree_html($tree, $arg, $baseurl, $output);
@@ -198,12 +198,18 @@ foreach($args as $arg){
 //	our objects.
 print "==== FETCHING OBJECTS ====\n";
 flush();
-$objects = $docs["xpath"]->query("//object");
+//	build the xpath statement -- ignore any objects that don't begin with our root objects.
+$query = array();
+foreach($args as $arg){
+	$query[] = '//object[starts-with(@location, "' . $arg . '")]';
+}
+$q = implode(" | ", $query);
+$objects = $docs["xpath"]->query($q);
 foreach($objects as $object){
 	$page = $object->getAttribute("location");
 	print "Generating " . implode("/", explode(".", $page)) . $output . "\n";
 	flush();
-	$html = generate_object_html($page, $version, $baseurl, $output, $docs);
+	$html = generate_object_html($page, $version, $baseurl, $output, false, $docs);
 	if(isset($template)){
 		$html = str_replace($templateBlock, $html, $template);
 		$html = str_replace($templateTitleBlock, $page, $html);
