@@ -37,7 +37,7 @@ array_pop($tmp);	//	last member is never a directory.
 $assembled = array();
 foreach($tmp as $part){
 	if(!file_exists($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part)){
-		mkdir($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part, 0700);
+		mkdir($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part, 0750);
 	}
 	$assembled[] = $part;
 }

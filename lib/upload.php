@@ -44,8 +44,8 @@ if(isset($_POST["dir"])){
 			$logger[] = "There was an issue getting the api.xml file at '" . $_POST["api"] . "'; returned HTTP " . $info["http_code"] . ".";
 		} else {
 			if(!file_exists($dataDir . $version)){
-				mkdir($dataDir . $version, 0700);
-				mkdir($dataDir . $version . '/cache', 0700);
+				mkdir($dataDir . $version, 0750);
+				mkdir($dataDir . $version . '/cache', 0750);
 			} else {
 				//	clear the cache
 				$f = glob($dataDir . $version . '/cache/*');
