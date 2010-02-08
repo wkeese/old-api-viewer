@@ -77,6 +77,20 @@ h2.jsdoc-summary-heading span.closed {
 	background-position: 0 0;
 }
 
+.arrayIcon{ background-image:url('icons/16x16/array.png'); }
+.booleanIcon{ background-image:url('icons/16x16/boolean.png'); }
+.constructorIcon{ background-image:url('icons/16x16/constructor.png'); }
+.dateIcon{ background-image:url('icons/16x16/date.png'); }
+.domnodeIcon{ background-image:url('icons/16x16/domnode.png'); }
+.errorIcon{ background-image:url('icons/16x16/error.png'); }
+.functionIcon{ background-image:url('icons/16x16/function.png'); }
+.namespaceIcon{ background-image:url('icons/16x16/namespace.png'); }
+.numberIcon{ background-image:url('icons/16x16/number.png'); }
+.objectIcon{ background-image:url('icons/16x16/object.png'); }
+.regexpIcon{ background-image:url('icons/16x16/regexp.png'); }
+.singletonIcon{ background-image:url('icons/16x16/singleton.png'); }
+.stringIcon{ background-image:url('icons/16x16/string.png'); }
+
 .arrayIcon16{ background-image:url('icons/16x16/array.png'); }
 .booleanIcon16{ background-image:url('icons/16x16/boolean.png'); }
 .constructorIcon16{ background-image:url('icons/16x16/constructor.png'); }
@@ -121,6 +135,41 @@ h2.jsdoc-summary-heading span.closed {
 
 /* jsdoc styling */
 a { color: #47a; }
+h1.arrayIcon36,
+h1.booleanIcon36,
+h1.constructorIcon36,
+h1.dateIcon36,
+h1.domnodeIcon36,
+h1.errorIcon36,
+h1.functionIcon36,
+h1.namespaceIcon36,
+h1.numberIcon36,
+h1.objectIcon36,
+h1.regexpIcon36,
+h1.singletonIcon36,
+h1.stringIcon36 {
+	padding-left: 40px;
+	background-repeat: no-repeat;
+	min-height: 36px;
+}
+
+span.arrayIcon,
+span.booleanIcon,
+span.constructorIcon,
+span.dateIcon,
+span.domnodeIcon,
+span.errorIcon,
+span.functionIcon,
+span.namespaceIcon,
+span.numberIcon,
+span.objectIcon,
+span.regexpIcon,
+span.singletonIcon,
+span.stringIcon {
+	display: inline-block;
+	padding-left: 20px;
+	background-repeat: no-repeat;
+}
 
 div.jsdoc-toolbar {
 	margin: -5px -5px 0 -5px;
