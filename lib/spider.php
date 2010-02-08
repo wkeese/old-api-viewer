@@ -225,7 +225,7 @@ foreach($objects as $object){
 	$assembled = array();
 	foreach($tmp as $part){
 		if(!file_exists($outdir . implode('/', $assembled) . '/' . $part)){
-			mkdir($outdir . implode('/', $assembled) . '/' . $part, 700);
+			mkdir($outdir . implode('/', $assembled) . '/' . $part, 0700);
 		}
 		$assembled[] = $part;
 	}
