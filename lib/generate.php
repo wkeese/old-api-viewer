@@ -347,7 +347,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
 			$private = $n->getAttribute("private") == "true";
-			if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+			if(!$private && strpos($nm, "_")===0){
 				$private = true;
 			}
 			if(array_key_exists($nm, $props)){
@@ -385,7 +385,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		foreach($nl as $n){
 			$nm = $n->getAttribute("name");
 			$private = $n->getAttribute("private") == "true";
-			if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+			if(!$private && strpos($nm, "_")===0){
 				$private = true;
 			}
 			if(array_key_exists($nm, $methods)){
@@ -474,7 +474,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
 		$private = $n->getAttribute("private") == "true";
-		if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+		if(!$private && strpos($nm, "_")===0){
 			$private = true;
 		}
 
@@ -513,7 +513,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	foreach($nl as $n){
 		$nm = $n->getAttribute("name");
 		$private = $n->getAttribute("private") == "true";
-		if(!$private && isset($filter_privates) && $filter_privates && strpos($nm, "_")===0){
+		if(!$private && strpos($nm, "_")===0){
 			$private = true;
 		}
 
