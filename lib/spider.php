@@ -139,7 +139,7 @@ if(file_exists($outdir)){
 	//	create the directory
 	print "===== CREATING the output directory: " . $outdir . " =====\n";
 	flush();
-	mkdir($outdir, 700);
+	mkdir($outdir, 0750);
 }
 
 //	check to see if we have a template
@@ -155,6 +155,9 @@ if(strlen($templatePath)){
 		if(isset($template) && strpos($template, $templateBlock) === false){
 			die("==== Template does not have a content block like so: " . $templateBlock . " ====");
 		}
+
+		//	if we got here, we have a template string.  pull any fricking \r's from it.
+		$template = str_replace("\r", "", $template);
 	}
 }
 

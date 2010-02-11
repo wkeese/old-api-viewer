@@ -98,7 +98,7 @@ function format_example($text){
 	$isCode = false;
 	foreach($lines as &$line){
 		if(strpos($line, "\t")===0){
-			$line = substr($line, 1);	//	always pull off the first tab.
+			$line = htmlentities(substr($line, 1));	//	always pull off the first tab.
 		}
 		if(strpos($line, "\t")===0){
 			if(!$isCode){
