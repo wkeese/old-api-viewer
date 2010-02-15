@@ -3,7 +3,7 @@
 function remove_dir($path){
 	$dir = new DirectoryIterator($path);
 	foreach($dir as $f){
-		if($f->isFile() || $f->isSymlink()){
+		if($f->isFile() || $f->isLink()){
 			unlink($f->getPathName());
 		}
 		else if(!$f->isDot() && $f->isDir()){
