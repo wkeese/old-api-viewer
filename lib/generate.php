@@ -323,7 +323,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	foreach($mixins as $key=>$node){
 		//	TODO: don't build the link if it's not part of the fearsome threesome.
 		$name = implode("/", explode('.', $key));
-		$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $version . '/' . $name . $suffix . '">' . $key . '</a>';
+		$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $key . '</a>';
 	}
 	if(count($tmp)){
 		$s .= '<div class="jsdoc-mixins"><label>mixins: </label>'
