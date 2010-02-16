@@ -16,7 +16,14 @@ if(!isset($page)){ $page = "dojo"; }
 
 //	check if there's URL variables
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
-if(isset($_GET["v"])){ $version = $_GET["v"]; }
+if(isset($_GET["v"])){
+	//	we really only care about the last thing on the GET string.
+	$version = $_GET["v"];
+	if(strpos("/", $version) !== false){
+		$tmp = explode($version, "/");
+		$version = array_pop($tmp);
+	}
+}
 
 if(strpos($page, "/") > 0){ $page = implode(".", explode("/", $page)); }
 $data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
