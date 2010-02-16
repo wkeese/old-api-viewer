@@ -43,9 +43,9 @@ paneOnLoad = function(data){
 	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
 		link.onclick = function(e){
 			dojo.stopEvent(e);
-			var tmp = this.href.split("/");
-			var version = tmp[3];
-			var page = tmp.slice(4).join(".");
+			var tmp = this.href.replace(window.location.href, "").split("/");
+			var version = tmp[0];
+			var page = tmp.slice(1).join(".");
 			addTabPane(page, version);
 			return false;
 		};
