@@ -159,11 +159,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$details = "details.xml";
 		$f = $data_dir . $details;
 		if(!file_exists($f)){
-			$data_dir = dirname(__FILE__) . "/../data/" . $defVersion . "/";
-			$f = $data_dir . $details;
-		}
-		if(!file_exists($f)){
-			echo "API data does not exist for the default version: " . $defVersion . "<br/>";
+			echo "API data does not exist for the version: " . $version . "<br/>";
 			exit();
 		}
 
