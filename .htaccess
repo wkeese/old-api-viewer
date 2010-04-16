@@ -7,6 +7,9 @@ Options -MultiViews
 
 RewriteEngine On
 
+#  Set the prefix for all matches
+RewriteBase   /
+
 # convert static/rest-like requests
 RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
 RewriteRule ^json/([0-9.]+)/class-tree\.json$ lib/class-tree.php?v=$1 [L,QSA]

@@ -72,19 +72,19 @@ if(isset($_GET["clearcache"])){
 	<head>
 	<title><?php echo ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
 		<meta http-equiv="X-UA-Compatible" content="chrome=1"/> 
-		<link rel="stylesheet" href="/css/jsdoc.css" type="text/css" media="all" />
-		<link rel="stylesheet" href="/css/jsdoc-print.css" type="text/css" media="print" />
+		<link rel="stylesheet" href="<?php echo $basePath; ?>css/jsdoc.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="<?php echo $basePath; ?>css/jsdoc-print.css" type="text/css" media="print" />
 <?php if(file_exists("themes/" . $th . "/" . $th . ".css")){ ?>
-<link rel="stylesheet" href="/themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
+<link rel="stylesheet" href="<?php echo $basePath; ?>themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"></script>
 		<!-- SyntaxHighlighter -->
-		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shCore.js"><</script>
-		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
-		<script type="text/javascript" src="/js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
-		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shCore.css" type="text/css" />
-		<link rel="stylesheet" href="/js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
+		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shCore.js"><</script>
+		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
+		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
+		<link rel="stylesheet" href="<?php echo $basePath; ?>js/syntaxhighlighter/styles/shCore.css" type="text/css" />
+		<link rel="stylesheet" href="<?php echo $basePath; ?>js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="keywords" content="The Dojo Toolkit, dojo, JavaScript Framework" />
@@ -109,14 +109,14 @@ if(isset($_GET["clearcache"])){
 
 			var currentVersion = '<?php echo $version; ?>';
 		</script>
-		<script type="text/javascript" src="/js/api.js"></script>
+		<script type="text/javascript" src="<?php echo $basePath; ?>js/api.js"></script>
 	</head>
 	<body class="nihilo">
 		<div id="loader"><div id="loaderInner"></div></div>
 		<div id="printBlock"></div>
 <!--
-		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="/lib/class-tree.php?v=<?php echo $version; ?>"></div>
-		<div dojoType="dojo.data.ItemFileReadStore" jsId="moduleStore" url="/lib/module-tree.php?v=<?php echo $version; ?>"></div>
+		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="<?php echo $basePath; ?>lib/class-tree.php?v=<?php echo $version; ?>"></div>
+		<div dojoType="dojo.data.ItemFileReadStore" jsId="moduleStore" url="<?php echo $basePath; ?>lib/module-tree.php?v=<?php echo $version; ?>"></div>
 -->
 		<div id="main" dojoType="dijit.layout.BorderContainer" liveSplitters="false">
 			<div id="head" dojoType="dijit.layout.ContentPane" region="top">
@@ -175,19 +175,19 @@ foreach($versions as $v){
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="bottom" style="height:18px;background-color:#f2f2f2;border-top:1px solid #dedede;padding:0 2px 4px 48px;position:relative;overflow:hidden;">
 					<span style="position:absolute;top:5px;left:3px;font-size:11px;">Legend: </span>
-					<img src="/css/icons/16x16/array.png" align="middle" title="Array" alt="Array" border="0" />
-					<img src="/css/icons/16x16/boolean.png" align="middle" title="Boolean" alt="Boolean" border="0" />
-					<img src="/css/icons/16x16/constructor.png" align="middle" title="Constructor" alt="Constructor" border="0" />
-					<img src="/css/icons/16x16/date.png" align="middle" title="Date" alt="Date" border="0" />
-					<img src="/css/icons/16x16/domnode.png" align="middle" title="DomNode" alt="DomNode" border="0" />
-					<img src="/css/icons/16x16/error.png" align="middle" title="Error" alt="Error" border="0" />
-					<img src="/css/icons/16x16/function.png" align="middle" title="Function" alt="Function" border="0" />
-					<img src="/css/icons/16x16/namespace.png" align="middle" title="Namespace" alt="Namespace" border="0" />
-					<img src="/css/icons/16x16/number.png" align="middle" title="Number" alt="Number" border="0" />
-					<img src="/css/icons/16x16/object.png" align="middle" title="Object" alt="Object" border="0" />
-					<img src="/css/icons/16x16/regexp.png" align="middle" title="RegExp" alt="RegExp" border="0" />
-					<img src="/css/icons/16x16/singleton.png" align="middle" title="Singleton" alt="Singleton" border="0" />
-					<img src="/css/icons/16x16/string.png" align="middle" title="String" alt="String" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/array.png" align="middle" title="Array" alt="Array" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/boolean.png" align="middle" title="Boolean" alt="Boolean" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/constructor.png" align="middle" title="Constructor" alt="Constructor" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/date.png" align="middle" title="Date" alt="Date" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/domnode.png" align="middle" title="DomNode" alt="DomNode" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/error.png" align="middle" title="Error" alt="Error" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/function.png" align="middle" title="Function" alt="Function" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/namespace.png" align="middle" title="Namespace" alt="Namespace" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/number.png" align="middle" title="Number" alt="Number" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/object.png" align="middle" title="Object" alt="Object" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/regexp.png" align="middle" title="RegExp" alt="RegExp" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/singleton.png" align="middle" title="Singleton" alt="Singleton" border="0" />
+					<img src="<?php echo $basePath; ?>css/icons/16x16/string.png" align="middle" title="String" alt="String" border="0" />
 				</div>
 			</div>
 			<div id="content" dojoType="dijit.layout.TabContainer" region="center" tabStrip="true">
@@ -198,7 +198,7 @@ foreach($versions as $v){
 	//*
 	echo '<div id="initialPagePane" dojoType="dijit.layout.ContentPane" title="'
 		. implode(".", explode("/", $page))
-		. '" closable="true" selected="true" onLoad="paneOnLoad" href="/lib/item.php?v='
+		. '" closable="true" selected="true" onLoad="paneOnLoad" href="'.$basePath.'lib/item.php?v='
 		. $version
 		. '&p='
 		. $page
