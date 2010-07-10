@@ -118,11 +118,449 @@ function format_example($text){
 	}
 	return $s . implode("\n", $lines);
 }
+
 function is_event($item){
 	return strpos($item["name"], "on") === 0;
 }
 function is_method($item){
 	return strpos($item["name"], "on") !== 0;
+}
+function is_static($item){
+	return $item["scope"] == "normal";
+}
+
+function load_docs($version){
+	//	helper function to load up the XML docs we need.
+	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
+
+	//	load up the doc.
+	$provides = "provides.xml";
+	$resources = "resources.xml";
+	$details = "details.xml";
+	$f = $data_dir . $details;
+	if(!file_exists($f)){
+		echo "API data does not exist for the version: " . $version . "<br/>";
+		exit();
+	}
+
+	$xml = new DOMDocument();
+	$xml->load($f);
+
+	$p_xml = new DOMDocument();
+	$p_xml->load($data_dir . $provides);
+
+	$r_xml = new DOMDocument();
+	$r_xml->load($data_dir . $resources);
+
+	$xpath = new DOMXPath($xml);
+	$p_xpath = new DOMXPath($p_xml);
+	$r_xpath = new DOMXPath($r_xml);
+
+	$docs = array(
+		"xml"=>$xml,
+		"p_xml"=>$p_xml,
+		"r_xml"=>$r_xml,
+		"xpath"=>$xpath,
+		"p_xpath"=>$p_xpath,
+		"r_xpath"=>$r_xpath
+	);
+	return $docs;
+}
+
+function read_object_fields($page, $version, $docs=array()){
+	//	for the given page, grab any mixins and assemble a "flat" version of it (no prototype walking).
+	//	create a PHP-based associative array structure out of the page in question.
+	if(!count($docs)){
+		$docs = load_docs($version);
+	}
+
+	$xml = $docs["xml"];
+	$p_xml = $docs["p_xml"];
+	$r_xml = $docs["r_xml"];
+	$xpath = $docs["xpath"];
+	$p_xpath = $docs["p_xpath"];
+	$r_xpath = $docs["r_xpath"];
+
+	//	get the XML for the page.
+	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
+	if(!$context){
+		//	we got nothing, just return null.
+		return null;
+	}
+
+	//	get any mixins, and ignore if the mixin == superclass.  Note that we're going to ignore any prototype mixins,
+	//	as they are (in general) applied in the same way as instance mixins.
+	$mixinNodes = $xpath->query('mixins/mixin[@scope="instance"]', $context);
+	$mixins = array();
+	foreach($mixinNodes as $m){
+		//	test 1: make sure the mixin is not the superclass.
+		if($m->getAttribute("location") == $context->getAttribute("superclass")){
+			continue;
+		}
+		//	test 2: make sure we can actually read the mixin definition
+		$m_test = $xpath->query("//object[@location='" . $m->getAttribute("location") . "']");
+		if($m_test->length){
+			$mixins[$m->getAttribute("location")] = $m_test->item(0);
+		}
+	}
+
+	//	push in our page.
+	$mixins[$page] = $context;
+	$props = array();
+	$methods = array();
+
+	foreach($mixins as $location=>$node){
+		//	properties
+		$nl = $xpath->query("properties/property", $node);
+		foreach($nl as $n){
+			$nm = $n->getAttribute("name");
+			$private = $n->getAttribute("private") == "true";
+			if(!$private && strpos($nm, "_")===0){
+				$private = true;
+			}
+			if(array_key_exists($nm, $props)){
+				//	next one up in the chain overrides the original.
+				$props[$nm]["scope"] = $n->getAttribute("scope");
+				$props[$nm]["type"] = $n->getAttribute("type");
+				$props[$nm]["override"] = true;
+				$props[$nm]["defines"][] = $location;
+			} else {
+				$props[$nm] = array(
+					"name"=>$nm,
+					"scope"=>$n->getAttribute("scope"),
+					"visibility"=>($private == true ? "private" : "public"),
+					"type"=>$n->getAttribute("type"),
+					"defines"=>array($location),
+					"override"=>false
+				);
+			}
+
+			if($n->getElementsByTagName("summary")->length){
+				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
+				if(strlen($desc)){
+					$props[$nm]["summary"] = $desc;
+				}
+			}
+			if($n->getElementsByTagName("description")->length){
+				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+				if(strlen($desc)){
+					$props[$nm]["description"] = do_markdown($desc);
+				}
+			}
+		}
+
+		//	methods
+		$nl = $xpath->query("methods/method", $node);
+		foreach($nl as $n){
+			$nm = $n->getAttribute("name");
+			$private = $n->getAttribute("private") == "true";
+			if(!$private && strpos($nm, "_")===0){
+				$private = true;
+			}
+			if(!strlen($nm)){
+				$nm = "constructor";
+			}
+			if(array_key_exists($nm, $methods)){
+				//	next one up in the chain overrides the original.
+				$methods[$nm]["scope"] = $n->getAttribute("scope");
+				$methods[$nm]["override"] = true;
+				$methods[$nm]["defines"][] = $location;
+				if($n->getAttribute("constructor") == "constructor"){
+					$methods[$nm]["constructor"] = true;
+					$methods[$nm]["scope"] = "prototype";
+				}
+			} else {
+				$methods[$nm] = array(
+					"name"=>$nm,
+					"scope"=>$n->getAttribute("scope"),
+					"visibility"=>($private=="true"?"private":"public"),
+					"parameters"=>array(),
+					"return-types"=>array(),
+					"defines"=>array($location),
+					"override"=>false,
+					"constructor"=>$n->getAttribute("constructor")=="constructor"
+				);
+			}
+
+			if($n->getElementsByTagName("summary")->length){
+				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
+				if(strlen($desc)){
+					$methods[$nm]["summary"] = $desc;
+				}
+			}
+			if($n->getElementsByTagName("description")->length){
+				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+				if(strlen($desc)){
+					$methods[$nm]["description"] = do_markdown($desc);
+				}
+			}
+			$ex = $n->getElementsByTagName("example");
+			if($ex->length){
+				if(!array_key_exists("examples", $methods[$nm])){
+					$methods[$nm]["examples"] = array();
+				}
+				foreach($ex as $example){
+					$methods[$nm]["examples"][] = format_example($example->nodeValue);
+				}
+			}
+			if($n->getElementsByTagName("return-description")->length){
+				$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
+				if(strlen($desc)){
+					$methods[$nm]["return-description"] = $desc;
+				}
+			}
+
+			//	do up the parameters and the return types.
+			$params = $xpath->query("parameters/parameter", $n);
+			if($params->length){
+				//	TODO: double-check that the XML will always have this.
+				$methods[$nm]["parameters"] = array();
+				foreach($params as $param){
+					$item = array(
+						"name"=>$param->getAttribute("name"),
+						"type"=>$param->getAttribute("type"),
+						"usage"=>$param->getAttribute("usage"),
+						"description"=>""
+					);
+					if($param->getElementsByTagName("summary")->length){
+						$desc = htmlentities(trim($param->getElementsByTagName("summary")->item(0)->nodeValue));
+						if(strlen($desc)){
+							$item["description"] = $desc;
+						}
+					}
+					$methods[$nm]["parameters"][] = $item;
+				}
+			}
+
+			if($nm == "constructor"){
+				$methods[$nm]["return-types"] = array();
+				$methods[$nm]["return-types"][] = array(
+					"type"=>$location,
+					"description"=>""
+				);
+			} else {
+				$rets = $xpath->query("return-types/return-type", $n);
+				if($rets->length){
+					//	TODO: double-check that the XML will always have this.
+					$methods[$nm]["return-types"] = array();
+					foreach($rets as $ret){
+						$item = array(
+							"type"=>$ret->getAttribute("type"),
+							"description"=>""
+						);
+						$methods[$nm]["return-types"][] = $item;
+					}
+				}
+			}
+		}
+	}
+	return array("props"=>$props, "methods"=>$methods);
+}
+
+function get_Object_fields(){
+	//	simple helper function to return a fake generated prop/method set for Object.
+	$props = array();
+	$methods = array();
+
+	//	no properties other than the constructor on an object, so we'll just return that as an empty array.
+	$native = array("constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString", "toString", "valueOf");
+	$returns = array("Object", "Boolean", "Boolean", "Boolean", "String", "String", "Object");
+	$summaries = array(
+		"A reference to the constructor function for this object.",
+		"Checks whether an object has a locally defined (noninherited) property with a specified name.",
+		"Check whether this object is the prototype object of a specified object.",
+		"Checks whether a named property exists and would be enumerated by a for/in loop.",
+		"Returns a localized string representation of the object.",
+		"Returns a string representation of the object.",
+		"Returns the primitve value of the object, if any."
+	);
+
+	foreach($native as $i=>$nm){
+		$methods[$nm] = array(
+			"name"=>$nm,
+			"scope"=>"instance",
+			"visibility"=>"public",
+			"parameters"=>array(),
+			"return-types"=>array(),
+			"defines"=>array("Object"),
+			"override"=>false,
+			"summary"=>$summaries[$i]
+		);
+		$methods[$nm]["return-types"][] = array(
+			"type"=>$returns[$i],
+			"description"=>""
+		);
+		if($nm == "hasOwnProperty" || $nm == "propertyIsEnumerable"){
+			$methods[$nm]["parameters"][] = array(
+				"name"=>"propname",
+				"type"=>"String",
+				"usage"=>"",
+				"description"=>"The property to check."
+			);
+		}
+		else if($nm == "isPrototypeOf"){
+			$methods[$nm]["parameters"][] = array(
+				"name"=>"o",
+				"type"=>"Object",
+				"usage"=>"",
+				"description"=>"The object to check against."
+			);
+		}
+	}
+
+	return array("props"=>$props, "methods"=>$methods);
+}
+
+function generate_object($page, $version, $docs=array()){
+	//	create a PHP-based associative array structure out of the page in question.
+	if(!count($docs)){
+		$docs = load_docs($version);
+	}
+
+	$xml = $docs["xml"];
+	$p_xml = $docs["p_xml"];
+	$r_xml = $docs["r_xml"];
+	$xpath = $docs["xpath"];
+	$p_xpath = $docs["p_xpath"];
+	$r_xpath = $docs["r_xpath"];
+
+	//	get the XML for the page.
+	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
+	if(!$context){
+		//	we got nothing, just return null.
+		return null;
+	}
+
+	//	ok, we have a context, let's build up our object.
+	$obj = array();
+
+	//	BEGIN OBJECT GRAPH ASSEMBLY.
+	//	provides
+	$test = $p_xpath->query('//object[@location="' . $page . '"]/provides/provide');
+	if($test && $test->length == 1){
+		$obj["require"] = $test->item(0)->nodeValue;
+	}
+
+	//	resources
+	$test = $r_xpath->query('//object[@location="' . $page . '"]/resources/resource');
+	if($test && $test->length == 1){
+		$obj["resource"] = $test->item(0)->nodeValue;
+	}
+
+	//	basic information.
+	$is_constructor = ($context->getAttribute("type")=="Function" && $context->getAttribute("classlike")=="true");
+	$nl = $xpath->query('//object[starts-with(@location, "' . $page . '.") and not(starts-with(substring-after(@location, "' . $page . '."), "_"))]');
+	$is_namespace = ($nl->length > 0);
+	$type = $context->getAttribute("type");
+	if(!strlen($type)){ $type = 'Object'; }
+	if($is_constructor){ $type = 'Constructor'; }
+//	if($is_namespace){ $type = 'Namespace'; }
+
+	$obj["type"] = $type;
+	$obj["title"] = $context->getAttribute("location");
+	$obj["version"] = $version;
+
+	//	the prototype chain
+	$bc = array($context->getAttribute("location"));
+	$node = $context;
+	while($node && $node->getAttribute("superclass")){
+		$sc = $node->getAttribute("superclass");
+		$bc[] = $sc;
+		$node = $xpath->query('//object[@location="' . $sc . '"]')->item(0);
+	}
+	$bc[] = "Object";
+	$bc = array_reverse($bc);
+
+	//	note that this is "in order"; used to either fetch other objects or for something like breadcrumbs.
+	$obj["prototypes"] = $bc;
+
+	//	description.  Actual description node first, fall back to summary if needed.
+	$desc = $xpath->query("description/text()", $context)->item(0);
+	if(!$desc){ $desc = $xpath->query("summary/text()", $context)->item(0); }
+	if($desc){ $obj["description"] = $desc->nodeValue; }
+
+	//	mixins
+	//	examples.
+	$examples = $xpath->query("examples/example", $context);
+	if($examples->length > 0){
+		$obj["examples"] = array();
+		foreach($examples as $example){
+			$obj["examples"][] = $example->nodeValue;
+		}
+	}
+
+	//	now it gets ugly.  We need to go get all the properties and methods of ourselves,
+	//	plus anything in the prototype chain (i.e. superclass), PLUS anything in the mixins list,
+	//	and merge them all together, AND make sure they are unique.  On top of that, we need
+	//	to make sure we're getting that info from the top to the bottom.
+	$obj["mixins"] = array();
+	$obj["properties"] = array();
+	$obj["methods"] = array();
+
+	//	start with getting the mixins.
+	$nl = $xpath->query("mixins/mixin[@scope='instance']", $context);
+	foreach($nl as $m){
+		//	again, this is ugly.
+		$m_test = $xpath->query("//object[@location='" . $m->getAttribute("location") . "']");
+		if($m_test->length){
+			$obj["mixins"][] = $m->getAttribute("location");
+		}
+	}
+
+	//	ok.  Walk the prototype chain from one to another, and get the list of props and methods for all.
+	$protos = array();
+	foreach($bc as $ancestor){
+		if($ancestor == "Object"){
+			$protos[$ancestor] = get_Object_fields();
+		} else {
+			$protos[$ancestor] = read_object_fields($ancestor, $version, $docs);
+		}
+	}
+
+	/*
+	print "<pre>";
+	print_r($protos);
+	print "</pre>";
+	//	*/
+	
+	//	Now that we have the complete prototype chain, merge everything and include override info if needed.
+	$props = array();
+	$methods = array();
+	foreach($protos as $_object=>$proto){
+		foreach($proto["props"] as $nm=>$prop){
+			if(array_key_exists($nm, $props)){
+				//	next one up in the chain overrides the original.
+				$props[$nm]["override"] = true;
+				$props[$nm]["defines"][] = $_object;
+			} else {
+				$props[$nm] = $prop;
+			}
+		}
+		foreach($proto["methods"] as $nm=>$method){
+			if(array_key_exists($nm, $methods)){
+				//	next one up in the chain overrides the original.
+				$methods[$nm]["override"] = true;
+				$methods[$nm]["defines"][] = $_object;
+				$methods[$nm]["scope"] = $method["scope"];
+				if($nm == "constructor"){
+					$methods[$nm]["return-types"][0]["type"] = $_object;
+				}
+				if(count($method["parameters"])){
+					$methods[$nm]["parameters"] = $method["parameters"];
+				}
+			} else {
+				$methods[$nm] = $method;
+			}
+		}
+	}
+	//*
+	print "<pre>";
+	print_r($props);
+	print_r($methods);
+	print "</pre>";
+	//	*/
+
+	return $obj;	
 }
 
 //	Generate an HTML representation of a particular object
@@ -153,36 +591,15 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	get the docs to run against.  this can be optionally provided;
 	//	if they are they ALL need to be there.
 	if(!count($docs)){
-		//	load up the doc.
-		$provides = "provides.xml";
-		$resources = "resources.xml";
-		$details = "details.xml";
-		$f = $data_dir . $details;
-		if(!file_exists($f)){
-			echo "API data does not exist for the version: " . $version . "<br/>";
-			exit();
-		}
-
-		$xml = new DOMDocument();
-		$xml->load($f);
-
-		$p_xml = new DOMDocument();
-		$p_xml->load($data_dir . $provides);
-
-		$r_xml = new DOMDocument();
-		$r_xml->load($data_dir . $resources);
-
-		$xpath = new DOMXPath($xml);
-		$p_xpath = new DOMXPath($p_xml);
-		$r_xpath = new DOMXPath($r_xml);
-	} else {
-		$xml = $docs["xml"];
-		$p_xml = $docs["p_xml"];
-		$r_xml = $docs["r_xml"];
-		$xpath = $docs["xpath"];
-		$p_xpath = $docs["p_xpath"];
-		$r_xpath = $docs["r_xpath"];
+		$docs = load_docs($version);
 	}
+
+	$xml = $docs["xml"];
+	$p_xml = $docs["p_xml"];
+	$r_xml = $docs["r_xml"];
+	$xpath = $docs["xpath"];
+	$p_xpath = $docs["p_xpath"];
+	$r_xpath = $docs["r_xpath"];
 
 	//	check if we're to build links versioned and if so, add that to the base url.
 	if($versioned){
@@ -331,7 +748,6 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. '</div>';
 	}
 
-
 	//	and now, this is how we shall do the inheritance!
 	$protos = array_reverse($protos);
 	$chains = array_merge($protos, $mixins);
@@ -363,7 +779,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			}
 
 			if($n->getElementsByTagName("summary")->length){
-				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
 				if(strlen($desc)){
 					$props[$nm]["summary"] = $desc;
 				}
@@ -401,7 +817,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			}
 
 			if($n->getElementsByTagName("summary")->length){
-				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
 				if(strlen($desc)){
 					$methods[$nm]["summary"] = $desc;
 				}
@@ -441,7 +857,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 						"description"=>""
 					);
 					if($param->getElementsByTagName("summary")->length){
-						$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
+						$desc = htmlentities(trim($param->getElementsByTagName("summary")->item(0)->nodeValue));
 						if(strlen($desc)){
 							$item["description"] = $desc;
 						}
@@ -491,7 +907,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 
 		if($n->getElementsByTagName("summary")->length){
-			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+			$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
 			if(strlen($desc)){
 				$props[$nm]["summary"] = $desc;
 			}
@@ -530,7 +946,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 
 		if($n->getElementsByTagName("summary")->length){
-			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+			$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
 			if(strlen($desc)){
 				$methods[$nm]["summary"] = $desc;
 			}
@@ -571,7 +987,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 					"description"=>""
 				);
 				if($param->getElementsByTagName("summary")->length){
-					$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
+					$desc = htmlentities(trim($param->getElementsByTagName("summary")->item(0)->nodeValue));
 					if(strlen($desc)){
 						$item["description"] = $desc;
 					}
