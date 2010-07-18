@@ -236,9 +236,6 @@ function read_object_fields($page, $version, $docs=array()){
 			if(!$private && strpos($nm, "_")===0){
 				$private = true;
 			}
-			if($n->getAttribute("scope")=="normal" && $location != $page){
-				continue;
-			}
 			if(array_key_exists($nm, $props)){
 				//	next one up in the chain overrides the original.
 				$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -280,9 +277,6 @@ function read_object_fields($page, $version, $docs=array()){
 			}
 			if(!strlen($nm)){
 				$nm = "constructor";
-			}
-			if($n->getAttribute("scope")=="normal" && $location != $page){
-				continue;
 			}
 			if(array_key_exists($nm, $methods)){
 				//	next one up in the chain overrides the original.
@@ -580,12 +574,15 @@ function generate_object($page, $version, $docs=array()){
 	ksort($methods);
 	ksort($events);
 
-	//	put any normal scope (i.e. attached directly) first.
+	//	put any normal scope (i.e. attached directly) first.  Note that we only want
+	//	the ones attached directly to our page, and nothing from the inheritance chain.
 	$static = array_filter($props, "is_static");
 	$not_static = array_filter($props, "is_not_static");
 	$tmp = array();
 	foreach($static as $nm=>$field){
-		$tmp[$page . "." . $nm] = $field;
+		if($field["defines"][0] == $page){
+			$tmp[$page . "." . $nm] = $field;
+		}
 	}
 	$props = array_merge($tmp, $not_static);
 
@@ -593,7 +590,9 @@ function generate_object($page, $version, $docs=array()){
 	$not_static = array_filter($methods, "is_not_static");
 	$tmp = array();
 	foreach($static as $nm=>$field){
-		$tmp[$page . "." . $nm] = $field;
+		if($field["defines"][0] == $page){
+			$tmp[$page . "." . $nm] = $field;
+		}
 	}
 	$methods = array_merge($tmp, $not_static);
 
@@ -601,7 +600,9 @@ function generate_object($page, $version, $docs=array()){
 	$not_static = array_filter($events, "is_not_static");
 	$tmp = array();
 	foreach($static as $nm=>$field){
-		$tmp[$page . "." . $nm] = $field;
+		if($field["defines"][0] == $page){
+			$tmp[$page . "." . $nm] = $field;
+		}
 	}
 	$events = array_merge($tmp, $not_static);
 
