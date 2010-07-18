@@ -324,7 +324,7 @@ function read_object_fields($page, $version, $docs=array()){
 					$methods[$nm]["examples"] = array();
 				}
 				foreach($ex as $example){
-					$methods[$nm]["examples"][] = format_example($example->nodeValue);
+					$methods[$nm]["examples"][] = $example->nodeValue;
 				}
 			}
 			if($n->getElementsByTagName("return-description")->length){
