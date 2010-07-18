@@ -67,11 +67,11 @@ paneOnLoad = function(data){
 	});
 
 	//	build the toolbar.
-	var link = null, perm = dojo.query("div.jsdoc-permalink", context);
+	var link = null, perm = dojo.query("div.jsdoc-permalink", context), l = window.location;
 	if(perm.length){
-		link = perm[0].innerHTML;
+		link = l.protocol + "//" + l.host + (l.port.length?":"+l.port:"") + perm[0].innerHTML;
 	}
-	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + baseUrl + link + '">Permalink</a></span>' : '')
+	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + link + '">Permalink</a></span>' : '')
 		+ '<label>View options: </label>'
 		+ '<span class="trans-icon jsdoc-private"><img src="' + baseUrl + 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
 		+ '<span class="trans-icon jsdoc-inherited"><img src="' + baseUrl + 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>';
