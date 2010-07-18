@@ -6,7 +6,7 @@
 $basePath = "/";
 
 //$_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath;
-$_base_url = "/";
+$_base_url = "";
 $_site_name = "The Dojo Toolkit";
 $defVersion = "1.5";
 $dataDir = dirname(__FILE__) . "/data/";

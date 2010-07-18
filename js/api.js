@@ -17,6 +17,7 @@ if(currentVersion === undefined){
 if(page.length){
 	var _href = window.location.href;
 	baseUrl = _href.replace(currentVersion + "/", "").replace(page, "");
+	delete _href;
 }
 
 var classTree, classStore;
@@ -75,7 +76,7 @@ paneOnLoad = function(data){
 	//	build the toolbar.
 	var link = null, perm = dojo.query("div.jsdoc-permalink", context), l = window.location;
 	if(perm.length){
-		link = baseUrl + perm[0].innerHTML;
+		link = (page.length ? baseUrl : "") + perm[0].innerHTML;
 	}
 	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + link + '">Permalink</a></span>' : '')
 		+ '<label>View options: </label>'
