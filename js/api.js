@@ -10,7 +10,13 @@ dojo.require("dojox.fx._core");
 
 if(currentVersion === undefined){
 	//	fallback.
-	var currentVersion = "1.3";
+	var currentVersion = "1.5";
+}
+
+//	redefine the base URL.
+if(page.length){
+	var _href = window.location.href;
+	baseUrl = _href.replace(currentVersion + "/", "").replace(page, "") + "/";
 }
 
 var classTree, classStore;

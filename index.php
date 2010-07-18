@@ -107,6 +107,7 @@ if(isset($_GET["clearcache"])){
 				}, 500);
 			});
 
+			var page = '<?php echo ($is_page?$page:"") ?>';
 			var currentVersion = '<?php echo $version; ?>';
 		</script>
 		<script type="text/javascript" src="<?php echo $basePath; ?>js/api.js"></script>
