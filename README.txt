@@ -24,6 +24,12 @@ vhost).  Note that modules to be displayed should all have a value of "-1" (this
 is set by the class tree generator), and should be in the order in which you want
 the modules to appear within the class tree.
 
+A note: the _base_url is important; you should not leave it as an empty string.
+Essentially all of the system uses that to generate things like permalinks, and
+because you can get a specific piece of documentation via rewrite rules, you
+will need to make sure that is filled.  It should be an absolute base URL and
+not a relative one (i.e. always start with "/").
+
 If you are just running the site with the included XML files, that should be 
 all there is to running the site; just hit your vhost and go.
 
