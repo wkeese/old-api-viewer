@@ -236,6 +236,9 @@ function read_object_fields($page, $version, $docs=array()){
 			if(!$private && strpos($nm, "_")===0){
 				$private = true;
 			}
+			if($n->getAttribute("scope")=="normal" && $location != $page){
+				continue;
+			}
 			if(array_key_exists($nm, $props)){
 				//	next one up in the chain overrides the original.
 				$props[$nm]["scope"] = $n->getAttribute("scope");
@@ -277,6 +280,9 @@ function read_object_fields($page, $version, $docs=array()){
 			}
 			if(!strlen($nm)){
 				$nm = "constructor";
+			}
+			if($n->getAttribute("scope")=="normal" && $location != $page){
+				continue;
 			}
 			if(array_key_exists($nm, $methods)){
 				//	next one up in the chain overrides the original.

@@ -15,8 +15,8 @@
  *	if callback is passed, this will be wrapped with that function name.
  */
 
-//	header("Content-Type: application/json");
-	header("Content-Type: text/plain");
+	header("Content-Type: application/json");
+//	header("Content-Type: text/plain");
 
 include(dirname(__FILE__) . "/../config.php");
 include(dirname(__FILE__) . "/../lib/generate.php");
@@ -72,12 +72,60 @@ if(array_key_exists("limit", $_GET) || array_key_exists("exclude", $_GET)){
 	}
 }
 
-//	ok, get the object.
+//	ok, get the object.  First time through.
 $obj = generate_object($page, $version);
-
 if(!$obj){
-	print "";
-	exit();
+	$tmp = explode(".", $page);
+	$find = array_pop($tmp);
+	$tmp = implode(".", $tmp);
+	$obj = generate_object($tmp, $version);
+	if(!$obj){
+		if(array_key_exists("callback", $_GET)){
+			print $_GET["callback"] . "();";
+		} else {
+			print "";
+		}
+		exit();
+	}
+	$field = null;
+	foreach($obj["properties"] as $key=>$value){
+		$test = array_pop(explode(".", $key));
+		if($test == $find){
+			$field = $value;
+			break;
+		}
+	}
+	if(!$field){
+		foreach($obj["methods"] as $key=>$value){
+			$test = array_pop(explode(".", $key));
+			if($test == $find){
+				$field = $value;
+				break;
+			}
+		}
+	}
+	if(!$field){
+		foreach($obj["events"] as $key=>$value){
+			$test = array_pop(explode(".", $key));
+			if($test == $find){
+				$field = $value;
+				break;
+			}
+		}
+	}
+	if(!$field){
+		if(array_key_exists("callback", $_GET)){
+			print $_GET["callback"] . "();";
+		} else {
+			print "";
+		}
+		exit();
+	}
+	if($field["name"] == "constructor" && array_key_exists("description", $obj)){
+		//	swap out the description from the object.
+		$field["summary"] = do_markdown($obj["description"]);
+	}
+	$obj = $field;
 }
 
 if($do_filter){
@@ -100,6 +148,35 @@ if($do_filter){
 	}
 
 	$obj = $tmp;
+}
+
+//	make sure description fields are markdown
+if(array_key_exists("description", $obj)){
+	$obj["description"] = do_markdown($obj["description"]);
+}
+
+if(array_key_exists("properties", $obj)){
+	foreach($obj["properties"] as $value){
+		if(array_key_exists("description", $value)){
+			$value["description"] = do_markdown($value["description"]);
+		}
+	}
+}
+
+if(array_key_exists("methods", $obj)){
+	foreach($obj["methods"] as $value){
+		if(array_key_exists("description", $value)){
+			$value["description"] = do_markdown($value["description"]);
+		}
+	}
+}
+
+if(array_key_exists("events", $obj)){
+	foreach($obj["events"] as $value){
+		if(array_key_exists("description", $value)){
+			$value["description"] = do_markdown($value["description"]);
+		}
+	}
 }
 
 $json = json_encode($obj);
