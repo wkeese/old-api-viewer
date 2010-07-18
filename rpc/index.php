@@ -60,6 +60,7 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	$page = $defPage;
 	$version = $defVersion;
 }
+$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
 //	find out if we are filtering.
 $do_filter = false;
@@ -72,60 +73,82 @@ if(array_key_exists("limit", $_GET) || array_key_exists("exclude", $_GET)){
 	}
 }
 
-//	ok, get the object.  First time through.
-$obj = generate_object($page, $version);
-if(!$obj){
-	$tmp = explode(".", $page);
-	$find = array_pop($tmp);
-	$tmp = implode(".", $tmp);
-	$obj = generate_object($tmp, $version);
+//	check for a cached version
+$cached = false;
+$test = implode("/", explode(".", $page));
+if(file_exists($data_dir . 'cache/' . $test . '.json')){
+	$obj = json_decode(file_get_contents($data_dir . 'cache/' . $test . '.json'), true);
+	$cached = true;
+} else {
+	//	ok, get the object.  First time through.
+	$obj = generate_object($page, $version);
 	if(!$obj){
-		if(array_key_exists("callback", $_GET)){
-			print $_GET["callback"] . "();";
-		} else {
-			print "";
+		$tmp = explode(".", $page);
+		$find = array_pop($tmp);
+		$tmp = implode(".", $tmp);
+		$obj = generate_object($tmp, $version);
+		if(!$obj){
+			if(array_key_exists("callback", $_GET)){
+				print $_GET["callback"] . "();";
+			} else {
+				print "";
+			}
+			exit();
 		}
-		exit();
-	}
-	$field = null;
-	foreach($obj["properties"] as $key=>$value){
-		$test = array_pop(explode(".", $key));
-		if($test == $find){
-			$field = $value;
-			break;
-		}
-	}
-	if(!$field){
-		foreach($obj["methods"] as $key=>$value){
+		$field = null;
+		foreach($obj["properties"] as $key=>$value){
 			$test = array_pop(explode(".", $key));
 			if($test == $find){
 				$field = $value;
 				break;
 			}
 		}
-	}
-	if(!$field){
-		foreach($obj["events"] as $key=>$value){
-			$test = array_pop(explode(".", $key));
-			if($test == $find){
-				$field = $value;
-				break;
+		if(!$field){
+			foreach($obj["methods"] as $key=>$value){
+				$test = array_pop(explode(".", $key));
+				if($test == $find){
+					$field = $value;
+					break;
+				}
 			}
 		}
-	}
-	if(!$field){
-		if(array_key_exists("callback", $_GET)){
-			print $_GET["callback"] . "();";
-		} else {
-			print "";
+		if(!$field){
+			foreach($obj["events"] as $key=>$value){
+				$test = array_pop(explode(".", $key));
+				if($test == $find){
+					$field = $value;
+					break;
+				}
+			}
 		}
-		exit();
+		if(!$field){
+			if(array_key_exists("callback", $_GET)){
+				print $_GET["callback"] . "();";
+			} else {
+				print "";
+			}
+			exit();
+		}
+		if($field["name"] == "constructor" && array_key_exists("description", $obj)){
+			//	swap out the description from the object.
+			$field["summary"] = do_markdown($obj["description"]);
+		}
+		$obj = $field;
 	}
-	if($field["name"] == "constructor" && array_key_exists("description", $obj)){
-		//	swap out the description from the object.
-		$field["summary"] = do_markdown($obj["description"]);
+}
+
+if(!$cached){
+	//	check to make sure all directories are made before trying to save it.
+	$tmp = explode(".", $page);
+	array_pop($tmp);	//	last member is never a directory.
+	$assembled = array();
+	foreach($tmp as $part){
+		if(!file_exists($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part)){
+			mkdir($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part, 0750);
+		}
+		$assembled[] = $part;
 	}
-	$obj = $field;
+	file_put_contents($data_dir . 'cache/' . implode('/', explode('.', $page)) . '.json', json_encode($obj));
 }
 
 if($do_filter){
@@ -150,31 +173,33 @@ if($do_filter){
 	$obj = $tmp;
 }
 
-//	make sure description fields are markdown
-if(array_key_exists("description", $obj)){
-	$obj["description"] = do_markdown($obj["description"]);
-}
+if(!$cached){
+	//	make sure description fields are markdown
+	if(array_key_exists("description", $obj)){
+		$obj["description"] = do_markdown($obj["description"]);
+	}
 
-if(array_key_exists("properties", $obj)){
-	foreach($obj["properties"] as $value){
-		if(array_key_exists("description", $value)){
-			$value["description"] = do_markdown($value["description"]);
+	if(array_key_exists("properties", $obj)){
+		foreach($obj["properties"] as $value){
+			if(array_key_exists("description", $value)){
+				$value["description"] = do_markdown($value["description"]);
+			}
 		}
 	}
-}
 
-if(array_key_exists("methods", $obj)){
-	foreach($obj["methods"] as $value){
-		if(array_key_exists("description", $value)){
-			$value["description"] = do_markdown($value["description"]);
+	if(array_key_exists("methods", $obj)){
+		foreach($obj["methods"] as $value){
+			if(array_key_exists("description", $value)){
+				$value["description"] = do_markdown($value["description"]);
+			}
 		}
 	}
-}
 
-if(array_key_exists("events", $obj)){
-	foreach($obj["events"] as $value){
-		if(array_key_exists("description", $value)){
-			$value["description"] = do_markdown($value["description"]);
+	if(array_key_exists("events", $obj)){
+		foreach($obj["events"] as $value){
+			if(array_key_exists("description", $value)){
+				$value["description"] = do_markdown($value["description"]);
+			}
 		}
 	}
 }
