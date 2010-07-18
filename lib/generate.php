@@ -995,6 +995,9 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 							. $def
 							. '</a>';
 					}
+					if($prop["override"]){
+						array_pop($tmp);
+					}
 					$details .= '<div class="jsdoc-inheritance">'
 						. ($prop["override"] ? "Overrides ":"Defined by ")
 						. implode(", ", $tmp)
