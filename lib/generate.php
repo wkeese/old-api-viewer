@@ -254,7 +254,7 @@ function read_object_fields($page, $version, $docs=array()){
 			}
 
 			if($n->getElementsByTagName("summary")->length){
-				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
+				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 				if(strlen($desc)){
 					$props[$nm]["summary"] = $desc;
 				}
@@ -301,7 +301,7 @@ function read_object_fields($page, $version, $docs=array()){
 			}
 
 			if($n->getElementsByTagName("summary")->length){
-				$desc = htmlentities(trim($n->getElementsByTagName("summary")->item(0)->nodeValue));
+				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
 				if(strlen($desc)){
 					$methods[$nm]["summary"] = $desc;
 				}
@@ -341,7 +341,7 @@ function read_object_fields($page, $version, $docs=array()){
 						"description"=>""
 					);
 					if($param->getElementsByTagName("summary")->length){
-						$desc = htmlentities(trim($param->getElementsByTagName("summary")->item(0)->nodeValue));
+						$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
 						if(strlen($desc)){
 							$item["description"] = $desc;
 						}
@@ -684,6 +684,9 @@ function _method_output($methods, $docs, $field_counter, $base_url, $suffix, $ti
 					$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
 						. $def
 						. '</a>';
+				}
+				if($method["override"]){
+					array_pop($tmp);
 				}
 				$details .= '<div class="jsdoc-inheritance">'
 					. ($method["override"] ? "Overrides ":"Defined by ")
