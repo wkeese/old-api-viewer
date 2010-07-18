@@ -570,9 +570,6 @@ function generate_object($page, $version, $docs=array()){
 	$methods = array_filter($methods, "is_not_from_Object");
 	$events = array_filter($methods, "is_event");
 	$methods = array_filter($methods, "is_method");
-	ksort($props);
-	ksort($methods);
-	ksort($events);
 
 	//	put any normal scope (i.e. attached directly) first.  Note that we only want
 	//	the ones attached directly to our page, and nothing from the inheritance chain.
@@ -584,6 +581,8 @@ function generate_object($page, $version, $docs=array()){
 			$tmp[$page . "." . $nm] = $field;
 		}
 	}
+	ksort($tmp);
+	ksort($not_static);
 	$props = array_merge($tmp, $not_static);
 
 	$static = array_filter($methods, "is_static");
@@ -594,6 +593,8 @@ function generate_object($page, $version, $docs=array()){
 			$tmp[$page . "." . $nm] = $field;
 		}
 	}
+	ksort($tmp);
+	ksort($not_static);
 	$methods = array_merge($tmp, $not_static);
 
 	$static = array_filter($events, "is_static");
@@ -604,6 +605,8 @@ function generate_object($page, $version, $docs=array()){
 			$tmp[$page . "." . $nm] = $field;
 		}
 	}
+	ksort($tmp);
+	ksort($not_static);
 	$events = array_merge($tmp, $not_static);
 
 	$obj["properties"] = $props;
@@ -634,7 +637,6 @@ function _method_output($methods, $docs, $field_counter, $base_url, $suffix, $ti
 			. '<div class="jsdoc-summary-list">'
 			. '<ul>';
 		$details .= '<h2>' . $title . 's</h2>';
-		ksort($methods);
 		foreach($methods as $name=>$method){
 			$s .= '<li class="functionIcon '
 				. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
