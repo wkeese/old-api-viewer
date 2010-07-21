@@ -539,29 +539,33 @@ function generate_object($page, $version, $docs=array()){
 	$props = array();
 	$methods = array();
 	foreach($protos as $_object=>$proto){
-		foreach($proto["props"] as $nm=>$prop){
-			if(array_key_exists($nm, $props)){
-				//	next one up in the chain overrides the original.
-				$props[$nm]["override"] = true;
-				$props[$nm]["defines"][] = $_object;
-			} else {
-				$props[$nm] = $prop;
+		if(array_key_exists("props", $proto)){
+			foreach($proto["props"] as $nm=>$prop){
+				if(array_key_exists($nm, $props)){
+					//	next one up in the chain overrides the original.
+					$props[$nm]["override"] = true;
+					$props[$nm]["defines"][] = $_object;
+				} else {
+					$props[$nm] = $prop;
+				}
 			}
 		}
-		foreach($proto["methods"] as $nm=>$method){
-			if(array_key_exists($nm, $methods)){
-				//	next one up in the chain overrides the original.
-				$methods[$nm]["override"] = true;
-				$methods[$nm]["defines"][] = $_object;
-				$methods[$nm]["scope"] = $method["scope"];
-				if($nm == "constructor"){
-					$methods[$nm]["return-types"][0]["type"] = $_object;
+		if(array_key_exists("methods", $proto)){
+			foreach($proto["methods"] as $nm=>$method){
+				if(array_key_exists($nm, $methods)){
+					//	next one up in the chain overrides the original.
+					$methods[$nm]["override"] = true;
+					$methods[$nm]["defines"][] = $_object;
+					$methods[$nm]["scope"] = $method["scope"];
+					if($nm == "constructor"){
+						$methods[$nm]["return-types"][0]["type"] = $_object;
+					}
+					if(count($method["parameters"])){
+						$methods[$nm]["parameters"] = $method["parameters"];
+					}
+				} else {
+					$methods[$nm] = $method;
 				}
-				if(count($method["parameters"])){
-					$methods[$nm]["parameters"] = $method["parameters"];
-				}
-			} else {
-				$methods[$nm] = $method;
 			}
 		}
 	}
