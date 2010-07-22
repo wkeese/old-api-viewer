@@ -539,7 +539,7 @@ function generate_object($page, $version, $docs=array()){
 	$props = array();
 	$methods = array();
 	foreach($protos as $_object=>$proto){
-		if(array_key_exists("props", $proto)){
+		if($proto && array_key_exists("props", $proto)){
 			foreach($proto["props"] as $nm=>$prop){
 				if(array_key_exists($nm, $props)){
 					//	next one up in the chain overrides the original.
@@ -550,7 +550,7 @@ function generate_object($page, $version, $docs=array()){
 				}
 			}
 		}
-		if(array_key_exists("methods", $proto)){
+		if($proto && array_key_exists("methods", $proto)){
 			foreach($proto["methods"] as $nm=>$method){
 				if(array_key_exists($nm, $methods)){
 					//	next one up in the chain overrides the original.
