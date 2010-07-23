@@ -193,17 +193,17 @@ buildTree = function(){
 		store: classStore,
 		query: { type: 'root' },
 		getIconClass: function(item, opened){
-			if(!item){ return "objectIcon16"; }
+			if(!item){ return "icon16 objectIcon16"; }
 			if(item == this.model.root) {
-				return "namespaceIcon16";
+				return "icon16 namespaceIcon16";
 			} else {
 				if(classStore.getValue(item, "type") == "root"){
 					if(classStore.getValue(item, "name") == "djConfig"){
-						return "objectIcon16";
+						return "icon16 objectIcon16";
 					}
-					return "namespaceIcon16";
+					return "icon16 namespaceIcon16";
 				} else {
-					return classStore.getValue(item, "type") + "Icon16";
+					return "icon16 " + classStore.getValue(item, "type") + "Icon16";
 				}
 			}
 		},

@@ -78,7 +78,7 @@ if(isset($_GET["clearcache"])){
 <link rel="stylesheet" href="<?php echo $basePath; ?>themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"></script>
 		<!-- SyntaxHighlighter -->
 		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shCore.js"><</script>
 		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
@@ -112,7 +112,7 @@ if(isset($_GET["clearcache"])){
 		</script>
 		<script type="text/javascript" src="<?php echo $basePath; ?>js/api.js"></script>
 	</head>
-	<body class="nihilo">
+	<body class="claro">
 		<div id="loader"><div id="loaderInner"></div></div>
 		<div id="printBlock"></div>
 <!--
@@ -135,17 +135,6 @@ foreach($versions as $v){
 					</div>
 				</div>
 				<div dojoType="dijit.layout.AccordionContainer" region="center">
-					<div id="searchPane" dojoType="dijit.layout.ContentPane" title="Search">
-						<div>
-							<label for="searchText">Type in the word(s) to search for:</label>
-						</div>
-						<div>
-							<input type="text" name="searchText" id="searchText" value="" />
-						</div>
-						<div>
-							...results go here...
-						</div>
-					</div>
 					<div id="classTreePane" dojoType="dijit.layout.ContentPane" title="By Object" selected="true"></div>
 <!--
 					<div dojoType="dijit.layout.ContentPane" title="By Resource">
