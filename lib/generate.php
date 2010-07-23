@@ -1036,7 +1036,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	}
 
 	//	child objects: put up a list of any child objects that are attached to this particular one.
-	if(array_key_exists("attached", $obj)){
+	if(array_key_exists("attached", $obj) && count($obj["attached"])){
 		$children = $obj["attached"];
 		$s .= '<h2 class="jsdoc-summary-heading">Attached Objects <span class="jsdoc-summary-toggle"></span></h2>'
 			. '<div class="jsdoc-summary-list">';
