@@ -71,7 +71,9 @@ if(isset($_POST["dir"])){
 	//	check if there was a file uploaded first, and if not default to the URL.
 	if(isset($_FILES["xmlfile"]) && is_uploaded_file($_FILES["xmlfile"]["tmp_name"])){
 		//	save the file.
-		if($_FILES["xmlfile"]["type"] == 'text/xml'){
+		$type = explode("/", $_FILES["xmlfile"]["type"]);
+		$type = array_pop($type);
+		if($type == 'xml'){
 			$tmp_name = $_FILES["xmlfile"]["tmp_name"];
 			$name = $_FILES["xmlfile"]["name"];
 			$test = move_uploaded_file($tmp_name, $dataDir . $version . '/api.xml');
