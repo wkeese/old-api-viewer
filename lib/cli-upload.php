@@ -55,6 +55,7 @@ if(isset($_POST["dir"]) && isset($_POST["cli"])){
 	$version = $_POST["dir"];
 	$dataDir = dirname(__FILE__) . "/../data/";
 	$xslDir = dirname(__FILE__) . "/../xsl/";
+	$logger = array();
 	$s = microtime(1);
 
 	if(!file_exists($dataDir . $version)){
