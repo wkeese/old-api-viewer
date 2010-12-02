@@ -2,6 +2,7 @@
 	header("Content-Type: application/json");
 //	header("Content-Type: text/plain");
 include("../config.php");
+include("cache.php");
 
 function nodeSorter($a, $b){
 	if($a->getAttribute("location") == $b->getAttribute("location")){ return 0; }
@@ -40,9 +41,12 @@ EOM;
 	}
 
 	//	check the cache first
-	if(file_exists($data_dir . 'cache/class-tree.json')){
-		echo file_get_contents($data_dir . 'cache/class-tree.json');
-		exit();		
+	if($use_cache){
+		$out = _cache_file_get($data_dir, 'class-tree.json');
+		if($out){
+			echo $out;
+			exit();
+		}
 	}
 
 	$xml = new DOMDocument();
@@ -151,6 +155,8 @@ EOM;
 	}
 
 	$str = str_replace('{{{items}}}', json_encode($fin), $str);
-	file_put_contents($data_dir . 'cache/class-tree.json', $str);
+	if($use_cache){
+		$success = _cache_file_set($data_dir, "class-tree.json", $str);
+	}
 	echo $str;
 ?>

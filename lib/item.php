@@ -8,6 +8,7 @@
  */
 
 include(dirname(__FILE__) . "/../config.php");
+include("cache.php");
 include("generate.php");
 
 //	begin the real work.
@@ -17,30 +18,23 @@ if(!isset($page)){ $page = "dojo"; }
 //	check if there's URL variables
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
-
 if(strpos($page, "/") > 0){ $page = implode(".", explode("/", $page)); }
-$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
 //	test to see if this has been cached first.
-$test = implode("/", explode(".", $page));
-if(file_exists($data_dir . 'cache/' . $test . '.html')){
-	echo file_get_contents($data_dir . 'cache/' . $test . '.html');
-	exit();
+if($use_cache){
+	$html = cache_get($version, $page);
+	if($html){
+		echo $html;
+		exit();
+	}
 }
 
 //	if we got here, we're not cached so generate our HTML.
 $html = generate_object_html($page, $version, $_base_url);
 
-//	check to make sure all directories are made before trying to save it.
-$tmp = explode(".", $page);
-array_pop($tmp);	//	last member is never a directory.
-$assembled = array();
-foreach($tmp as $part){
-	if(!file_exists($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part)){
-		mkdir($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part, 0750);
-	}
-	$assembled[] = $part;
+if($use_cache){
+	$success = cache_set($version, $page, $html);
 }
-file_put_contents($data_dir . 'cache/' . implode('/', explode('.', $page)) . '.html', $html);
+
 echo $html;
 ?>

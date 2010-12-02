@@ -19,6 +19,7 @@
 //	header("Content-Type: text/plain");
 
 include(dirname(__FILE__) . "/../config.php");
+include(dirname(__FILE__) . "/../lib/cache.php");
 include(dirname(__FILE__) . "/../lib/generate.php");
 
 //	URL parsing.
@@ -75,9 +76,8 @@ if(array_key_exists("limit", $_GET) || array_key_exists("exclude", $_GET)){
 
 //	check for a cached version
 $cached = false;
-$test = implode("/", explode(".", $page));
-if(file_exists($data_dir . 'cache/' . $test . '.json')){
-	$obj = json_decode(file_get_contents($data_dir . 'cache/' . $test . '.json'), true);
+$obj = ($use_cache ? cache_get($version, $page, 'json') : null);
+if($obj){
 	$cached = true;
 } else {
 	//	ok, get the object.  First time through.
@@ -137,18 +137,8 @@ if(file_exists($data_dir . 'cache/' . $test . '.json')){
 	}
 }
 
-if(!$cached){
-	//	check to make sure all directories are made before trying to save it.
-	$tmp = explode(".", $page);
-	array_pop($tmp);	//	last member is never a directory.
-	$assembled = array();
-	foreach($tmp as $part){
-		if(!file_exists($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part)){
-			mkdir($data_dir . 'cache/' . implode('/', $assembled) . '/' . $part, 0750);
-		}
-		$assembled[] = $part;
-	}
-	file_put_contents($data_dir . 'cache/' . implode('/', explode('.', $page)) . '.json', json_encode($obj));
+if(!$cached && $use_cache){
+	cache_set($version, $page, $obj, 'json');
 }
 
 if($do_filter){
