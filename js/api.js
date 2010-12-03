@@ -15,8 +15,11 @@ if(currentVersion === undefined){
 
 //	redefine the base URL.
 if(page.length){
-	var _href = window.location.href;
-	baseUrl = _href.replace(currentVersion + "/", "").replace(page, "");
+	var _href = window.location.href.replace(window.location.protocol + '//' + window.location.hostname + '/','')
+		.replace('jsdoc/', '')	//	to handle legacy api.dojotoolkit.org URL formation
+		.replace(window.location.hash, '');
+	baseUrl = window.location.protocol + "//" + window.location.hostname + "/" + _href.replace(currentVersion + "/", "").replace(page, "").replace(".html","");
+	//console.log("The new base URL is ", baseUrl);
 	delete _href;
 }
 
@@ -150,7 +153,7 @@ paneOnLoad = function(data){
 	var w = dijit.byId("content").selectedChildWidget;
 	document.title = w.title + " - " + (siteName || "The Dojo Toolkit");
 	
-	//	finally set the content of the printBlock.
+	//	set the content of the printBlock.
 	dojo.byId("printBlock").innerHTML = w.domNode.innerHTML;
 };
 
@@ -176,6 +179,7 @@ addTabPane = function(page, version){
 	});
 	p.addChild(pane);
 	p.selectChild(pane);
+	return pane;
 };
 
 buildTree = function(){
@@ -250,4 +254,23 @@ dojo.addOnLoad(function(){
 	s.onchange = dojo.hitch(s, versionChange);
 
 	buildTree();
+
+	if(page && currentVersion) {
+		var p = addTabPane(page, currentVersion);
+
+		//	handle any URL hash marks.
+		if(p && window.location.hash.length){
+			var h = dojo.connect(p, "onLoad", function(){
+				dojo.disconnect(h);
+				var target = dojo.query('a[name$="' + window.location.hash.substr(window.location.hash.indexOf('#')+1) + '"]', p.domNode);
+				if(target.length){
+					var anim = smoothScroll({
+						node: target[0],
+						win: p.domNode,
+						duration: 600
+					}).play();
+				}
+			});
+		}
+	}
 });

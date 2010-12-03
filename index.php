@@ -183,7 +183,7 @@ foreach($versions as $v){
 <?php include("themes/" . $th . "/index.php"); ?>
 				</div>
 <?php if($is_page && strlen($page)){
-	//*
+	/*
 	echo '<div id="initialPagePane" dojoType="dijit.layout.ContentPane" title="'
 		. implode(".", explode("/", $page))
 		. '" closable="true" selected="true" onLoad="paneOnLoad" href="'.$basePath.'lib/item.php?v='
