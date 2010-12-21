@@ -545,6 +545,12 @@ function generate_object($page, $version, $docs=array()){
 					//	next one up in the chain overrides the original.
 					$props[$nm]["override"] = true;
 					$props[$nm]["defines"][] = $_object;
+					if(isset($prop["summary"])){
+						$prop[$nm]["summary"] = $prop["summary"];
+					}
+					if(isset($prop["description"])){
+						$prop[$nm]["description"] = $prop["description"];
+					}
 				} else {
 					$props[$nm] = $prop;
 				}
@@ -562,6 +568,12 @@ function generate_object($page, $version, $docs=array()){
 					}
 					if(count($method["parameters"])){
 						$methods[$nm]["parameters"] = $method["parameters"];
+					}
+					if(isset($method["summary"])){
+						$methods[$nm]["summary"] = $method["summary"];
+					}
+					if(isset($method["description"])){
+						$methods[$nm]["description"] = $method["description"];
 					}
 				} else {
 					$methods[$nm] = $method;
