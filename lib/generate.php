@@ -759,23 +759,26 @@ function _method_output($methods, $docs, $field_counter, $base_url, $suffix, $ti
 					$tester = array_pop(explode(".", $p["type"]));
 					if(strpos($tester, "__")===0){
 						//	try to find the object in question, and if found list out the props.
-						$pconfig = $xpath->query("//object[@location='" . $p["type"] . "']");
-						if($pconfig->length){
+						$pconfig = generate_object($p["type"], null, $docs);
+						if($pconfig && array_key_exists("properties", $pconfig)){
 							$p_param = array();
-							$p_nodes = $pconfig->item(0)->getElementsByTagName("property");
-							foreach($p_nodes as $p_node){
-								$summary = $p_node->getElementsByTagName("summary");
-								$p_param[] = '<tr>'
+							foreach($pconfig["properties"] as $name=>$value){
+								$tmp_str = '<tr>'
 									. '<td class="jsdoc-param-name">'
-									. $p_node->getAttribute("name")
+									. $name
 									. '</td>'
 									. '<td class="jsdoc-param-type">'
-									. $p_node->getAttribute("type")
+									. $value["type"]
 									. '</td>'
-									. '<td class="jsdoc-param-description">'
-									. ($summary->length ? do_markdown(trim($summary->item(0)->nodeValue)) : '&nbsp;')
-									. '</td>'
-									. '</tr>';
+									. '<td class="jsdoc-param-description">';
+								if(array_key_exists("description", $value)){
+									$tmp_str .= $value["description"];
+								} else if (array_key_exists("summary", $value)){
+									$tmp_str .= $value["summary"];
+								} else {
+									$tmp_str .= '$nbsp;';
+								}
+								$p_param[] = $tmp_str . '</td></tr>';
 							}
 							$pstr .= '<table class="jsdoc-parameters" style="margin-left:0;margin-right:0;margin-bottom:0;">'
 								. '<tr>'
