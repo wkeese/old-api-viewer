@@ -17,6 +17,8 @@ sort($versions);
 
 $parts = array();
 $is_page = false;
+$page = $defPage;
+$version = $defVersion;
 if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	$r = $_GET["qs"];
 	$r = str_replace("jsdoc/", "", $r);
@@ -38,9 +40,6 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 		}
 		$is_page = true;
 	}
-} else {
-	$page = $defPage;
-	$version = $defVersion;
 }
 
 //	check if the version passed is available.
