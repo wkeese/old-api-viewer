@@ -643,9 +643,256 @@ function generate_object($page, $version, $docs=array()){
 	return $obj;	
 }
 
-function _method_output($methods, $docs, $field_counter, $base_url, $suffix, $title="Method"){
-	$xpath = $docs["xpath"];
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	BEGIN HTML OUTPUT GENERATION
+//
+///////////////////////////////////////////////////////////////////////////////////////////////
 
+//	private functions for pieces
+function _generate_property_output($prop, $name, $docs, $counter, $base_url, $suffix){
+	//	create the HTML strings for a single property
+	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
+		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
+		. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
+		. ($counter % 2 == 0 ? ' even':' odd')
+		. '">'
+		. '<a class="inline-link" href="#' . $name . '">'
+		. $name
+		. '</a>';
+	$details = '<div class="jsdoc-field '
+		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
+		. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
+		. ($counter % 2 == 0 ? ' even':' odd')
+		. '">'
+		. '<div class="jsdoc-title">'
+		. '<a name="' . $name . '"></a>'
+		. '<span class="' . convert_type($prop["type"]) . 'Icon">'
+		. $name
+		. '</span>'
+		. '</div>';
+
+	//	inheritance list.
+	if(isset($prop["defines"]) && count($prop["defines"])){
+		$tmp = array();
+		foreach($prop["defines"] as $def){
+			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
+				. $def
+				. '</a>';
+		}
+		if($prop["override"]){
+			array_pop($tmp);
+		}
+		$details .= '<div class="jsdoc-inheritance">'
+			. ($prop["override"] ? "Overrides ":"Defined by ")
+			. implode(", ", $tmp)
+			. '</div>';
+	}
+	if(array_key_exists("description", $prop)){
+		$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
+	} else if(array_key_exists("summary", $prop)){
+		$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
+	}
+	if(array_key_exists("summary", $prop)){
+		$s .= ' <span>' . $prop["summary"] . '</span>';
+	}
+	$s .= '</li>';	//	jsdoc-title
+	$details .= '</div>';	//	jsdoc-field
+	return array("s"=>$s, "details"=>$details);
+}
+
+function _generate_method_output($method, $name, $docs, $counter, $base_url, $suffix){
+	//	create the HTML strings for a single method.
+	$s = '<li class="functionIcon '
+		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
+		. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
+		. ($counter % 2 == 0 ? ' even':' odd')
+		. '">'
+		. '<a class="inline-link" href="#' . $name . '">'
+		. $name
+		. '</a>';
+	$details = '<div class="jsdoc-field '
+		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
+		. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
+		. ($counter % 2 == 0 ? ' even':' odd')
+		. '">'
+		. '<div class="jsdoc-title">'
+		. '<a name="' . $name . '"></a>'
+		. '<span class="functionIcon">'
+		. $name
+		. '</span>'
+		. '</div>';
+	if(count($method["parameters"])){
+		$tmp = array();
+		foreach($method["parameters"] as $p){
+			$tmp[] = $p["name"];
+		}
+		$s .= '<span class="parameters">('
+			. implode(', ', $tmp)
+			. ')</span>';
+	} else {
+		$s .= '<span class="parameters">()</span>';
+	}
+
+	if(count($method["return-types"])){
+		$tmp = array();
+		foreach($method["return-types"] as $rt){
+			$tmp[] = $rt["type"];
+		}
+		$s .= '<span class="jsdoc-returns"> returns ' . implode("|", $tmp) . '</span>';
+	}
+
+	//	inheritance list.
+	if(isset($method["defines"]) && count($method["defines"])){
+		$tmp = array();
+		foreach($method["defines"] as $def){
+			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
+				. $def
+				. '</a>';
+		}
+		if($method["override"]){
+			array_pop($tmp);
+		}
+		$details .= '<div class="jsdoc-inheritance">'
+			. ($method["override"] ? "Overrides ":"Defined by ")
+			. implode(", ", $tmp) 
+			. '</div>';	//	jsdoc-inheritance
+	}
+
+	if(count($method["return-types"])){
+		$tmp = array();
+		foreach($method["return-types"] as $rt){
+			$tmp[] = $rt["type"];
+		}
+		$details .= '<div class="jsdoc-return-type">Returns '
+			. '<strong>'
+			. implode("|", $tmp)
+			. '</strong>';
+		if(array_key_exists("return-description", $method)){
+			$details .= ': <span class="jsdoc-return-description">'
+				. $method["return-description"]
+				. '</span>';
+		}
+		$details .= '</div>';
+	} 
+	else if(array_key_exists("return-description", $method)){
+		$details .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
+			. $method["return-description"]
+			. '</div></div>';
+	}
+
+	if(array_key_exists("description", $method)){
+		$details .= '<div class="jsdoc-summary">' . do_markdown($method["description"]) . '</div>';
+	} else if(array_key_exists("summary", $method)){
+		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
+	}
+	if(array_key_exists("summary", $method)){
+		$s .= ' <span>' . $method["summary"] . '</span>';
+	}
+	$s .= '</li>';	//	jsdoc-title
+
+	if(count($method["parameters"])){
+		$details .= _generate_param_table($method["parameters"], $docs, $base_url, $suffix);
+	}
+
+	if(array_key_exists("examples", $method)){
+		$details .= '<div class="jsdoc-examples">';
+		$counter = 1;
+		foreach($method["examples"] as $example){
+			$details .= '<div class="jsdoc-example">'
+				. '<div><strong>Example ' . $counter++ . '</strong></div>'
+				. format_example($example)
+				. '</div>';
+		}
+		$details .= '</div>';
+	}
+
+	$details .= '</div>';	//	jsdoc-field
+	return array("s"=>$s, "details"=>$details);
+}
+
+function _generate_param_table($params, $docs, $base_url, $suffix){
+	//	create the inline table for parameters; isolated so that nesting may occur on more than one level.
+	$tmp_details = array();
+	foreach($params as $p){
+		$tester = array_pop(explode(".", $p["type"]));
+		$pstr = '<tr>'
+			. '<td class="jsdoc-param-name">'
+			. $p["name"]
+			. '</td>'
+			. '<td class="jsdoc-param-type">'
+			. (strpos($tester, "__") === 0 ? "Object" : $p["type"])
+			. '</td>'
+			. '<td class="jsdoc-param-description">'
+			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
+			. $p["description"];
+
+		if(strpos($tester, "__")===0){
+			//	try to find the object in question, and if found list out the props.
+			$pconfig = generate_object($p["type"], null, $docs);
+			if($pconfig && array_key_exists("properties", $pconfig)){
+				$p_param = array();
+				foreach($pconfig["properties"] as $name=>$value){
+					$tmp_str = '<tr>'
+						. '<td class="jsdoc-param-name">'
+						. $name
+						. '</td>'
+						. '<td class="jsdoc-param-type">'
+						. $value["type"]
+						. '</td>'
+						. '<td class="jsdoc-param-description">';
+					if(array_key_exists("description", $value)){
+						$tmp_str .= $value["description"];
+					} else if (array_key_exists("summary", $value)){
+						$tmp_str .= $value["summary"];
+					} else {
+						$tmp_str .= '&nbsp;';
+					}
+					$p_param[] = $tmp_str . '</td></tr>';
+				}
+				$pstr .= '<table class="jsdoc-parameters" style="margin-left:0;margin-right:0;margin-bottom:0;">'
+					. '<tr>'
+					. '<th>Parameter</th>'
+					. '<th>Type</th>'
+					. '<th>Description</th>'
+					. '</tr>'
+					. implode('', $p_param)
+					. '</table>';
+			}
+		}
+		$pstr .= '</td>'
+			. '</tr>';
+		$tmp_details[] = $pstr;
+	}
+	return '<table class="jsdoc-parameters">'
+		. '<tr>'
+		. '<th>Parameter</th>'
+		. '<th>Type</th>'
+		. '<th>Description</th>'
+		. '</tr>'
+		. implode('', $tmp_details)
+		. '</table>';
+}
+
+function _generate_properties_output($properties, $docs, $field_counter, $base_url, $suffix, $title="Property"){
+	//	generate all of the properties output
+	$s = '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
+		. '<div class="jsdoc-summary-list">'
+		. '<ul>';
+	$details = '<h2>Properties</h2>';
+	foreach($properties as $name=>$prop){
+		$tmp = _generate_property_output($prop, $name, $docs, $field_counter, $base_url, $suffix);
+		$s .= $tmp["s"];
+		$details .= $tmp["details"];
+		$field_counter++;
+	}
+
+	$s .= '</ul></div>';	//	property-summary
+	return array("s"=>$s, "details"=>$details, "counter"=>$field_counter);
+}
+
+function _generate_methods_output($methods, $docs, $field_counter, $base_url, $suffix, $title="Method"){
+	//	generate all of the methods output
 	$s = "";
 	$details = "";
 	if(count($methods)){
@@ -654,169 +901,9 @@ function _method_output($methods, $docs, $field_counter, $base_url, $suffix, $ti
 			. '<ul>';
 		$details .= '<h2>' . $title . 's</h2>';
 		foreach($methods as $name=>$method){
-			$s .= '<li class="functionIcon '
-				. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
-				. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
-				. ($field_counter % 2 == 0 ? ' even':' odd')
-				. '">'
-				. '<a class="inline-link" href="#' . $name . '">'
-				. $name
-				. '</a>';
-			$details .= '<div class="jsdoc-field '
-				. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
-				. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
-				. ($field_counter % 2 == 0 ? ' even':' odd')
-				. '">'
-				. '<div class="jsdoc-title">'
-				. '<a name="' . $name . '"></a>'
-				. '<span class="functionIcon">'
-				. $name
-				. '</span>'
-				. '</div>';
-			if(count($method["parameters"])){
-				$tmp = array();
-				foreach($method["parameters"] as $p){
-					$tmp[] = $p["name"];
-				}
-				$s .= '<span class="parameters">('
-					. implode(', ', $tmp)
-					. ')</span>';
-			} else {
-				$s .= '<span class="parameters">()</span>';
-			}
-
-			if(count($method["return-types"])){
-				$tmp = array();
-				foreach($method["return-types"] as $rt){
-					$tmp[] = $rt["type"];
-				}
-				$s .= '<span class="jsdoc-returns"> returns ' . implode("|", $tmp) . '</span>';
-			}
-
-			//	inheritance list.
-			if(isset($method["defines"]) && count($method["defines"])){
-				$tmp = array();
-				foreach($method["defines"] as $def){
-					$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
-						. $def
-						. '</a>';
-				}
-				if($method["override"]){
-					array_pop($tmp);
-				}
-				$details .= '<div class="jsdoc-inheritance">'
-					. ($method["override"] ? "Overrides ":"Defined by ")
-					. implode(", ", $tmp) 
-					. '</div>';	//	jsdoc-inheritance
-			}
-
-			if(count($method["return-types"])){
-				$tmp = array();
-				foreach($method["return-types"] as $rt){
-					$tmp[] = $rt["type"];
-				}
-				$details .= '<div class="jsdoc-return-type">Returns '
-					. '<strong>'
-					. implode("|", $tmp)
-					. '</strong>';
-				if(array_key_exists("return-description", $method)){
-					$details .= ': <span class="jsdoc-return-description">'
-						. $method["return-description"]
-						. '</span>';
-				}
-				$details .= '</div>';
-			} 
-			else if(array_key_exists("return-description", $method)){
-				$details .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
-					. $method["return-description"]
-					. '</div></div>';
-			}
-
-			if(array_key_exists("description", $method)){
-				$details .= '<div class="jsdoc-summary">' . do_markdown($method["description"]) . '</div>';
-			} else if(array_key_exists("summary", $method)){
-				$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
-			}
-			if(array_key_exists("summary", $method)){
-				$s .= ' <span>' . $method["summary"] . '</span>';
-			}
-			$s .= '</li>';	//	jsdoc-title
-
-			if(count($method["parameters"])){
-				$tmp_details = array();
-				foreach($method["parameters"] as $p){
-					$pstr = '<tr>'
-						. '<td class="jsdoc-param-name">'
-						. $p["name"]
-						. '</td>'
-						. '<td class="jsdoc-param-type">'
-						. $p["type"]
-						. '</td>'
-						. '<td class="jsdoc-param-description">'
-						. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
-						. $p["description"];
-
-					$tester = array_pop(explode(".", $p["type"]));
-					if(strpos($tester, "__")===0){
-						//	try to find the object in question, and if found list out the props.
-						$pconfig = generate_object($p["type"], null, $docs);
-						if($pconfig && array_key_exists("properties", $pconfig)){
-							$p_param = array();
-							foreach($pconfig["properties"] as $name=>$value){
-								$tmp_str = '<tr>'
-									. '<td class="jsdoc-param-name">'
-									. $name
-									. '</td>'
-									. '<td class="jsdoc-param-type">'
-									. $value["type"]
-									. '</td>'
-									. '<td class="jsdoc-param-description">';
-								if(array_key_exists("description", $value)){
-									$tmp_str .= $value["description"];
-								} else if (array_key_exists("summary", $value)){
-									$tmp_str .= $value["summary"];
-								} else {
-									$tmp_str .= '$nbsp;';
-								}
-								$p_param[] = $tmp_str . '</td></tr>';
-							}
-							$pstr .= '<table class="jsdoc-parameters" style="margin-left:0;margin-right:0;margin-bottom:0;">'
-								. '<tr>'
-								. '<th>Parameter</th>'
-								. '<th>Type</th>'
-								. '<th>Description</th>'
-								. '</tr>'
-								. implode('', $p_param)
-								. '</table>';
-						}
-					}
-					$pstr .= '</td>'
-						. '</tr>';
-					$tmp_details[] = $pstr;
-				}
-				$details .= '<table class="jsdoc-parameters">'
-					. '<tr>'
-					. '<th>Parameter</th>'
-					. '<th>Type</th>'
-					. '<th>Description</th>'
-					. '</tr>'
-					. implode('', $tmp_details)
-					. '</table>';
-			}
-
-			if(array_key_exists("examples", $method)){
-				$details .= '<div class="jsdoc-examples">';
-				$counter = 1;
-				foreach($method["examples"] as $example){
-					$details .= '<div class="jsdoc-example">'
-						. '<div><strong>Example ' . $counter++ . '</strong></div>'
-						. format_example($example)
-						. '</div>';
-				}
-				$details .= '</div>';
-			}
-
-			$details .= '</div>';	//	jsdoc-field
+			$html = _generate_method_output($method, $name, $docs, $field_counter, $base_url, $suffix);
+			$s .= $html["s"];
+			$details .= $html["details"];
 			$field_counter++;
 		}
 		$s .= '</ul></div>';	//	method-summary
@@ -981,70 +1068,19 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	$events = $obj["events"];
 	if(count($props) || count($methods) || count($events)){
 		if(count($props)){
-			$s .= '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
-				. '<div class="jsdoc-summary-list">'
-				. '<ul>';
-			$details .= '<h2>Properties</h2>';
-			foreach($props as $name=>$prop){
-				$s .= '<li class="' . convert_type($prop["type"]) . 'Icon '
-					. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
-					. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
-					. ($field_counter % 2 == 0 ? ' even':' odd')
-					. '">'
-					. '<a class="inline-link" href="#' . $name . '">'
-					. $name
-					. '</a>';
-				$details .= '<div class="jsdoc-field '
-					. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
-					. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
-					. ($field_counter % 2 == 0 ? ' even':' odd')
-					. '">'
-					. '<div class="jsdoc-title">'
-					. '<a name="' . $name . '"></a>'
-					. '<span class="' . convert_type($prop["type"]) . 'Icon">'
-					. $name
-					. '</span>'
-					. '</div>';
-
-				//	inheritance list.
-				if(isset($prop["defines"]) && count($prop["defines"])){
-					$tmp = array();
-					foreach($prop["defines"] as $def){
-						$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
-							. $def
-							. '</a>';
-					}
-					if($prop["override"]){
-						array_pop($tmp);
-					}
-					$details .= '<div class="jsdoc-inheritance">'
-						. ($prop["override"] ? "Overrides ":"Defined by ")
-						. implode(", ", $tmp)
-						. '</div>';
-				}
-				if(array_key_exists("description", $prop)){
-					$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
-				} else if(array_key_exists("summary", $prop)){
-					$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
-				}
-				if(array_key_exists("summary", $prop)){
-					$s .= ' <span>' . $prop["summary"] . '</span>';
-				}
-				$s .= '</li>';	//	jsdoc-title
-				$details .= '</div>';	//	jsdoc-field
-				$field_counter++;
-			}
-
-			$s .= '</ul></div>';	//	property-summary
+			$tmp = _generate_properties_output($props, $docs, $field_counter, $base_url, $suffix, "Properties");
+			$s .= $tmp["s"];
+			$details .= $tmp["details"];
+			$field_counter = $tmp["counter"];
 		}
 		if(count($methods)){
-			$tmp = _method_output($methods, $docs, $field_counter, $base_url, $suffix, "Method");
+			$tmp = _generate_methods_output($methods, $docs, $field_counter, $base_url, $suffix, "Method");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 			$field_counter = $tmp["counter"];
 		}
 		if(count($events)){
-			$tmp = _method_output($events, $docs, $field_counter, $base_url, $suffix, "Event");
+			$tmp = _generate_methods_output($events, $docs, $field_counter, $base_url, $suffix, "Event");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}
