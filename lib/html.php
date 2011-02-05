@@ -24,17 +24,19 @@ if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
 if(strpos($page, "/") > 0){ $page = implode(".", explode("/", $page)); }
 
+$docs = load_docs($version);
+
 //	go find the object
-$obj = generate_object($page, $version);
+$obj = generate_object($page, $version, $docs);
 if($obj){
-	print generate_object_html($page, $version);
+	print generate_object_html($page, $version, "", "", true, $docs);
 	exit();
 }
 if(!$obj){
 	$tmp = explode(".", $page);
 	$find = array_pop($tmp);
 	$tmp = implode(".", $tmp);
-	$obj = generate_object($tmp, $version);
+	$obj = generate_object($tmp, $version, $docs);
 	if(!$obj){
 		print "Object not found.";
 		exit();
@@ -43,7 +45,7 @@ if(!$obj){
 	foreach($obj["properties"] as $key=>$value){
 		$test = array_pop(explode(".", $key));
 		if($test == $find){
-			$tmp = _generate_property_output($value, $key);
+			$tmp = _generate_property_output($value, $key, $docs);
 			print $tmp["details"];
 			exit();
 		}
@@ -52,7 +54,7 @@ if(!$obj){
 		foreach($obj["methods"] as $key=>$value){
 			$test = array_pop(explode(".", $key));
 			if($test == $find){
-				$tmp = _generate_method_output($value, $key);
+				$tmp = _generate_method_output($value, $key, $docs);
 				print $tmp["details"];
 				exit();
 			}
@@ -62,7 +64,7 @@ if(!$obj){
 		foreach($obj["events"] as $key=>$value){
 			$test = array_pop(explode(".", $key));
 			if($test == $find){
-				$tmp = _generate_method_output($value, $key);
+				$tmp = _generate_method_output($value, $key, $docs);
 				print $tmp["details"];
 				exit();
 			}
