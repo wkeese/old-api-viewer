@@ -650,7 +650,7 @@ function generate_object($page, $version, $docs=array()){
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 //	private functions for pieces
-function _generate_property_output($prop, $name, $docs, $counter, $base_url, $suffix){
+function _generate_property_output($prop, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single property
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
@@ -701,7 +701,7 @@ function _generate_property_output($prop, $name, $docs, $counter, $base_url, $su
 	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_method_output($method, $name, $docs, $counter, $base_url, $suffix){
+function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single method.
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
@@ -811,7 +811,7 @@ function _generate_method_output($method, $name, $docs, $counter, $base_url, $su
 	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_param_table($params, $docs, $base_url, $suffix){
+function _generate_param_table($params, $docs = array(), $base_url = "", $suffix = ""){
 	//	create the inline table for parameters; isolated so that nesting may occur on more than one level.
 	$tmp_details = array();
 	foreach($params as $p){
@@ -874,7 +874,7 @@ function _generate_param_table($params, $docs, $base_url, $suffix){
 		. '</table>';
 }
 
-function _generate_properties_output($properties, $docs, $field_counter, $base_url, $suffix, $title="Property"){
+function _generate_properties_output($properties, $docs = array(), $field_counter = 0, $base_url = "", $suffix = "", $title="Property"){
 	//	generate all of the properties output
 	$s = '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
 		. '<div class="jsdoc-summary-list">'
@@ -891,7 +891,7 @@ function _generate_properties_output($properties, $docs, $field_counter, $base_u
 	return array("s"=>$s, "details"=>$details, "counter"=>$field_counter);
 }
 
-function _generate_methods_output($methods, $docs, $field_counter, $base_url, $suffix, $title="Method"){
+function _generate_methods_output($methods, $docs = array(), $field_counter = 0, $base_url = "", $suffix = "", $title="Method"){
 	//	generate all of the methods output
 	$s = "";
 	$details = "";
