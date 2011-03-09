@@ -13,6 +13,10 @@
  *	exclude is a comma-delimited list of the properties you don't want.
  *
  *	if callback is passed, this will be wrapped with that function name.
+ *
+ *	Special URLs:
+ *		/versions:	will return an array of available versions.
+ *		/find
  */
 
 	header("Content-Type: application/json");
@@ -21,6 +25,14 @@
 include(dirname(__FILE__) . "/../config.php");
 include(dirname(__FILE__) . "/../lib/cache.php");
 include(dirname(__FILE__) . "/../lib/generate.php");
+
+//	array filter function for searches
+function object_is_public($item){
+	$pub = strpos($item, "_");
+	$style = strpos($item, "style");
+	$node = strpos($item, "Node");
+	return /* $pub === false && */ $style === false && $node === false;
+}
 
 //	URL parsing.
 $d = dir($dataDir);
@@ -34,12 +46,24 @@ while(($entry = $d->read()) !== false){
 $d->close();
 sort($versions);
 
+$is_search = false;
 $parts = array();
-$is_page = false;
 if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	$r = $_GET["qs"];
 	$r = str_replace("jsdoc/", "", $r);
 	$parts = explode("/", $r);
+
+	//	check if this is a search
+	if($parts[0] == "find"){
+		array_shift($parts);
+		$is_search = true;
+	}
+
+	//	check if this is a versions request
+	if($parts[0] == "versions"){
+		echo json_encode($versions);
+		exit();
+	}
 
 	//	check if the version exists
 	$version = $parts[0];
@@ -55,13 +79,50 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 		} else {
 			$page = str_replace("/", ".", $parts[0]);
 		}
-		$is_page = true;
 	}
 } else {
 	$page = $defPage;
 	$version = $defVersion;
 }
-$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
+
+if($is_search){
+	$obj = array();
+	$obj["term"] = $page;
+	$obj["version"] = $version;
+	$obj["results"] = array();
+
+	$start = microtime(1);
+
+	//	load the docs and do an xpath search on them
+	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
+	$xml = new DOMDocument();
+	$xml->load($data_dir . "details.xml");
+	$xpath = new DOMXPath($xml);
+
+	$query = '//object['
+		. '@location="' . $page . '" '
+		. 'or contains(@location, "' . $page . '") '
+		. 'or properties/property/@name="' . $page . '" '
+		. 'or contains(properties/property/@name, "' . $page . '") '
+		. 'or methods/method/@name="' . $page . '" '
+		. 'or contains(methods/method/@name, "' . $page . '") '
+		. ']';
+
+	$nodes = $xpath->query($query);
+	$tmp = array();
+	foreach($nodes as $node){
+		$tmp[] = $node->getAttribute("location");
+	}
+	$tmp = array_filter($tmp, "object_is_public");
+	foreach($tmp as $name){
+		if($name){ $obj["results"][] = $name; }
+	}
+	$obj["count"] = count($obj["results"]);
+	$obj["time"] = round((microtime(1) - $start) * 1000);
+
+	echo json_encode($obj);
+	exit();	
+}
 
 //	find out if we are filtering.
 $do_filter = false;
@@ -91,7 +152,7 @@ if($obj){
 			if(array_key_exists("callback", $_GET)){
 				print $_GET["callback"] . "();";
 			} else {
-				print "";
+				print "{}";
 			}
 			exit();
 		}
@@ -135,6 +196,9 @@ if($obj){
 		}
 		$obj = $field;
 	}
+
+	//	make sure the version is included in the returned object
+	$obj["version"] = $version;
 }
 
 if(!$cached && $use_cache){
