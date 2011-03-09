@@ -61,7 +61,11 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 
 	//	check if this is a versions request
 	if($parts[0] == "versions"){
-		echo json_encode($versions);
+		$json = json_encode($versions);
+		if(array_key_exists("callback", $_GET)){
+			$json = $_GET["callback"] . "(" . $json . ");";
+		}
+		echo $json;
 		exit();
 	}
 
@@ -120,8 +124,12 @@ if($is_search){
 	$obj["count"] = count($obj["results"]);
 	$obj["time"] = round((microtime(1) - $start) * 1000);
 
-	echo json_encode($obj);
-	exit();	
+	$json = json_encode($obj);
+	if(array_key_exists("callback", $_GET)){
+		$json = $_GET["callback"] . "(" . $json . ");";
+	}
+	echo $json;
+	exit();
 }
 
 //	find out if we are filtering.
