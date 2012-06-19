@@ -4,22 +4,24 @@
  *
  *	This file should only be run from the command line.
  *
- *	Run this to pre-generate the cache for a particular version
- *	of the API documentation.  Main arugments (space-delimited) will become,
+ *	Run this to generate a static HTML version of a particular version
+ *	of the API documentation.
+ *
+ *	Main arguments (space-delimited) will become,
  *	in order, the roots of any navigation tree generated.  If not specified
- *	the default is "dojo dijit dojox djConfig".
+ *	the default is "dojo dijit dojox".
  *
- * 	Run the spider for version 1.4
- *	php spider.php --dir=../data/1.4/ --baseurl=http://api.dojotoolkit.org/1.4
+ * 	Run the spider for version 1.8
+ *	php spider.php --dir=../data/1.8/ --baseurl=http://api.dojotoolkit.org/1.8
  *
- *	Run it for 1.4 and append ".html" to the end of each link in files
- *	php spider.php --dir=../data/1.4/ --baseurl=http://api.dojotoolkit.org/1.4 --output=html
+ *	Run it for 1.8 and append ".html" to the end of each link in files
+ *	php spider.php --dir=../data/1.8/ --baseurl=http://api.dojotoolkit.org/1.8 --output=html
  *
  * 	Run the spider and output the result to ../static
- *	php spider.php --dir=../data/1.4/ --baseurl=http://api.dojotoolkit.org/1.4 --outdir=../static --output=html
+ *	php spider.php --dir=../data/1.8/ --baseurl=http://api.dojotoolkit.org/1.8 --outdir=../static --output=html
  *
  * 	Run the spider, output the result to ../static, and use a template:
- *	php spider.php --dir=../data/1.4/ --baseurl=http://api.dojotoolkit.org/1.4 --template=../../myTemplate.html --outdir=../static --output=html
+ *	php spider.php --dir=../data/1.8/ --baseurl=http://api.dojotoolkit.org/1.8 --template=../../myTemplate.html --outdir=../static --output=html
  *
  *	A NOTE ABOUT USING A TEMPLATE:
  *	The template should have one variable in it, defined like so:
@@ -69,7 +71,7 @@ $templatePath = "";
 $templateBlock = '<!-- CONTENT BLOCK -->';
 $templateTitleBlock = '<!-- TITLE -->';
 $templateNavBlock = '<!-- NAVIGATION -->';
-$def_args = array("dojo", "dijit", "dojox", "djConfig");
+$def_args = array("dojo", "dijit", "dojox");
 $kwargs = array();
 foreach(array_slice($argv, 1) as $arg){
 	if($arg{0} == '-'){
@@ -235,7 +237,7 @@ foreach($objects as $object){
 	file_put_contents($outdir . implode('/', explode('.', $page)) . '.html', $html);
 }
 
-print "==== SPIDERING COMPELETE. ====\n";
+print "==== SPIDERING COMPLETE. ====\n";
 print "Processing time: " . round((microtime(true) - $start)/60, 3) . " minutes.\n";
 flush();
 ?>

@@ -1,12 +1,14 @@
 <?php
-/*	generate_html.php
+/*	generate.php
  *	TRT 2010-02-03
  *
- *	Given the page and version, generate the HTML fragment
- *	and return it.
+ *  Utility methods.
+ *
+ *	Functions externally used are:
+ *		generate_object() - returns metadata about specified module
+ *		generate_object_html() - returns the HTML for a page describing a module (ex: dijit/Dialog)
  */
 
-include("markdown/markdown.php");
 function convert_type($type){
 	$base = 'object';
 	switch($type){
@@ -61,62 +63,20 @@ function icon_url($type, $size=16){
 	return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 }
 
-function do_markdown($text){
-	//	prep the text and run it through the Markdown parser.
-	$lines = explode("\n", $text);
-	$fixed = array();
-	$b = false;
-	foreach($lines as $line){
-		//	 pull off the preceding tab.
-		$s = $line;
-		if(strpos($line, "\t")===0){ $s = substr($s, 1); }
-
-		//	deal with the munging of lists in the markdown.
-		if(preg_match('/(\t)*\*/', $s)){
-			if(!$b){
-				$b = true;
-				$s = "\n" . $s;
-			}
-		} else {
-			$b = false;
-		}
-
-		$fixed[] = $s;
-	}
-	$str = Markdown(implode("\n", $fixed));
-	return $str;
-}
-
 function format_example($text){
-	//	do this for SyntaxHighlighter use.
-	$s = ""; // */ "\n<!--\n" . $text . "\n-->\n";
-	//	insert an additional tab if the first character is a tab.
-	if(strpos($text, "\t")===0){
-		$text = "\t" . $text;
-	}
-	$lines = explode("\n", "\n" . $text);
-	$isCode = false;
-	foreach($lines as &$line){
-		if(strpos($line, "\t")===0){
-			$line = htmlentities(substr($line, 1));	//	always pull off the first tab.
-		}
-		if(strpos($line, "\t")===0){
-			if(!$isCode){
-				$isCode = true;
-				$line = '<pre class="brush: js;" lang="javascript">' . "\n" . $line;
-			}
-		} else {
-			if($isCode){
-				$isCode = false;
-				$line .= '</pre>';
-			}
-		}
-	}
-	if($isCode){
-		//	probably we never saw the last line, or the last line was code.
-		$lines[] = '</pre>';
-	}
-	return $s . implode("\n", $lines);
+	// summary:
+	//		Convert example formatting so the syntax highlighter can pick it up
+
+	// <pre><code> --> <pre class="brush: js;" lang="javascript">
+	// </code></pre> --> </pre>
+	$res = preg_replace(
+		array("/<pre><code>/", "/<\/code><\/pre>/"),
+		array("<pre class=\"brush: js;\" lang=\"javascript\">", "</pre>"),
+		$text
+	);
+	// echo "=========== After example ========" . $res;
+
+	return $res;
 }
 
 //	BEGIN array_filter functions
@@ -131,14 +91,10 @@ function is_method($item){
 	return $public !== 0 && $private !== 0;
 }
 function is_static($item){
-	return $item["scope"] == "normal";
+	return $item["scope"] == "normal" || $item["scope"] == "prototype";
 }
 function is_not_static($item){
-	return $item["scope"] != "normal";
-}
-
-function is_not_from_Object($item){
-	return !(count($item["defines"]) == 1 && $item["defines"][0] == "Object");
+	return $item["scope"] != "normal" && $item["scope"] != "prototype";
 }
 
 function is_not_node($item){
@@ -148,12 +104,10 @@ function is_not_node($item){
 //	END array_filter functions
 
 function load_docs($version){
-	//	helper function to load up the XML docs we need.
+	//	helper function to load up the XML doc and make it xpath-accessible
 	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
 	//	load up the doc.
-	$provides = "provides.xml";
-	$resources = "resources.xml";
 	$details = "details.xml";
 	$f = $data_dir . $details;
 	if(!file_exists($f)){
@@ -164,40 +118,29 @@ function load_docs($version){
 	$xml = new DOMDocument();
 	$xml->load($f);
 
-	$p_xml = new DOMDocument();
-	$p_xml->load($data_dir . $provides);
-
-	$r_xml = new DOMDocument();
-	$r_xml->load($data_dir . $resources);
-
 	$xpath = new DOMXPath($xml);
-	$p_xpath = new DOMXPath($p_xml);
-	$r_xpath = new DOMXPath($r_xml);
 
 	$docs = array(
 		"xml"=>$xml,
-		"p_xml"=>$p_xml,
-		"r_xml"=>$r_xml,
-		"xpath"=>$xpath,
-		"p_xpath"=>$p_xpath,
-		"r_xpath"=>$r_xpath
+		"xpath"=>$xpath
 	);
 	return $docs;
 }
 
 function read_object_fields($page, $version, $docs=array()){
-	//	for the given page, grab any mixins and assemble a "flat" version of it (no prototype walking).
-	//	create a PHP-based associative array structure out of the page in question.
+	// summary:
+	//		Return methods and properties for given module.
+	//		This used to trace mixins methods and properties, but now that's
+	//		done in the parser.
+
+	// TODO: the from field to list where each thing came from
+
 	if(!count($docs)){
 		$docs = load_docs($version);
 	}
 
 	$xml = $docs["xml"];
-	$p_xml = $docs["p_xml"];
-	$r_xml = $docs["r_xml"];
 	$xpath = $docs["xpath"];
-	$p_xpath = $docs["p_xpath"];
-	$r_xpath = $docs["r_xpath"];
 
 	//	get the XML for the page.
 	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
@@ -224,223 +167,169 @@ function read_object_fields($page, $version, $docs=array()){
 
 	//	push in our page.
 	$mixins[$page] = $context;
+
+	//	properties
 	$props = array();
+	$nl = $xpath->query("properties/property", $context);
+	foreach($nl as $n){
+		$nm = $n->getAttribute("name");
+		$private = $n->getAttribute("private") == "true";
+		if(!$private && strpos($nm, "_")===0){
+			$private = true;
+		}
+		if(array_key_exists($nm, $props)){
+			// TODO: remove this branch, we aren't tracing inheritance anymore
+			//	next one up in the chain overrides the original.
+			$props[$nm]["scope"] = $n->getAttribute("scope");
+			$props[$nm]["type"] = $n->getAttribute("type");
+			$props[$nm]["override"] = true;
+			$props[$nm]["defines"][] = $location;
+		} else {
+			$props[$nm] = array(
+				"name"=>$nm,
+				"scope"=>$n->getAttribute("scope"),
+				"from"=>$n->getAttribute("from"),
+				"visibility"=>($private == true ? "private" : "public"),
+				"type"=>$n->getAttribute("type"),
+				"defines"=>array($location),	// TODO: remove?
+				"override"=>false	// TODO: remove?
+			);
+		}
+
+		if($n->getElementsByTagName("summary")->length){
+			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$props[$nm]["summary"] = $desc;
+			}
+		}
+		if($n->getElementsByTagName("description")->length){
+			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$props[$nm]["description"] = $desc;
+			}
+		}
+	}
+
+	//	methods
 	$methods = array();
+	$nl = $xpath->query("methods/method", $context);
+	foreach($nl as $n){
+		$nm = $n->getAttribute("name");
+		$private = $n->getAttribute("private") == "true";
+		if(!$private && strpos($nm, "_")===0){
+			$private = true;
+		}
+		if(!strlen($nm)){
+			$nm = "constructor";
+		}
+		if(array_key_exists($nm, $methods)){
+			// TODO: remove this branch, we aren't tracing inheritance anymore
+			//	next one up in the chain overrides the original.
+			$methods[$nm]["scope"] = $n->getAttribute("scope");
+			$methods[$nm]["override"] = true;
+			$methods[$nm]["defines"][] = $location;
+			if($n->getAttribute("constructor") == "constructor"){
+				$methods[$nm]["constructor"] = true;
+				$methods[$nm]["scope"] = "prototype";
+			}
+		} else {
+			$methods[$nm] = array(
+				"name"=>$nm,
+				"scope"=>$n->getAttribute("scope"),
+				"from"=>$n->getAttribute("from"),
+				"visibility"=>($private=="true"?"private":"public"),
+				"parameters"=>array(),
+				"return-types"=>array(),
+				"defines"=>array($location),
+				"override"=>false,
+				"constructor"=>$n->getAttribute("constructor")=="constructor"
+			);
+		}
 
-	foreach($mixins as $location=>$node){
-		//	properties
-		$nl = $xpath->query("properties/property", $node);
-		foreach($nl as $n){
-			$nm = $n->getAttribute("name");
-			$private = $n->getAttribute("private") == "true";
-			if(!$private && strpos($nm, "_")===0){
-				$private = true;
+		if($n->getElementsByTagName("summary")->length){
+			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$methods[$nm]["summary"] = $desc;
 			}
-			if(array_key_exists($nm, $props)){
-				//	next one up in the chain overrides the original.
-				$props[$nm]["scope"] = $n->getAttribute("scope");
-				$props[$nm]["type"] = $n->getAttribute("type");
-				$props[$nm]["override"] = true;
-				$props[$nm]["defines"][] = $location;
-			} else {
-				$props[$nm] = array(
-					"name"=>$nm,
-					"scope"=>$n->getAttribute("scope"),
-					"visibility"=>($private == true ? "private" : "public"),
-					"type"=>$n->getAttribute("type"),
-					"defines"=>array($location),
-					"override"=>false
-				);
+		}
+		if($n->getElementsByTagName("description")->length){
+			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$methods[$nm]["description"] = $desc;
 			}
-
-			if($n->getElementsByTagName("summary")->length){
-				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
-				if(strlen($desc)){
-					$props[$nm]["summary"] = $desc;
-				}
+		}
+		$ex = $n->getElementsByTagName("example");
+		if($ex->length){
+			if(!array_key_exists("examples", $methods[$nm])){
+				$methods[$nm]["examples"] = array();
 			}
-			if($n->getElementsByTagName("description")->length){
-				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
-				if(strlen($desc)){
-					$props[$nm]["description"] = do_markdown($desc);
-				}
+			foreach($ex as $example){
+				$methods[$nm]["examples"][] = $example->nodeValue;
+			}
+		}
+		if($n->getElementsByTagName("return-description")->length){
+			$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
+			if(strlen($desc)){
+				$methods[$nm]["return-description"] = $desc;
 			}
 		}
 
-		//	methods
-		$nl = $xpath->query("methods/method", $node);
-		foreach($nl as $n){
-			$nm = $n->getAttribute("name");
-			$private = $n->getAttribute("private") == "true";
-			if(!$private && strpos($nm, "_")===0){
-				$private = true;
-			}
-			if(!strlen($nm)){
-				$nm = "constructor";
-			}
-			if(array_key_exists($nm, $methods)){
-				//	next one up in the chain overrides the original.
-				$methods[$nm]["scope"] = $n->getAttribute("scope");
-				$methods[$nm]["override"] = true;
-				$methods[$nm]["defines"][] = $location;
-				if($n->getAttribute("constructor") == "constructor"){
-					$methods[$nm]["constructor"] = true;
-					$methods[$nm]["scope"] = "prototype";
-				}
-			} else {
-				$methods[$nm] = array(
-					"name"=>$nm,
-					"scope"=>$n->getAttribute("scope"),
-					"visibility"=>($private=="true"?"private":"public"),
-					"parameters"=>array(),
-					"return-types"=>array(),
-					"defines"=>array($location),
-					"override"=>false,
-					"constructor"=>$n->getAttribute("constructor")=="constructor"
-				);
-			}
-
-			if($n->getElementsByTagName("summary")->length){
-				$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
-				if(strlen($desc)){
-					$methods[$nm]["summary"] = $desc;
-				}
-			}
-			if($n->getElementsByTagName("description")->length){
-				$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
-				if(strlen($desc)){
-					$methods[$nm]["description"] = do_markdown($desc);
-				}
-			}
-			$ex = $n->getElementsByTagName("example");
-			if($ex->length){
-				if(!array_key_exists("examples", $methods[$nm])){
-					$methods[$nm]["examples"] = array();
-				}
-				foreach($ex as $example){
-					$methods[$nm]["examples"][] = $example->nodeValue;
-				}
-			}
-			if($n->getElementsByTagName("return-description")->length){
-				$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
-				if(strlen($desc)){
-					$methods[$nm]["return-description"] = $desc;
-				}
-			}
-
-			//	do up the parameters and the return types.
-			$params = $xpath->query("parameters/parameter", $n);
-			if($params->length){
-				//	TODO: double-check that the XML will always have this.
-				$methods[$nm]["parameters"] = array();
-				foreach($params as $param){
-					$item = array(
-						"name"=>$param->getAttribute("name"),
-						"type"=>$param->getAttribute("type"),
-						"usage"=>$param->getAttribute("usage"),
-						"description"=>""
-					);
-					if($param->getElementsByTagName("summary")->length){
-						$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
-						if(strlen($desc)){
-							$item["description"] = $desc;
-						}
-					}
-					$methods[$nm]["parameters"][] = $item;
-				}
-			}
-
-			if($nm == "constructor"){
-				$methods[$nm]["return-types"] = array();
-				$methods[$nm]["return-types"][] = array(
-					"type"=>$location,
+		//	do up the parameters and the return types.
+		$params = $xpath->query("parameters/parameter", $n);
+		if($params->length){
+			//	TODO: double-check that the XML will always have this.
+			$methods[$nm]["parameters"] = array();
+			foreach($params as $param){
+				$item = array(
+					"name"=>$param->getAttribute("name"),
+					"type"=>$param->getAttribute("type"),
+					"usage"=>$param->getAttribute("usage"),
 					"description"=>""
 				);
-			} else {
-				$rets = $xpath->query("return-types/return-type", $n);
-				if($rets->length){
-					//	TODO: double-check that the XML will always have this.
-					$methods[$nm]["return-types"] = array();
-					foreach($rets as $ret){
-						$item = array(
-							"type"=>$ret->getAttribute("type"),
-							"description"=>""
-						);
-						$methods[$nm]["return-types"][] = $item;
+				if($param->getElementsByTagName("summary")->length){
+					$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
+					if(strlen($desc)){
+						$item["description"] = $desc;
 					}
+				}
+				$methods[$nm]["parameters"][] = $item;
+			}
+		}
+
+		if($nm == "constructor"){
+			$methods[$nm]["return-types"] = array();
+			$methods[$nm]["return-types"][] = array(
+				"type"=>$location,
+				"description"=>""
+			);
+		} else {
+			$rets = $xpath->query("return-types/return-type", $n);
+			if($rets->length){
+				//	TODO: double-check that the XML will always have this.
+				$methods[$nm]["return-types"] = array();
+				foreach($rets as $ret){
+					$item = array(
+						"type"=>$ret->getAttribute("type"),
+						"description"=>""
+					);
+					$methods[$nm]["return-types"][] = $item;
 				}
 			}
 		}
 	}
-	return array("props"=>$props, "methods"=>$methods);
-}
-
-function get_Object_fields(){
-	//	simple helper function to return a fake generated prop/method set for Object.
-	$props = array();
-	$methods = array();
-
-	//	no properties other than the constructor on an object, so we'll just return that as an empty array.
-	$native = array("constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString", "toString", "valueOf");
-	$returns = array("Object", "Boolean", "Boolean", "Boolean", "String", "String", "Object");
-	$summaries = array(
-		"A reference to the constructor function for this object.",
-		"Checks whether an object has a locally defined (noninherited) property with a specified name.",
-		"Check whether this object is the prototype object of a specified object.",
-		"Checks whether a named property exists and would be enumerated by a for/in loop.",
-		"Returns a localized string representation of the object.",
-		"Returns a string representation of the object.",
-		"Returns the primitve value of the object, if any."
-	);
-
-	foreach($native as $i=>$nm){
-		$methods[$nm] = array(
-			"name"=>$nm,
-			"scope"=>"prototype",
-			"visibility"=>"public",
-			"parameters"=>array(),
-			"return-types"=>array(),
-			"defines"=>array("Object"),
-			"override"=>false,
-			"summary"=>$summaries[$i]
-		);
-		$methods[$nm]["return-types"][] = array(
-			"type"=>$returns[$i],
-			"description"=>""
-		);
-		if($nm == "hasOwnProperty" || $nm == "propertyIsEnumerable"){
-			$methods[$nm]["parameters"][] = array(
-				"name"=>"propname",
-				"type"=>"String",
-				"usage"=>"",
-				"description"=>"The property to check."
-			);
-		}
-		else if($nm == "isPrototypeOf"){
-			$methods[$nm]["parameters"][] = array(
-				"name"=>"o",
-				"type"=>"Object",
-				"usage"=>"",
-				"description"=>"The object to check against."
-			);
-		}
-	}
 
 	return array("props"=>$props, "methods"=>$methods);
 }
+
 
 function generate_object($page, $version, $docs=array()){
 	//	create a PHP-based associative array structure out of the page in question.
+
 	if(!count($docs)){
 		$docs = load_docs($version);
 	}
-
 	$xml = $docs["xml"];
-	$p_xml = $docs["p_xml"];
-	$r_xml = $docs["r_xml"];
 	$xpath = $docs["xpath"];
-	$p_xpath = $docs["p_xpath"];
-	$r_xpath = $docs["r_xpath"];
 
 	//	get the XML for the page.
 	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
@@ -452,19 +341,6 @@ function generate_object($page, $version, $docs=array()){
 	//	ok, we have a context, let's build up our object.
 	$obj = array();
 
-	//	BEGIN OBJECT GRAPH ASSEMBLY.
-	//	provides
-	$test = $p_xpath->query('//object[@location="' . $page . '"]/provides/provide');
-	if($test && $test->length == 1){
-		$obj["require"] = $test->item(0)->nodeValue;
-	}
-
-	//	resources
-	$test = $r_xpath->query('//object[@location="' . $page . '"]/resources/resource');
-	if($test && $test->length == 1){
-		$obj["resource"] = $test->item(0)->nodeValue;
-	}
-
 	//	basic information.
 	$is_constructor = ($context->getAttribute("type")=="Function" && $context->getAttribute("classlike")=="true");
 	$nl = $xpath->query('//object[starts-with(@location, "' . $page . '.") and not(starts-with(substring-after(@location, "' . $page . '."), "_"))]');
@@ -472,20 +348,11 @@ function generate_object($page, $version, $docs=array()){
 	$type = $context->getAttribute("type");
 	if(!strlen($type)){ $type = 'Object'; }
 	if($is_constructor){ $type = 'Constructor'; }
-//	if($is_namespace){ $type = 'Namespace'; }
 
 	$obj["type"] = $type;
 	$obj["title"] = $context->getAttribute("location");
 	$obj["version"] = $version;
 
-	//	the prototype chain
-	$bc = array($context->getAttribute("location"));
-	$node = $context;
-	while($node && $node->getAttribute("superclass")){
-		$sc = $node->getAttribute("superclass");
-		$bc[] = $sc;
-		$node = $xpath->query('//object[@location="' . $sc . '"]')->item(0);
-	}
 	$bc[] = "Object";
 	$bc = array_reverse($bc);
 
@@ -497,7 +364,6 @@ function generate_object($page, $version, $docs=array()){
 	if(!$desc){ $desc = $xpath->query("summary/text()", $context)->item(0); }
 	if($desc){ $obj["description"] = $desc->nodeValue; }
 
-	//	mixins
 	//	examples.
 	$examples = $xpath->query("examples/example", $context);
 	if($examples->length > 0){
@@ -507,10 +373,7 @@ function generate_object($page, $version, $docs=array()){
 		}
 	}
 
-	//	now it gets ugly.  We need to go get all the properties and methods of ourselves,
-	//	plus anything in the prototype chain (i.e. superclass), PLUS anything in the mixins list,
-	//	and merge them all together, AND make sure they are unique.  On top of that, we need
-	//	to make sure we're getting that info from the top to the bottom.
+	//	code below here used to do unwinding of inheritance, but now that's done in the doc parser
 	$obj["mixins"] = array();
 	$obj["properties"] = array();
 	$obj["methods"] = array();
@@ -525,67 +388,19 @@ function generate_object($page, $version, $docs=array()){
 		}
 	}
 
-	//	ok.  Walk the prototype chain from one to another, and get the list of props and methods for all.
-	$protos = array();
-	foreach($bc as $ancestor){
-		if($ancestor == "Object"){
-			$protos[$ancestor] = get_Object_fields();
-		} else {
-			$protos[$ancestor] = read_object_fields($ancestor, $version, $docs);
-		}
-	}
+	// Get methods and properties, and sort
+	$foo = read_object_fields($page, $version, $docs);
+	$props = $foo["props"];
+	$methods = $foo["methods"];
+	ksort($methods);
+	ksort($props);
 
-	//	Now that we have the complete prototype chain, merge everything and include override info if needed.
-	$props = array();
-	$methods = array();
-	foreach($protos as $_object=>$proto){
-		if($proto && array_key_exists("props", $proto)){
-			foreach($proto["props"] as $nm=>$prop){
-				if(array_key_exists($nm, $props)){
-					//	next one up in the chain overrides the original.
-					$props[$nm]["override"] = true;
-					$props[$nm]["defines"][] = $_object;
-					if(isset($prop["summary"])){
-						$prop[$nm]["summary"] = $prop["summary"];
-					}
-					if(isset($prop["description"])){
-						$prop[$nm]["description"] = $prop["description"];
-					}
-				} else {
-					$props[$nm] = $prop;
-				}
-			}
-		}
-		if($proto && array_key_exists("methods", $proto)){
-			foreach($proto["methods"] as $nm=>$method){
-				if(array_key_exists($nm, $methods)){
-					//	next one up in the chain overrides the original.
-					$methods[$nm]["override"] = true;
-					$methods[$nm]["defines"][] = $_object;
-					$methods[$nm]["scope"] = $method["scope"];
-					if($nm == "constructor"){
-						$methods[$nm]["return-types"][0]["type"] = $_object;
-					}
-					if(count($method["parameters"])){
-						$methods[$nm]["parameters"] = $method["parameters"];
-					}
-					if(isset($method["summary"])){
-						$methods[$nm]["summary"] = $method["summary"];
-					}
-					if(isset($method["description"])){
-						$methods[$nm]["description"] = $method["description"];
-					}
-				} else {
-					$methods[$nm] = $method;
-				}
-			}
-		}
-	}
-
-	//	sort the props and methods correctly (alphabetical order).
-	$methods = array_filter($methods, "is_not_from_Object");
+	// reclassify methods with names starting with "on" as events
 	$events = array_filter($methods, "is_event");
 	$methods = array_filter($methods, "is_method");
+
+/********
+unclear what this code is for, so commenting out for now
 
 	//	put any normal scope (i.e. attached directly) first.  Note that we only want
 	//	the ones attached directly to our page, and nothing from the inheritance chain.
@@ -624,11 +439,13 @@ function generate_object($page, $version, $docs=array()){
 	ksort($tmp);
 	ksort($not_static);
 	$events = array_merge($tmp, $not_static);
+***************/
 
 	$obj["properties"] = $props;
 	$obj["methods"] = $methods;
 	$obj["events"] = $events;
 
+	// TODO: remove this section?   what's an attached object?
 	//	attached objects.  Try to filter out the craptacular ones.
 	$children = $xpath->query('//object[starts-with(@location, "' . $page . '.")]');
 	$attached = array();
@@ -654,7 +471,6 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 	//	create the HTML strings for a single property
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
-		. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
@@ -662,7 +478,6 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. '</a>';
 	$details = '<div class="jsdoc-field '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
-		. (isset($prop["defines"]) && count($prop["defines"]) && !$prop["override"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
@@ -672,22 +487,10 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. '</span>'
 		. '</div>';
 
-	//	inheritance list.
-	if(isset($prop["defines"]) && count($prop["defines"])){
-		$tmp = array();
-		foreach($prop["defines"] as $def){
-			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
-				. $def
-				. '</a>';
-		}
-		if($prop["override"]){
-			array_pop($tmp);
-		}
-		$details .= '<div class="jsdoc-inheritance">'
-			. ($prop["override"] ? "Overrides ":"Defined by ")
-			. implode(", ", $tmp)
-			. '</div>';
-	}
+	$details .= '<div class="jsdoc-inheritance">Defined by '
+		. $prop["from"]		// TODO: make this hyperlink
+	. '</div>';
+
 	if(array_key_exists("description", $prop)){
 		$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
 	} else if(array_key_exists("summary", $prop)){
@@ -705,7 +508,6 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	//	create the HTML strings for a single method.
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
-		. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
@@ -713,7 +515,6 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		. '</a>';
 	$details = '<div class="jsdoc-field '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
-		. (isset($method["defines"]) && count($method["defines"]) && !$method["override"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
@@ -739,25 +540,13 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		foreach($method["return-types"] as $rt){
 			$tmp[] = $rt["type"];
 		}
-		$s .= '<span class="jsdoc-returns"> returns ' . implode("|", $tmp) . '</span>';
+		$s .= '<span class="jsdoc-returns"> returns ' . implode("", $tmp) . '</span>';	// TODO: make hyperlinks
 	}
 
 	//	inheritance list.
-	if(isset($method["defines"]) && count($method["defines"])){
-		$tmp = array();
-		foreach($method["defines"] as $def){
-			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $def)) . $suffix . '">'
-				. $def
-				. '</a>';
-		}
-		if($method["override"]){
-			array_pop($tmp);
-		}
-		$details .= '<div class="jsdoc-inheritance">'
-			. ($method["override"] ? "Overrides ":"Defined by ")
-			. implode(", ", $tmp) 
-			. '</div>';	//	jsdoc-inheritance
-	}
+	$details .= '<div class="jsdoc-inheritance">Defined by '
+		. $method["from"]		// TODO: make this hyperlink
+		. '</div>';	//	jsdoc-inheritance
 
 	if(count($method["return-types"])){
 		$tmp = array();
@@ -766,7 +555,7 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		}
 		$details .= '<div class="jsdoc-return-type">Returns '
 			. '<strong>'
-			. implode("|", $tmp)
+			. implode("|", $tmp)	// TODO: make hyperlinks
 			. '</strong>';
 		if(array_key_exists("return-description", $method)){
 			$details .= ': <span class="jsdoc-return-description">'
@@ -782,7 +571,7 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	}
 
 	if(array_key_exists("description", $method)){
-		$details .= '<div class="jsdoc-summary">' . do_markdown($method["description"]) . '</div>';
+		$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
 	} else if(array_key_exists("summary", $method)){
 		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 	}
@@ -913,7 +702,7 @@ function _generate_methods_output($methods, $docs = array(), $field_counter = 0,
 
 function generate_object_html($page, $version, $base_url = "", $suffix = "", $versioned = true, $docs = array()){
 	//	$page:
-	//		The object to render, i.e. "dojox.charting.Chart2D"
+	//		The object to render, i.e. "dojox/charting/Chart2D"
 	//	$version:
 	//		The version against which to generate the page.
 	//	$base_url:
@@ -930,9 +719,6 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		throw new Exception("generate_html: you must pass a version!");
 	}
 
-	if(strpos($page, "/") > 0){
-		$page = implode(".", explode("/", $page));
-	}
 	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
 	//	get the docs to run against.  this can be optionally provided;
@@ -975,7 +761,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	foreach($obj["prototypes"] as $i=>$p){
 		if($i){ $s .= ' &raquo; '; }
 		if($p != $page && $p != "Object"){
-			$name = implode("/", explode(".", $p));
+			$name = $p;
 			$s .= '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $p . '</a>';
 		} else {
 			$s .= $p;
@@ -1017,7 +803,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 
 	if(array_key_exists("description", $obj)){
 		$s .= '<div class="jsdoc-full-summary">'
-			. do_markdown($obj["description"])
+			. $obj["description"]
 			. "</div>";
 	}
 
@@ -1044,7 +830,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$super = $obj["prototypes"][count($obj["prototypes"])-2];
 		foreach($obj["mixins"] as $mixin){
 			if($mixin != $super){
-				$name = implode("/", explode('.', $mixin));
+				$name = $mixin;
 				$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $mixin . '</a>';
 			}
 		}
@@ -1086,6 +872,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 	}
 
+	// TODO: remove this section?
 	//	child objects: put up a list of any child objects that are attached to this particular one.
 	if(array_key_exists("attached", $obj) && count($obj["attached"])){
 		$children = $obj["attached"];
@@ -1124,6 +911,9 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	return $s . $details;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Old functions to generate static tree of objects
+///////////////////////////////////////////////////////////////////////////////
 
 //	sorting functions used for the tree
 function object_node_sorter($a, $b){

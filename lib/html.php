@@ -22,7 +22,10 @@ if(!isset($page)){ $page = "dojo"; }
 //	check if there's URL variables
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
-if(strpos($page, "/") > 0){ $page = implode(".", explode("/", $page)); }
+
+// Convert dots to slashes
+// Not sure if we want this code... not even sure who calls this method, if anyone
+if(strpos($page, ".") > 0){ $page = implode("/", explode(".", $page)); }
 
 $docs = load_docs($version);
 

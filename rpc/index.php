@@ -200,7 +200,7 @@ if($obj){
 		}
 		if($field["name"] == "constructor" && array_key_exists("description", $obj)){
 			//	swap out the description from the object.
-			$field["summary"] = do_markdown($obj["description"]);
+			$field["summary"] = $obj["description"];
 		}
 		$obj = $field;
 	}
@@ -236,15 +236,14 @@ if($do_filter){
 }
 
 if(!$cached){
-	//	make sure description fields are markdown
 	if(array_key_exists("description", $obj)){
-		$obj["description"] = do_markdown($obj["description"]);
+		$obj["description"] = $obj["description"];
 	}
 
 	if(array_key_exists("properties", $obj)){
 		foreach($obj["properties"] as $value){
 			if(array_key_exists("description", $value)){
-				$value["description"] = do_markdown($value["description"]);
+				$value["description"] = $value["description"];
 			}
 		}
 	}
@@ -252,7 +251,7 @@ if(!$cached){
 	if(array_key_exists("methods", $obj)){
 		foreach($obj["methods"] as $value){
 			if(array_key_exists("description", $value)){
-				$value["description"] = do_markdown($value["description"]);
+				$value["description"] = $value["description"];
 			}
 		}
 	}
@@ -260,7 +259,7 @@ if(!$cached){
 	if(array_key_exists("events", $obj)){
 		foreach($obj["events"] as $value){
 			if(array_key_exists("description", $value)){
-				$value["description"] = do_markdown($value["description"]);
+				$value["description"] = $value["description"];
 			}
 		}
 	}

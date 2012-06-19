@@ -1,5 +1,5 @@
 <?php
-	$defVersion = "1.4";
+	$defVersion = "1.8";
 	$dataDir = dirname(__FILE__) . "/data/";
 	$defPage = "";
 	$defTheme = "";

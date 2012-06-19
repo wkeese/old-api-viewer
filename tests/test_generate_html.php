@@ -4,21 +4,21 @@
 
 /*
 	$page = "dijit.layout.ContentPane";
-	$version = "1.4";
+	$version = "1.8";
 	echo generate_object_html($page, $version, "../");
  */
 
 /*
-	$tree = generate_object_tree("1.4", array(
+	$tree = generate_object_tree("1.8", array(
 		"dojo"=>-1,
 		"dijit"=>-1,
 		"dojox"=>-1,
 		"djConfig"=>-1
 	));
-	echo generate_object_tree_html($tree, "dojox", "http://dojo-api.local/html/1.4/", ".html");
+	echo generate_object_tree_html($tree, "dojox", "http://dojo-api.local/html/1.8/", ".html");
 */
 	$page = "dijit.form.CurrencyTextBox";
-	$version = "1.4";
+	$version = "1.8";
 
 	if(count($_GET)){
 		if(array_key_exists("p", $_GET)) $page = $_GET["p"];

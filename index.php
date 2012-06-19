@@ -8,7 +8,7 @@ $d = dir($dataDir);
 $versions = array();
 $has_version = false;
 while(($entry = $d->read()) !== false){
-	if(!(strpos($entry, ".")===0) && file_exists("data/".$entry."/api.xml")){
+	if(!(strpos($entry, ".")===0) && file_exists("data/".$entry."/details.xml")){
 		$versions[] = $entry;
 	}
 }
@@ -64,24 +64,32 @@ if(isset($_GET["clearcache"]) && $use_cache){
 	cache_clear($version);
 }
 
+// I can't get through to google CDN so changing this temporarily to point to my local install
+$dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.7/";
+$dojoroot = "/trunk";
+
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-	<title><?php echo ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
-		<meta http-equiv="X-UA-Compatible" content="chrome=1"/> 
-		<link rel="stylesheet" href="<?php echo $basePath; ?>css/jsdoc.css" type="text/css" media="all" />
-		<link rel="stylesheet" href="<?php echo $basePath; ?>css/jsdoc-print.css" type="text/css" media="print" />
+	<title><?= ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
+		<meta http-equiv="X-UA-Compatible" content="chrome=1"/>
+		<link rel="stylesheet" href="<?= $dojoroot ?>/dojo/resources/dojo.css" />
+		<link rel="stylesheet" href="<?= $dojoroot ?>/dijit/themes/claro/claro.css" />
+		<link rel="stylesheet" href="css/jsdoc.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="css/jsdoc-print.css" type="text/css" media="print" />
 <?php if(file_exists("themes/" . $th . "/" . $th . ".css")){ ?>
-<link rel="stylesheet" href="<?php echo $basePath; ?>themes/<?php echo $th; ?>/<?php echo $th; ?>.css" type="text/css" media="all" />
+<link rel="stylesheet" href="themes/<?= $th ?>/<?= $th ?>.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"></script>
+		<script type="text/javascript" src="<?= $dojoroot ?>/dojo/dojo.js"
+				data-dojo-config="async: true"></script>
+
 		<!-- SyntaxHighlighter -->
-		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shCore.js"><</script>
-		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
-		<script type="text/javascript" src="<?php echo $basePath; ?>js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
-		<link rel="stylesheet" href="<?php echo $basePath; ?>js/syntaxhighlighter/styles/shCore.css" type="text/css" />
-		<link rel="stylesheet" href="<?php echo $basePath; ?>js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
+		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shCore.js"><</script>
+		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
+		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
+		<link rel="stylesheet" href="<?= $basePath ?>js/syntaxhighlighter/styles/shCore.css" type="text/css" />
+		<link rel="stylesheet" href="<?= $basePath ?>js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="keywords" content="The Dojo Toolkit, dojo, JavaScript Framework" />
@@ -91,31 +99,35 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<meta name="company" content="Dojo Foundation" />
 
 		<script type="text/javascript">
-			var baseUrl = "<?php echo $_base_url; ?>";
+			var baseUrl = "<?= $_base_url; ?>";
 			var siteName = 'The Dojo Toolkit';
-			dojo.addOnLoad(function(){
-				dojo.parser.parse(document.body);
+			require([
+				"dojo/dom",
+				"dojo/_base/fx",
+				"dojo/ready",
+				"dijit/registry",
+				"./js/api"		// main work is done in here
+			], function(dom, fx, ready, registry){
+				ready(function(){
 <?php if($is_page){ ?>
-				(dojo.hitch(dijit.byId("initialPagePane"), paneOnLoad))();
+					// This is disabled
+					registry.byId("initialPagePane").paneOnLoad();
 <?php } ?>
-				setTimeout(function(){
-					var loader = dojo.byId("loader");
-					dojo.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
-				}, 500);
+					setTimeout(function(){
+						var loader = dojo.byId("loader");
+						fx.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
+					}, 500);
+				});
 			});
 
-			var page = '<?php echo ($is_page?$page:"") ?>';
-			var currentVersion = '<?php echo $version; ?>';
+			var page = '<?= ($is_page?$page:"") ?>';
+			var currentVersion = '<?= $version; ?>';
 		</script>
-		<script type="text/javascript" src="<?php echo $basePath; ?>js/api.js"></script>
 	</head>
 	<body class="claro">
 		<div id="loader"><div id="loaderInner"></div></div>
 		<div id="printBlock"></div>
-<!--
-		<div dojoType="dojo.data.ItemFileReadStore" jsId="classStore" url="<?php echo $basePath; ?>lib/class-tree.php?v=<?php echo $version; ?>"></div>
-		<div dojoType="dojo.data.ItemFileReadStore" jsId="moduleStore" url="<?php echo $basePath; ?>lib/module-tree.php?v=<?php echo $version; ?>"></div>
--->
+
 		<div id="main" dojoType="dijit.layout.BorderContainer" liveSplitters="false">
 			<div id="head" dojoType="dijit.layout.ContentPane" region="top">
 <?php include("themes/" . $th . "/header.php"); ?>
@@ -132,49 +144,23 @@ foreach($versions as $v){
 					</div>
 				</div>
 				<div dojoType="dijit.layout.AccordionContainer" region="center">
-					<div id="classTreePane" dojoType="dijit.layout.ContentPane" title="By Object" selected="true"></div>
-<!--
-					<div dojoType="dijit.layout.ContentPane" title="By Resource">
-						<div id="moduleTree" dojoType="dijit.Tree" store="moduleStore" query="{type:'root'}">
-							<script type="dojo/method" event="getIconClass" args="item, opened">
-								if(!item || (moduleStore.getValue(item, "type") == "folder" || moduleStore.getValue(item, "type") == "root")){
-									return opened ? "dijitFolderOpened":"dijitFolderClosed"; 
-								}
-								else if(moduleStore.getValue(item, "type") == "file"){
-									return "dijitLeaf";
-								} 
-								else if (!moduleStore.getValue(item, "type").length){
-									return "objectIcon16";
-								}
-								else {
-									return moduleStore.getValue(item, "type").toLowerCase() + "Icon16";
-								}
-							</script>
-								<script type="dojo/method" event="onClick" args="item">
-								var type = moduleStore.getValue(item, "type");
-								if(type != "folder" && type != "root" && type != "file"){
-									addTabPane(moduleStore.getValue(item, "name"), currentVersion);
-								}
-							</script>
-						</div>
-					</div>
--->
+					<div id="moduleTreePane" dojoType="dijit.layout.ContentPane" title="By Module" selected="true"></div>
 				</div>
 				<div dojoType="dijit.layout.ContentPane" region="bottom" style="height:18px;background-color:#f2f2f2;border-top:1px solid #dedede;padding:0 2px 4px 48px;position:relative;overflow:hidden;">
 					<span style="position:absolute;top:5px;left:3px;font-size:11px;">Legend: </span>
-					<img src="<?php echo $basePath; ?>css/icons/16x16/array.png" align="middle" title="Array" alt="Array" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/boolean.png" align="middle" title="Boolean" alt="Boolean" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/constructor.png" align="middle" title="Constructor" alt="Constructor" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/date.png" align="middle" title="Date" alt="Date" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/domnode.png" align="middle" title="DomNode" alt="DomNode" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/error.png" align="middle" title="Error" alt="Error" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/function.png" align="middle" title="Function" alt="Function" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/namespace.png" align="middle" title="Namespace" alt="Namespace" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/number.png" align="middle" title="Number" alt="Number" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/object.png" align="middle" title="Object" alt="Object" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/regexp.png" align="middle" title="RegExp" alt="RegExp" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/singleton.png" align="middle" title="Singleton" alt="Singleton" border="0" />
-					<img src="<?php echo $basePath; ?>css/icons/16x16/string.png" align="middle" title="String" alt="String" border="0" />
+					<img src="css/icons/16x16/array.png" align="middle" title="Array" alt="Array" border="0" />
+					<img src="css/icons/16x16/boolean.png" align="middle" title="Boolean" alt="Boolean" border="0" />
+					<img src="css/icons/16x16/constructor.png" align="middle" title="Constructor" alt="Constructor" border="0" />
+					<img src="css/icons/16x16/date.png" align="middle" title="Date" alt="Date" border="0" />
+					<img src="css/icons/16x16/domnode.png" align="middle" title="DomNode" alt="DomNode" border="0" />
+					<img src="css/icons/16x16/error.png" align="middle" title="Error" alt="Error" border="0" />
+					<img src="css/icons/16x16/function.png" align="middle" title="Function" alt="Function" border="0" />
+					<img src="css/icons/16x16/namespace.png" align="middle" title="Namespace" alt="Namespace" border="0" />
+					<img src="css/icons/16x16/number.png" align="middle" title="Number" alt="Number" border="0" />
+					<img src="css/icons/16x16/object.png" align="middle" title="Object" alt="Object" border="0" />
+					<img src="css/icons/16x16/regexp.png" align="middle" title="RegExp" alt="RegExp" border="0" />
+					<img src="css/icons/16x16/singleton.png" align="middle" title="Singleton" alt="Singleton" border="0" />
+					<img src="css/icons/16x16/string.png" align="middle" title="String" alt="String" border="0" />
 				</div>
 			</div>
 			<div id="content" dojoType="dijit.layout.TabContainer" region="center" tabStrip="true">

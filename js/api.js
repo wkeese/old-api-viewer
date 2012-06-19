@@ -1,16 +1,24 @@
-dojo.require("dojo.parser");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("dijit.layout.BorderContainer");
-dojo.require("dijit.layout.AccordionContainer");
-dojo.require("dijit.layout.TabContainer");
-dojo.require("dijit.layout.ContentPane");
-dojo.require("dijit.Tree");
-dojo.require("dojo.fx.easing");
-dojo.require("dojox.fx._core");
+require([
+	"dojo",
+	"dojo/fx/easing",
+	"dojo/parser",
+	"dijit/registry",
+	"dojox/fx/_core",
+	"./js/ModuleTreeModel",
+	"./js/ModuleTree",
+
+	// Modules used by the parser
+	"dijit/layout/BorderContainer",
+	"dijit/layout/TabContainer",
+	"dijit/layout/ContentPane",
+	"dijit/layout/AccordionContainer"
+], function(dojo, easing, parser, registry, xfx, ModuleTreeModel, ModuleTree){
+
+// This file contains the top level javascript code to setup the tree, etc.
 
 if(currentVersion === undefined){
 	//	fallback.
-	var currentVersion = "1.5";
+	var currentVersion = "1.8";
 }
 
 //	redefine the base URL.
@@ -24,7 +32,6 @@ if(page.length){
 	delete _href;
 }
 
-var classTree, classStore;
 function smoothScroll(args){
 	//	NB: this is basically dojox.fx.smoothScroll, but for some reason smoothScroll uses target.x/y instead
 	//	of left/top.  dojo.coords is returning a different y than the top for some reason.  Maybe position will
@@ -100,7 +107,7 @@ paneOnLoad = function(data){
 	//	hide the private members.
 	dojo.query("div.private, li.private", this.domNode).style("display", "none");
 
-	//	make the summary sections collapsable.
+	//	make the summary sections collapsible.
 	dojo.query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
 		dojo.connect(item, "onclick", function(e){
 			var d = e.target.nextSibling;
@@ -151,7 +158,7 @@ paneOnLoad = function(data){
 	});
 
 	//	set the title
-	var w = dijit.byId("content").selectedChildWidget;
+	var w = registry.byId("content").selectedChildWidget;
 	document.title = w.title + " - " + (siteName || "The Dojo Toolkit");
 	
 	//	set the content of the printBlock.
@@ -159,9 +166,9 @@ paneOnLoad = function(data){
 };
 
 addTabPane = function(page, version){
-	var p = dijit.byId("content");
+	var p = registry.byId("content");
 	var url = baseUrl + "lib/item.php?p=" + page.split(".").join("/") + "&v=" + (version || currentVersion);
-	var title = page.split("/").join(".");
+	var title = page;
 
 	//	get the children and make sure we haven't opened this yet.
 	var c = p.getChildren();
@@ -183,43 +190,30 @@ addTabPane = function(page, version){
 	return pane;
 };
 
+var moduleTree, moduleModel;
+
 buildTree = function(){
 	//	handle changing the tree versions.
-	if(classTree){
-		classTree.destroyRecursive();
+	if(moduleTree){
+		moduleTree.destroyRecursive();
 	}
 
-	//	load the class tree data.
-	classStore = new dojo.data.ItemFileReadStore({
-		url: baseUrl + 'lib/class-tree.php?v=' + currentVersion
-	});
+	//	load the module tree data.
+	moduleModel = new ModuleTreeModel(baseUrl + 'data/' + currentVersion + '/tree.json');
 
-	classTree = new dijit.Tree({
-		store: classStore,
-		query: { type: 'root' },
-		getIconClass: function(item, opened){
-			if(!item){ return "icon16 objectIcon16"; }
-			if(item == this.model.root) {
-				return "icon16 namespaceIcon16";
-			} else {
-				if(classStore.getValue(item, "type") == "root"){
-					if(classStore.getValue(item, "name") == "djConfig"){
-						return "icon16 objectIcon16";
-					}
-					return "icon16 namespaceIcon16";
-				} else {
-					return "icon16 " + classStore.getValue(item, "type") + "Icon16";
-				}
-			}
-		},
-		onClick: function(item){
-			addTabPane(classStore.getValue(item, 'fullname'), currentVersion);
-		}
+	moduleTree = new ModuleTree({
+		model: moduleModel,
+		showRoot: false
 	});
-	dijit.byId("classTreePane").domNode.appendChild(classTree.domNode);
+	moduleTree.placeAt("moduleTreePane");
 };
 
 versionChange = function(e){
+	// summary:
+	//		Change the version displayed.
+	//		TODO.   This currently doesn't work because we need to switch to the old API doc viewer
+	//		to see old versions of the API.
+
 	var cv = currentVersion, v = this.options[this.selectedIndex].value;
 	if(v.length){
 		// switch to the current version and reload the tree.
@@ -243,7 +237,8 @@ versionChange = function(e){
 };
 
 dojo.addOnLoad(function(){
-	var w = dijit.byId("content");
+	parser.parse(document.body);
+	var w = registry.byId("content");
 	if(w){
 		dojo.subscribe(w.id + "-selectChild", w, function(arr){
 			document.title = this.selectedChildWidget.title + " - " + (siteName || "The Dojo Toolkit");
@@ -274,4 +269,6 @@ dojo.addOnLoad(function(){
 			});
 		}
 	}
+});
+
 });

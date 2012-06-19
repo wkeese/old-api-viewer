@@ -1,6 +1,4 @@
-@import "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/resources/dojo.css";
-@import "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/claro/claro.css";
-html, body { 
+html, body {
 	height: 100%; width: 100%; padding: 0; border: 0;
 	font-family: Helvetica, Arial, sans-serif !important;
 	font-size: 0.85em !important;

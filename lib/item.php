@@ -5,6 +5,10 @@
  *	The file that generates the HTML that gets sent out
  *	in response to a tree click using the standalone API
  *	tool.
+ *
+ *  In other words, returns the content for a tab describing a specified module, like dijit/Dialog.
+ *
+ *  Usage: http://.../api/lib/item.php?p=dijit/Dialog&v=1.7
  */
 
 include(dirname(__FILE__) . "/../config.php");
@@ -19,6 +23,10 @@ function get_page($version, $page, $use_cache=true, $_base_url = ""){
 			return $html;
 		}
 	}
+
+/*******
+Code for handling when people try to go directly to a field, or give an invalid page.
+Commented out for now since generate_object() is likely broken.
 
 	//	if we got here, it's not in the cache so we need to pull some hackery (in case someone is
 	//	trying to hit a field directly).
@@ -76,6 +84,7 @@ function get_page($version, $page, $use_cache=true, $_base_url = ""){
 			return $html;
 		}
 	}
+******/
 
 	//	if we got here, we're not cached so generate our HTML.
 	$html = generate_object_html($page, $version, $_base_url);
@@ -93,7 +102,10 @@ if(!isset($page)){ $page = "dojo"; }
 //	check if there's URL variables
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
-if(strpos($page, "/") > 0){ $page = implode(".", explode("/", $page)); }
+
+// Convert dots in module name to slashes (just in case user specified a weird URL)
+// Not sure if we want this code or not.
+if(strpos($page, ".") > 0){ $page = implode("/", explode(".", $page)); }
 
 echo get_page($version, $page, $use_cache, $_base_url);
 ?>
