@@ -172,8 +172,7 @@ function read_object_fields($page, $version, $docs=array()){
 			"from"=>$n->getAttribute("from"),
 			"visibility"=>($private == true ? "private" : "public"),
 			"type"=>$n->getAttribute("type"),
-			"defines"=>array($location),	// TODO: remove?
-			"override"=>false	// TODO: remove?
+			"inherited"=>$n->getAttribute("from")!=$page
 		);
 
 		if($n->getElementsByTagName("summary")->length){
@@ -209,8 +208,7 @@ function read_object_fields($page, $version, $docs=array()){
 			"visibility"=>($private=="true"?"private":"public"),
 			"parameters"=>array(),
 			"return-types"=>array(),
-			"defines"=>array($location),
-			"override"=>false,
+			"inherited"=>$n->getAttribute("from")!=$page,
 			"constructor"=>$n->getAttribute("constructor")=="constructor"
 		);
 
@@ -385,6 +383,7 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 	//	create the HTML strings for a single property
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
+		. ($prop["inherited"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
@@ -392,6 +391,7 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. '</a>';
 	$details = '<div class="jsdoc-field '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
+		. ($prop["inherited"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
@@ -422,6 +422,7 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	//	create the HTML strings for a single method.
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
+		. ($method["inherited"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
@@ -429,6 +430,7 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		. '</a>';
 	$details = '<div class="jsdoc-field '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
+		. ($method["inherited"] ? 'inherited':'')
 		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
