@@ -64,9 +64,8 @@ if(isset($_GET["clearcache"]) && $use_cache){
 	cache_clear($version);
 }
 
-// I can't get through to google CDN so changing this temporarily to point to my local install
 $dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.7/";
-$dojoroot = "/trunk";
+// $dojoroot = "/trunk";	// local build
 
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">

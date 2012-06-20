@@ -31,13 +31,13 @@ all there is to running the site; just hit your vhost and go.
 Generating the documentation files from your source
 ---------------------------------------------------
 
-1. check out js-doc-parse
+1. get latest Node.js from http://nodejs.org/#download
 
-	$ git clone --recursive https://github.com/csnover/js-doc-parse.git
+2. check out js-doc-parse from bill (it has tree.json generation code)
 
-
-2. get latest Node.js from http://nodejs.org/#download
-
+	$ git clone --recursive https://github.com/wkeese/js-doc-parse.git
+	$ cd js-doc-parse
+	$ git checkout tree
 
 3. edit config.js to give path to dojo (your path may vary from example below):
 
@@ -76,7 +76,7 @@ Windows:
 
 MacOS:
 
-    $ ./parse.sh ../trunk
+    $ ./parse.sh ../trunk/dojo ../trunk/dijit ../trunk/dojox
 
 Windows:
 
