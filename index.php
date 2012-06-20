@@ -67,25 +67,25 @@ if(isset($_GET["clearcache"]) && $use_cache){
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-	<title><?= ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
+	<title><?php echo ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
 		<meta http-equiv="X-UA-Compatible" content="chrome=1"/>
-		<link rel="stylesheet" href="<?= $dojoroot ?>/dojo/resources/dojo.css" />
-		<link rel="stylesheet" href="<?= $dojoroot ?>/dijit/themes/claro/claro.css" />
+		<link rel="stylesheet" href="<?php echo $dojoroot ?>/dojo/resources/dojo.css" />
+		<link rel="stylesheet" href="<?php echo $dojoroot ?>/dijit/themes/claro/claro.css" />
 		<link rel="stylesheet" href="css/jsdoc.css" type="text/css" media="all" />
 		<link rel="stylesheet" href="css/jsdoc-print.css" type="text/css" media="print" />
 <?php if(file_exists("themes/" . $th . "/" . $th . ".css")){ ?>
-<link rel="stylesheet" href="themes/<?= $th ?>/<?= $th ?>.css" type="text/css" media="all" />
+<link rel="stylesheet" href="themes/<?php echo $th ?>/<?php echo $th ?>.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">djConfig={isDebug:false};</script>
-		<script type="text/javascript" src="<?= $dojoroot ?>/dojo/dojo.js"
+		<script type="text/javascript" src="<?php echo $dojoroot ?>/dojo/dojo.js"
 				data-dojo-config="async: true"></script>
 
 		<!-- SyntaxHighlighter -->
 		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shCore.js"><</script>
 		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shBrushJScript.js"><</script>
 		<script type="text/javascript" src="js/syntaxhighlighter/scripts/shBrushXml.js"><</script>
-		<link rel="stylesheet" href="<?= $basePath ?>js/syntaxhighlighter/styles/shCore.css" type="text/css" />
-		<link rel="stylesheet" href="<?= $basePath ?>js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
+		<link rel="stylesheet" href="<?php echo $basePath ?>js/syntaxhighlighter/styles/shCore.css" type="text/css" />
+		<link rel="stylesheet" href="<?php echo $basePath ?>js/syntaxhighlighter/styles/shThemeDefault.css" type="text/css" />
 
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="keywords" content="The Dojo Toolkit, dojo, JavaScript Framework" />
@@ -95,7 +95,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<meta name="company" content="Dojo Foundation" />
 
 		<script type="text/javascript">
-			var baseUrl = "<?= $_base_url; ?>";
+			var baseUrl = "<?php echo $_base_url; ?>";
 			var siteName = 'The Dojo Toolkit';
 			require([
 				"dojo/dom",
@@ -116,8 +116,8 @@ if(isset($_GET["clearcache"]) && $use_cache){
 				});
 			});
 
-			var page = '<?= ($is_page?$page:"") ?>';
-			var currentVersion = '<?= $version; ?>';
+			var page = '<?php echo ($is_page?$page:"") ?>';
+			var currentVersion = '<?php echo $version; ?>';
 		</script>
 	</head>
 	<body class="claro">
