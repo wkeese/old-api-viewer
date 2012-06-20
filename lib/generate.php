@@ -90,17 +90,7 @@ function is_method($item){
 	$private = strpos($item["name"], "_on");
 	return $public !== 0 && $private !== 0;
 }
-function is_static($item){
-	return $item["scope"] == "normal" || $item["scope"] == "prototype";
-}
-function is_not_static($item){
-	return $item["scope"] != "normal" && $item["scope"] != "prototype";
-}
 
-function is_not_node($item){
-	$obj = strtolower($item);
-	return !strpos($obj, "node") && !strpos($obj, "style") && !strpos($obj, "__");
-}
 //	END array_filter functions
 
 function load_docs($version){
@@ -132,8 +122,6 @@ function read_object_fields($page, $version, $docs=array()){
 	//		Return methods and properties for given module.
 	//		This used to trace mixins methods and properties, but now that's
 	//		done in the parser.
-
-	// TODO: the from field to list where each thing came from
 
 	if(!count($docs)){
 		$docs = load_docs($version);
@@ -177,24 +165,16 @@ function read_object_fields($page, $version, $docs=array()){
 		if(!$private && strpos($nm, "_")===0){
 			$private = true;
 		}
-		if(array_key_exists($nm, $props)){
-			// TODO: remove this branch, we aren't tracing inheritance anymore
-			//	next one up in the chain overrides the original.
-			$props[$nm]["scope"] = $n->getAttribute("scope");
-			$props[$nm]["type"] = $n->getAttribute("type");
-			$props[$nm]["override"] = true;
-			$props[$nm]["defines"][] = $location;
-		} else {
-			$props[$nm] = array(
-				"name"=>$nm,
-				"scope"=>$n->getAttribute("scope"),
-				"from"=>$n->getAttribute("from"),
-				"visibility"=>($private == true ? "private" : "public"),
-				"type"=>$n->getAttribute("type"),
-				"defines"=>array($location),	// TODO: remove?
-				"override"=>false	// TODO: remove?
-			);
-		}
+
+		$props[$nm] = array(
+			"name"=>$nm,
+			"scope"=>$n->getAttribute("scope"),
+			"from"=>$n->getAttribute("from"),
+			"visibility"=>($private == true ? "private" : "public"),
+			"type"=>$n->getAttribute("type"),
+			"defines"=>array($location),	// TODO: remove?
+			"override"=>false	// TODO: remove?
+		);
 
 		if($n->getElementsByTagName("summary")->length){
 			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
@@ -222,29 +202,17 @@ function read_object_fields($page, $version, $docs=array()){
 		if(!strlen($nm)){
 			$nm = "constructor";
 		}
-		if(array_key_exists($nm, $methods)){
-			// TODO: remove this branch, we aren't tracing inheritance anymore
-			//	next one up in the chain overrides the original.
-			$methods[$nm]["scope"] = $n->getAttribute("scope");
-			$methods[$nm]["override"] = true;
-			$methods[$nm]["defines"][] = $location;
-			if($n->getAttribute("constructor") == "constructor"){
-				$methods[$nm]["constructor"] = true;
-				$methods[$nm]["scope"] = "prototype";
-			}
-		} else {
-			$methods[$nm] = array(
-				"name"=>$nm,
-				"scope"=>$n->getAttribute("scope"),
-				"from"=>$n->getAttribute("from"),
-				"visibility"=>($private=="true"?"private":"public"),
-				"parameters"=>array(),
-				"return-types"=>array(),
-				"defines"=>array($location),
-				"override"=>false,
-				"constructor"=>$n->getAttribute("constructor")=="constructor"
-			);
-		}
+		$methods[$nm] = array(
+			"name"=>$nm,
+			"scope"=>$n->getAttribute("scope"),
+			"from"=>$n->getAttribute("from"),
+			"visibility"=>($private=="true"?"private":"public"),
+			"parameters"=>array(),
+			"return-types"=>array(),
+			"defines"=>array($location),
+			"override"=>false,
+			"constructor"=>$n->getAttribute("constructor")=="constructor"
+		);
 
 		if($n->getElementsByTagName("summary")->length){
 			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
@@ -399,63 +367,9 @@ function generate_object($page, $version, $docs=array()){
 	$events = array_filter($methods, "is_event");
 	$methods = array_filter($methods, "is_method");
 
-/********
-unclear what this code is for, so commenting out for now
-
-	//	put any normal scope (i.e. attached directly) first.  Note that we only want
-	//	the ones attached directly to our page, and nothing from the inheritance chain.
-	$static = array_filter($props, "is_static");
-	$not_static = array_filter($props, "is_not_static");
-	$tmp = array();
-	foreach($static as $nm=>$field){
-		if($field["defines"][0] == $page){
-			$tmp[$page . "." . $nm] = $field;
-		}
-	}
-	ksort($tmp);
-	ksort($not_static);
-	$props = array_merge($tmp, $not_static);
-
-	$static = array_filter($methods, "is_static");
-	$not_static = array_filter($methods, "is_not_static");
-	$tmp = array();
-	foreach($static as $nm=>$field){
-		if($field["defines"][0] == $page){
-			$tmp[$page . "." . $nm] = $field;
-		}
-	}
-	ksort($tmp);
-	ksort($not_static);
-	$methods = array_merge($tmp, $not_static);
-
-	$static = array_filter($events, "is_static");
-	$not_static = array_filter($events, "is_not_static");
-	$tmp = array();
-	foreach($static as $nm=>$field){
-		if($field["defines"][0] == $page){
-			$tmp[$page . "." . $nm] = $field;
-		}
-	}
-	ksort($tmp);
-	ksort($not_static);
-	$events = array_merge($tmp, $not_static);
-***************/
-
 	$obj["properties"] = $props;
 	$obj["methods"] = $methods;
 	$obj["events"] = $events;
-
-	// TODO: remove this section?   what's an attached object?
-	//	attached objects.  Try to filter out the craptacular ones.
-	$children = $xpath->query('//object[starts-with(@location, "' . $page . '.")]');
-	$attached = array();
-	if($children->length){
-		foreach($children as $node){
-			$attached[] = $node->getAttribute("location");
-		}
-		$attached = array_filter($attached, "is_not_node");
-		$obj["attached"] = $attached;
-	}
 
 	return $obj;	
 }
@@ -842,7 +756,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		
 	}
 
-	//	Properties, methods, events, and attached objects.
+	//	Properties, methods, events
 	$s .= '<div class="jsdoc-children">';
 	$s .= '<div class="jsdoc-field-list">';
 	$details = '<div class="jsdoc-children">'
@@ -870,38 +784,6 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}
-	}
-
-	// TODO: remove this section?
-	//	child objects: put up a list of any child objects that are attached to this particular one.
-	if(array_key_exists("attached", $obj) && count($obj["attached"])){
-		$children = $obj["attached"];
-		$s .= '<h2 class="jsdoc-summary-heading">Attached Objects <span class="jsdoc-summary-toggle"></span></h2>'
-			. '<div class="jsdoc-summary-list">';
-		foreach($children as $child){
-			$s .= '<div class="jsdoc-field">'
-				. '<div class="jsdoc-title">'
-				. '<span class="';
-
-			$tmp = $xpath->query('//object[@location="' . $child . '"]')->item(0);
-			if($tmp){
-				if($tmp->getAttribute("type") == "Function" && $tmp->getAttribute("classlike") == "true"){
-					$s .= "constructor";
-				} else {
-					$s .= convert_type($tmp->getAttribute("type"));
-				}
-			} else {
-				$s .= convert_type("Object");
-			}
-			$s .= '">'
-				. '<a class="jsdoc-link" href="' . $base_url . implode("/", explode(".", $child)) . $suffix . '">'
-				. $child
-				. '</a>'
-				. '</span>'
-				. '</div>'	//	jsdoc-title
-				. '</div>';	//	jsdoc-field
-		}
-		$s .= '</div>';
 	}
 
 	$s .= '</div>';	// jsdoc-field-list.
