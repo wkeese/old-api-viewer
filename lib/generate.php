@@ -11,27 +11,24 @@
 
 function convert_type($type){
 	$base = 'object';
-	switch($type){
-		case 'Namespace':
+	switch(strtolower($type)){
 		case 'namespace': $base='namespace'; break;
-		case 'Constructor': $base='constructor'; break;
-		case 'Node':
-		case 'DOMNode':
-		case 'DomNode':   $base='domnode'; break;
-		case 'Array':   $base='array'; break;
-		case 'Boolean':   $base='boolean'; break;
-		case 'Date':    $base='date'; break; 
-		case 'Error':     $base='error'; break;
-		case 'Function':  $base='function'; break;
-		case 'Integer':
-		case 'Float':
-		case 'int':
-		case 'Double':
+		case 'constructor': $base='constructor'; break;
+		case 'node':
+		case 'domnode':   $base='domnode'; break;
+		case 'array':   $base='array'; break;
+		case 'boolean':   $base='boolean'; break;
+		case 'date':    $base='date'; break;
+		case 'error':     $base='error'; break;
+		case 'function':  $base='function'; break;
 		case 'integer':
-		case 'Number':    $base='number'; break;   
-		case 'RegExp':    $base='regexp'; break;
-		case 'String':    $base='string'; break;
-		default:      $base='object'; break;
+		case 'float':
+		case 'int':
+		case 'double':
+		case 'integer':
+		case 'number':    $base='number'; break;
+		case 'regexp':    $base='regexp'; break;
+		case 'string':    $base='string'; break;
 	}
 	return $base;
 }
