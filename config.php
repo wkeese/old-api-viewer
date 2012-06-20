@@ -7,6 +7,9 @@ $basePath = "";
 
 //$_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath;
 $_base_url = "./";
+$dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.7";
+// $dojoroot = "/trunk";	// local build
+
 $_site_name = "The Dojo Toolkit";
 $defVersion = "1.8";
 $dataDir = dirname(__FILE__) . "/data/";
@@ -15,10 +18,4 @@ $default_theme = "dtk";
 $theme = "dtk";
 $filter_privates = true;
 $use_cache = true;
-$modules = array(
-	"dojo"=>-1, 
-	"dijit"=>-1, 
-	"dojox"=>-1, 
-	"djConfig"=>-1
- );
-?>
+
