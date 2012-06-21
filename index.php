@@ -97,12 +97,17 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<script type="text/javascript">
 			var baseUrl = "<?php echo $_base_url; ?>";
 			var siteName = 'The Dojo Toolkit';
-			require([
+			require({
+				packages: [{
+					name: "api",
+					location: location.pathname.replace(/\/[^/]+$/, '') + "./js"
+				}]},
+			[
 				"dojo/dom",
 				"dojo/_base/fx",
 				"dojo/ready",
 				"dijit/registry",
-				"./js/api"		// main work is done in here
+				"api/api"		// main work is done in here
 			], function(dom, fx, ready, registry){
 				ready(function(){
 <?php if($is_page){ ?>

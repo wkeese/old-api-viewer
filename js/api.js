@@ -4,8 +4,8 @@ require([
 	"dojo/parser",
 	"dijit/registry",
 	"dojox/fx/_core",
-	"./js/ModuleTreeModel",
-	"./js/ModuleTree",
+	"api/ModuleTreeModel",
+	"api/ModuleTree",
 
 	// Modules used by the parser
 	"dijit/layout/BorderContainer",
