@@ -1,5 +1,5 @@
 				<div class="innerBox">
-					<div class="logo"><a href="http://dojotoolkit.org/"><img alt="Dojo Toolkit" src="<?php echo $basePath; ?>themes/dtk/images/logo.png" /></a></div>
+					<div class="logo"><a href="http://dojotoolkit.org/"><img alt="Dojo Toolkit" src="<?php echo $basePath; ?>/themes/dtk/images/logo.png" /></a></div>
 					<div class="navi">
 						<ul id="nav">
 							<li class="home"><a href="http://dojotoolkit.org/">Home</a></li>
