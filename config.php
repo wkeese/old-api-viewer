@@ -5,8 +5,8 @@
 # you'll need to make similar changes to the rewrite rules
 $basePath = "";
 
-//$_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath;
-$_base_url = "./";
+$_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath . "/";
+//$_base_url = "./";
 $dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.7";
 // $dojoroot = "/trunk";	// local build
 
