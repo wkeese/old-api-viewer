@@ -17,9 +17,14 @@ define(["dojo/_base/declare", "dijit/Tree"], function(declare, Tree){
 			return "icon16 " + type + "Icon16";
 		},
 
-		onClick: function(item){
+		onClick: function(item, nodeWidget){
 			var type = item.__type;
-			if(type != "namespace"){
+			if(type == "namespace"){
+				// Since namespaces have no associated pages, expand the TreeNode instead, to hint the user
+				// that they need to descendant on a child of this node.
+				this._onExpandoClick({node:nodeWidget});
+			}else{
+				// Open the page for this module.
 				addTabPane(item.__id, currentVersion);
 			}
 		}
