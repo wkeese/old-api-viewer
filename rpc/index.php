@@ -39,7 +39,7 @@ $d = dir($dataDir);
 $versions = array();
 $has_version = false;
 while(($entry = $d->read()) !== false){
-	if(!(strpos($entry, ".")===0) && file_exists("../data/".$entry."/api.xml")){
+	if(!(strpos($entry, ".")===0) && file_exists("../data/".$entry."/details.xml")){
 		$versions[] = $entry;
 	}
 }
@@ -49,17 +49,13 @@ sort($versions);
 $is_search = false;
 $parts = array();
 if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
+	
 	$r = $_GET["qs"];
 	$r = str_replace("jsdoc/", "", $r);
 	$parts = explode("/", $r);
 
-	//	check if this is a search
-	if($parts[0] == "find"){
-		array_shift($parts);
-		$is_search = true;
-	}
-
 	//	check if this is a versions request
+	//  Moved before /find since this exits and find unshifts
 	if($parts[0] == "versions"){
 		$json = json_encode($versions);
 		if(array_key_exists("callback", $_GET)){
@@ -67,6 +63,12 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 		}
 		echo $json;
 		exit();
+	}
+
+	//	check if this is a search
+	if($parts[0] == "find"){
+		array_shift($parts);
+		$is_search = true;
 	}
 
 	//	check if the version exists
@@ -79,9 +81,9 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 
 	if(count($parts)){
 		if(count($parts)>1){
-			$page = implode(".", $parts);
+			$page = implode("/", $parts);
 		} else {
-			$page = str_replace("/", ".", $parts[0]);
+			$page = str_replace(".", "/", $parts[0]);
 		}
 	}
 } else {
