@@ -118,7 +118,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 					// registry.byId("initialPagePane").paneOnLoad();
 <?php } ?>
 					setTimeout(function(){
-						var loader = dojo.byId("loader");
+						var loader = dom.byId("loader");
 						fx.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
 					}, 500);
 				});
