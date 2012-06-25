@@ -1,6 +1,6 @@
 <div id="header">
     <div class="container">
-        <span id="logo"><a href="/" title="Home"><img src="themes/dtk/images/logo.png" alt="Dojo Toolkit" /></a></span>
+        <span id="logo"><a href="/" title="Home"><img src="<?php echo $basePath ?>/themes/dtk/images/logo.png" alt="Dojo Toolkit" /></a></span>
         <ul id="navigation">
 			<li class="home"><a href="/"><span class="homeIcon"></span></a></li>
 			<li class="download"><a href="/download/">Download</a></li>

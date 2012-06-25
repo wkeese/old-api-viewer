@@ -128,15 +128,15 @@
 }
 .dtk-object-title { font-size: 1.25em; }
 .dtk-object-description { font-size: 0.85em; }
-.dtk-dojo { background-image: url(themes/dtk/images/api/dojo.png); }
-.dtk-dijit { background-image: url(themes/dtk/images/api/dijit.png); }
-.dtk-dojox { background-image: url(themes/dtk/images/api/dojox.png); }
-.dtk-dojo-query { background-image: url(themes/dtk/images/api/query.png); }
-.dtk-dojo-NodeList { background-image: url(themes/dtk/images/api/nodelist.png); }
-.dtk-dijit-form { background-image: url(themes/dtk/images/api/form.png); }
-.dtk-dijit-layout { background-image: url(themes/dtk/images/api/layout.png); }
-.dtk-dojox-chart2d { background-image: url(themes/dtk/images/api/charts.png); }
-.dtk-dojox-grid { background-image: url(themes/dtk/images/api/grid.png); }
+.dtk-dojo { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/dojo.png); }
+.dtk-dijit { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/dijit.png); }
+.dtk-dojox { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/dojox.png); }
+.dtk-dojo-query { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/query.png); }
+.dtk-dojo-NodeList { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/nodelist.png); }
+.dtk-dijit-form { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/form.png); }
+.dtk-dijit-layout { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/layout.png); }
+.dtk-dojox-chart2d { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/charts.png); }
+.dtk-dojox-grid { background-image: url(<?php echo $basePath ?>/themes/dtk/images/api/grid.png); }
 .dtk-doc-tools {
 	font-size: 0.85em;
 	margin: 0.5em;
