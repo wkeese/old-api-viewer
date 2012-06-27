@@ -209,19 +209,22 @@ function read_object_fields($page, $version, $docs=array()){
 			"constructor"=>$n->getAttribute("constructor")=="constructor"
 		);
 
-		if($n->getElementsByTagName("summary")->length){
-			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+		// Get the method's summary, description, etc. taking care to ignore summaries of the method parameters
+		$methodSummaries = $xpath->query("summary", $n);
+		if($methodSummaries->length){
+			$desc = trim($methodSummaries->item(0)->nodeValue);
 			if(strlen($desc)){
 				$methods[$nm]["summary"] = $desc;
 			}
 		}
-		if($n->getElementsByTagName("description")->length){
-			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+		$methodDescriptions = $xpath->query("description", $n);
+		if($methodDescriptions->length){
+			$desc = trim($methodDescriptions->item(0)->nodeValue);
 			if(strlen($desc)){
 				$methods[$nm]["description"] = $desc;
 			}
 		}
-		$ex = $n->getElementsByTagName("example");
+		$ex = $xpath->query("example", $n);
 		if($ex->length){
 			if(!array_key_exists("examples", $methods[$nm])){
 				$methods[$nm]["examples"] = array();
@@ -230,8 +233,9 @@ function read_object_fields($page, $version, $docs=array()){
 				$methods[$nm]["examples"][] = $example->nodeValue;
 			}
 		}
-		if($n->getElementsByTagName("return-description")->length){
-			$desc = trim($n->getElementsByTagName("return-description")->item(0)->nodeValue);
+		$methodReturnDescriptions = $xpath->query("return-description", $n);
+		if($methodReturnDescriptions->length){
+			$desc = trim($methodReturnDescriptions->item(0)->nodeValue);
 			if(strlen($desc)){
 				$methods[$nm]["return-description"] = $desc;
 			}
@@ -416,6 +420,7 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 }
 
 function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
+print "output for method " . $name . "<br/>";
 	//	create the HTML strings for a single method.
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
@@ -484,8 +489,10 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	}
 
 	if(array_key_exists("description", $method)){
+		print " description is " . $method["description"] . "<br/>";
 		$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
 	} else if(array_key_exists("summary", $method)){
+		print " summary is " . $method["summary"] . "<br/>";
 		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 	}
 	if(array_key_exists("summary", $method)){
