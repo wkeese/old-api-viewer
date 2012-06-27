@@ -172,14 +172,16 @@ function read_object_fields($page, $version, $docs=array()){
 			"inherited"=>$n->getAttribute("from")!=$page
 		);
 
-		if($n->getElementsByTagName("summary")->length){
-			$desc = trim($n->getElementsByTagName("summary")->item(0)->nodeValue);
+		$summaries = $xpath->query("summary", $n);
+		if($summaries->length){
+			$desc = trim($summaries->item(0)->nodeValue);
 			if(strlen($desc)){
 				$props[$nm]["summary"] = $desc;
 			}
 		}
-		if($n->getElementsByTagName("description")->length){
-			$desc = trim($n->getElementsByTagName("description")->item(0)->nodeValue);
+		$descriptions = $xpath->query("description", $n);
+		if($descriptions->length){
+			$desc = trim($descriptions->item(0)->nodeValue);
 			if(strlen($desc)){
 				$props[$nm]["description"] = $desc;
 			}
@@ -253,8 +255,9 @@ function read_object_fields($page, $version, $docs=array()){
 					"usage"=>$param->getAttribute("usage"),
 					"description"=>""
 				);
-				if($param->getElementsByTagName("summary")->length){
-					$desc = trim($param->getElementsByTagName("summary")->item(0)->nodeValue);
+				$summaries = $xpath->query("summary", $param);
+				if($summaries->length){
+					$desc = trim($summaries->item(0)->nodeValue);
 					if(strlen($desc)){
 						$item["description"] = $desc;
 					}
@@ -420,7 +423,6 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 }
 
 function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
-print "output for method " . $name . "<br/>";
 	//	create the HTML strings for a single method.
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
@@ -489,10 +491,8 @@ print "output for method " . $name . "<br/>";
 	}
 
 	if(array_key_exists("description", $method)){
-		print " description is " . $method["description"] . "<br/>";
 		$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
 	} else if(array_key_exists("summary", $method)){
-		print " summary is " . $method["summary"] . "<br/>";
 		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 	}
 	if(array_key_exists("summary", $method)){
