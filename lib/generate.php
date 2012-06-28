@@ -253,11 +253,20 @@ function read_object_fields($page, $version, $docs=array()){
 					"name"=>$param->getAttribute("name"),
 					"type"=>$param->getAttribute("type"),
 					"usage"=>$param->getAttribute("usage"),
+					"summary"=>"",
 					"description"=>""
 				);
 				$summaries = $xpath->query("summary", $param);
 				if($summaries->length){
 					$desc = trim($summaries->item(0)->nodeValue);
+					if(strlen($desc)){
+						$item["summary"] = $desc;
+					}
+				}
+				// normally parameters don't have descriptions but Colin is outputting description for kwArgs params
+				$descriptions = $xpath->query("description", $param);
+				if($descriptions->length){
+					$desc = trim($descriptions->item(0)->nodeValue);
 					if(strlen($desc)){
 						$item["description"] = $desc;
 					}
@@ -293,7 +302,8 @@ function read_object_fields($page, $version, $docs=array()){
 
 
 function generate_object($page, $version, $docs=array()){
-	//	create a PHP-based associative array structure out of the page in question.
+	// summary:
+	//		create a PHP-based associative array structure for specified module
 
 	if(!count($docs)){
 		$docs = load_docs($version);
@@ -409,10 +419,13 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. $prop["from"]		// TODO: make this hyperlink
 	. '</div>';
 
+	// Normally properties just have a summary, but properties based on an inlined type also have a description which
+	// (unlike methods) *supplements* the summary... so display both.
+	if(array_key_exists("summary", $prop)){
+		$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
+	}
 	if(array_key_exists("description", $prop)){
 		$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
-	} else if(array_key_exists("summary", $prop)){
-		$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
 	}
 	if(array_key_exists("summary", $prop)){
 		$s .= ' <span>' . $prop["summary"] . '</span>';
@@ -534,8 +547,15 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
-			. $p["description"];
+			. $p["summary"];
 
+			// parameters from inlined types have a description that supplements the summary
+			if(strlen($p["description"])){
+				$pstr .= "<br/>" . $p["description"];
+			}
+
+		// This is vestigial code to look up kwArgs definitions (ex: __IoArgs), and display them as a nested table
+		// inside the description cell for the given parameter.   With the new doc parser this isn't run.
 		if(strpos($tester, "__")===0){
 			//	try to find the object in question, and if found list out the props.
 			$pconfig = generate_object($p["type"], null, $docs);
