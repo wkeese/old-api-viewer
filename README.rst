@@ -15,21 +15,21 @@ For uploading and processing documentation XML files:
 
 Instructions to run the site:
 
-    Create a virtual host in Apache, and allow Overrides in the definition.
+1. Create a virtual host in Apache, and allow Overrides in the definition.
 
-    Place the entire API site in the directory where you are pointing the vhost.
+2. Place the entire API site in the directory where you are pointing the vhost.
 
-    Set the permissions on the /data directory to be writable; it should have the
+3. Set the permissions on the /data directory to be writable; it should have the
     ability to not only write directly to that directory, but to also create sub-
     directories and write to them as well.
 
-    Open the config.php file, and edit with your specific information (including the
+4. Open the config.php file, and edit with your specific information (including the
     ``_base_url`` variable; leave this to be ``/`` if you are running in the root of a
     vhost).  Note that modules to be displayed should all have a value of ``-1`` (this
     is set by the class tree generator), and should be in the order in which you want
     the modules to appear within the class tree.
 
-    If you are just running the site with the included XML files, that should be 
+5. If you are just running the site with the included XML files, that should be 
     all there is to running the site; just hit your vhost and go.
 
 Generating the documentation files from your source
