@@ -278,7 +278,7 @@ function read_object_fields($page, $version, $docs=array()){
 		if($nm == "constructor"){
 			$methods[$nm]["return-types"] = array();
 			$methods[$nm]["return-types"][] = array(
-				"type"=>$location,
+				"type"=>$page,
 				"description"=>""
 			);
 		} else {
