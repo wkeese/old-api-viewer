@@ -668,11 +668,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	}
 
 	$xml = $docs["xml"];
-	$p_xml = $docs["p_xml"];
-	$r_xml = $docs["r_xml"];
 	$xpath = $docs["xpath"];
-	$p_xpath = $docs["p_xpath"];
-	$r_xpath = $docs["r_xpath"];
 
 	//	check if we're to build links versioned and if so, add that to the base url.
 	if($versioned){
