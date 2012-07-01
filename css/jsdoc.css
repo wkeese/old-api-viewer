@@ -4,8 +4,8 @@ html, body {
 	font-size: 0.85em !important;
 }
 #main { height: 100%; width: 100%; border: 0; }
-#header { margin: 0px; }
-#loader { 
+#header { margin: 0; }
+#loader {
 	padding:0;
 	margin:0;
 	position:absolute; 
@@ -28,12 +28,13 @@ html, body {
 	background-repeat: no-repeat;
 }
 #printBlock { display: none; }
-hr.spacer { border:0; background-color:#ededed; width:80%; height:1px; } 
+.spacer { border:0; background-color:#ededed; width:80%; height:1px; } 
 /*  Override dijit.layout.ContentPane's loadingMessage style. */
-#content span.dijitContentPaneLoading {
+#content .dijitContentPaneLoading {
 	position: absolute;
 	display: block;
 	text-indent: -5000px;
+	direction: ltr;
 	top: 50%;
 	left: 50%;
 	background-repeat: no-repeat;
@@ -72,38 +73,47 @@ h2.jsdoc-summary-heading span {
 	background-repeat: no-repeat;
 	background-position: -16px 0;
 }
-h2.jsdoc-summary-heading span.closed {
+h2.jsdoc-summary-heading .closed {
 	background-position: 0 0;
 }
 
-.arrayIcon{ background-image:url('icons/16x16/array.png'); }
-.booleanIcon{ background-image:url('icons/16x16/boolean.png'); }
-.constructorIcon{ background-image:url('icons/16x16/constructor.png'); }
-.dateIcon{ background-image:url('icons/16x16/date.png'); }
-.domnodeIcon{ background-image:url('icons/16x16/domnode.png'); }
-.errorIcon{ background-image:url('icons/16x16/error.png'); }
-.functionIcon{ background-image:url('icons/16x16/function.png'); }
-.namespaceIcon{ background-image:url('icons/16x16/namespace.png'); }
-.numberIcon{ background-image:url('icons/16x16/number.png'); }
-.objectIcon{ background-image:url('icons/16x16/object.png'); }
-.regexpIcon{ background-image:url('icons/16x16/regexp.png'); }
-.singletonIcon{ background-image:url('icons/16x16/singleton.png'); }
-.stringIcon{ background-image:url('icons/16x16/string.png'); }
+/* Clear Styling */
+
+pre code {
+	background: none;
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+.arrayIcon,
+.arrayIcon16{ background-image:url('icons/16x16/array.png'); }
+.booleanIcon,
+.booleanIcon16{ background-image:url('icons/16x16/boolean.png'); }
+.constructorIcon,
+.constructorIcon16{ background-image:url('icons/16x16/constructor.png'); }
+.dateIcon,
+.dateIcon16{ background-image:url('icons/16x16/date.png'); }
+.domnodeIcon,
+.domnodeIcon16{ background-image:url('icons/16x16/domnode.png'); }
+.errorIcon,
+.errorIcon16{ background-image:url('icons/16x16/error.png'); }
+.functionIcon,
+.functionIcon16{ background-image:url('icons/16x16/function.png'); }
+.namespaceIcon,
+.namespaceIcon16{ background-image:url('icons/16x16/namespace.png'); }
+.numberIcon,
+.numberIcon16{ background-image:url('icons/16x16/number.png'); }
+.objectIcon,
+.objectIcon16{ background-image:url('icons/16x16/object.png'); }
+.regexpIcon,
+.regexpIcon16{ background-image:url('icons/16x16/regexp.png'); }
+.singletonIcon,
+.singletonIcon16{ background-image:url('icons/16x16/singleton.png'); }
+.stringIcon,
+.stringIcon16{ background-image:url('icons/16x16/string.png'); }
 
 .icon16{ width: 16px; height: 16px; }
-.arrayIcon16{ background-image:url('icons/16x16/array.png'); }
-.booleanIcon16{ background-image:url('icons/16x16/boolean.png'); }
-.constructorIcon16{ background-image:url('icons/16x16/constructor.png'); }
-.dateIcon16{ background-image:url('icons/16x16/date.png'); }
-.domnodeIcon16{ background-image:url('icons/16x16/domnode.png'); }
-.errorIcon16{ background-image:url('icons/16x16/error.png'); }
-.functionIcon16{ background-image:url('icons/16x16/function.png'); }
-.namespaceIcon16{ background-image:url('icons/16x16/namespace.png'); }
-.numberIcon16{ background-image:url('icons/16x16/number.png'); }
-.objectIcon16{ background-image:url('icons/16x16/object.png'); }
-.regexpIcon16{ background-image:url('icons/16x16/regexp.png'); }
-.singletonIcon16{ background-image:url('icons/16x16/singleton.png'); }
-.stringIcon16{ background-image:url('icons/16x16/string.png'); }
 
 .icon24{ width: 24px; height: 24px; }
 .arrayIcon24{ background-image:url('icons/24x24/array.png'); }
@@ -174,18 +184,18 @@ span.stringIcon {
 }
 
 div.jsdoc-toolbar {
-	margin: -5px -5px 0 -5px;
+	margin: -8px -8px 12px -8px;
 	padding: 4px 4px 0 4px;
 	background-color: #f2f2f2;
 	border-bottom: 1px solid #e5e3cf;
-	height: 28px;
+	height: 32px;
 }
-div.jsdoc-toolbar span.jsdoc-permalink {
+div.jsdoc-toolbar .jsdoc-permalink {
 	position: absolute;
 	top: 10px;
 	left: 10px;
 }
-div.jsdoc-toolbar span.trans-icon {
+div.jsdoc-toolbar .trans-icon {
 	position: absolute;
 	top: 4px;
 	display: block;
@@ -193,11 +203,11 @@ div.jsdoc-toolbar span.trans-icon {
 	height: 24px;
 	cursor: pointer;
 }
-div.jsdoc-toolbar span.jsdoc-private {
+div.jsdoc-toolbar .jsdoc-private {
 	right: 28px;
 }
-div.jsdoc-toolbar span.jsdoc-public,
-div.jsdoc-toolbar span.jsdoc-inherited {
+div.jsdoc-toolbar .jsdoc-public,
+div.jsdoc-toolbar .jsdoc-inherited {
 	right: 4px;
 }
 div.jsdoc-toolbar label {
@@ -205,7 +215,7 @@ div.jsdoc-toolbar label {
 	top: 10px;
 	right: 60px;
 }
-div.jsdoc-toolbar span.off {
+div.jsdoc-toolbar .off {
 	opacity: 0.25;
 }
 
@@ -304,7 +314,7 @@ div.jsdoc-field div.jsdoc-return-type {
 div.jsdoc-field .jsdoc-return-description {
 	font-style: italic;
 }
-div.jsdoc-field div.jsdoc-summary {
+div.jsdoc-field .jsdoc-summary {
 	padding-left: 28px;
 	margin: 0.25em 0 1em 0;
 }
@@ -329,11 +339,11 @@ table.jsdoc-parameters th {
 table.jsdoc-parameters td {
 	background-color: #fff;
 }
-table.jsdoc-parameters td.jsdoc-param-description p {
+table.jsdoc-parameters .jsdoc-param-description p {
 	margin: 0;
 }
 
-div.jsdoc-fields div.jsdoc-example {
+div.jsdoc-fields .jsdoc-example {
 	margin-top: 1em;
 }
 
@@ -357,6 +367,6 @@ div.jsdoc-summary-list ul li span {
 div.jsdoc-summary-list ul li span.parameters {
 	font-size: 1em;
 }
-div.jsdoc-summary-list ul li span.jsdoc-returns {
+div.jsdoc-summary-list ul li .jsdoc-returns {
 	font-weight: bold;
 }
