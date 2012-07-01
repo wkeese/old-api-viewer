@@ -73,7 +73,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<link rel="stylesheet" href="<?php echo $dojoroot ?>/dijit/themes/claro/claro.css" />
 		<link rel="stylesheet" href="<?php echo $basePath ?>/css/jsdoc.css" type="text/css" media="all" />
 		<link rel="stylesheet" href="<?php echo $basePath ?>/css/jsdoc-print.css" type="text/css" media="print" />
-<?php if(file_exists("themes/" . $th . "/" . $th . ".css")){ ?>
+<?php if(file_exists("themes/" . $th . "/theme.css")){ ?>
 <link rel="stylesheet" href="<?php echo $basePath ?>/themes/<?php echo $th ?>/theme.css" type="text/css" media="all" />
 <?php } ?>
 		<script type="text/javascript">dojoConfig={
