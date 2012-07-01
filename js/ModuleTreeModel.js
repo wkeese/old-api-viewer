@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dojo/_base/xhr"], function(declare, xhr){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/xhr"], function(declare, lang, xhr){
 
 	return declare("ModuleTreeModel", null, {
 		// summary:
@@ -45,7 +45,23 @@ define(["dojo/_base/declare", "dojo/_base/xhr"], function(declare, xhr){
 			var children = [];
 			for(var k in parentItem){
 				if(!/^__/.test(k)){
-					children.push(parentItem[k]);
+					var child = parentItem[k];
+
+					if(child.__type != "namespace" && this.mayHaveChildren(child)){
+						// Child is both a module and a folder for other modules (ex: dojo/date).
+						// Show it as two TreeNodes.
+						children.push({
+							__id: child.__id,
+							__name: child.__name,
+							__type: child.__type
+						});
+						children.push(lang.delegate(child, {
+							__id: child.__id + "_namespace",
+							__type: "namespace"
+						}));
+					}else{
+						children.push(parentItem[k]);
+					}
 				}
 			}
 			onComplete(children);
