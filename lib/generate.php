@@ -351,9 +351,10 @@ function generate_object($page, $version, $docs=array()){
 	//	note that this is "in order"; used to either fetch other objects or for something like breadcrumbs.
 	$obj["prototypes"] = $bc;
 
-	//	description.  Actual description node first, fall back to summary if needed.
+	//	summary and description.
+	$summary = $xpath->query("summary/text()", $context)->item(0);
+	if($summary){ $obj["summary"] = $summary->nodeValue; }
 	$desc = $xpath->query("description/text()", $context)->item(0);
-	if(!$desc){ $desc = $xpath->query("summary/text()", $context)->item(0); }
 	if($desc){ $obj["description"] = $desc->nodeValue; }
 
 	//	examples.
@@ -690,6 +691,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	$docs:
 	//		An optional array of XML documents to run the function against.  See spider.php
 	//		for example usage.
+
 	if(!isset($page)){
 		throw new Exception("generate_html: you must pass an object name!");
 	}
@@ -743,8 +745,14 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 	}
 
+	//	summary.
+	if(array_key_exists("summary", $obj)){
+		$s .= '<div class="jsdoc-full-summary">'
+			. $obj["summary"]
+			. "</div>";
+	}
+
 	//	description.
-	// TODO: list summary too?   sometimes it's redundant, but sometimes it isn't.
 	if(array_key_exists("description", $obj)){
 		$s .= '<div class="jsdoc-full-summary">'
 			. $obj["description"]
