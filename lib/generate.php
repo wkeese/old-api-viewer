@@ -431,7 +431,8 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 }
 
 function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
-	//	create the HTML strings for a single method.
+	// summary:
+	//		Creates and returns the summary and details HTML strings for a single method.
 
 	// Method summary section
 	$s = '<li class="functionIcon '
@@ -634,6 +635,10 @@ function _generate_methods_output($methods, $docs = array(), $field_counter = 0,
 			. '<ul>';
 		$details .= '<h2>' . $title . 's</h2>';
 		foreach($methods as $name=>$method){
+			if($name == "constructor"){
+				// We displayed the constructor already, at the top of the page.
+				continue;
+			}
 			$html = _generate_method_output($method, $name, $docs, $field_counter, $base_url, $suffix);
 			$s .= $html["s"];
 			$details .= $html["details"];
@@ -710,15 +715,12 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 	}
 
-	// TODO: redo for AMD
-	if($page == "dojo"){
-		$s .= '<div class="jsdoc-require">&lt;script src="path/to/dojo.js"&gt;&lt;/script&gt;</div>';
-	} else if(array_key_exists("require", $obj)) {
-		$s .= '<div class="jsdoc-require">dojo.require("' . $obj["require"] . '");</div>';
-	}
-
-	if(array_key_exists("resource", $obj)){
-		$s .= '<div class="jsdoc-prototype">Defined in ' . $obj["resource"] . '</div>';
+	//	description.
+	// TODO: list summary too?   sometimes it's redundant, but sometimes it isn't.
+	if(array_key_exists("description", $obj)){
+		$s .= '<div class="jsdoc-full-summary">'
+			. $obj["description"]
+			. "</div>";
 	}
 
 	//	usage.  Go look for a constructor.
@@ -741,12 +743,19 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= implode(", ", $tmp);
 		}
 		$s .= ');</div></div>';
-	}
 
-	if(array_key_exists("description", $obj)){
-		$s .= '<div class="jsdoc-full-summary">'
-			. $obj["description"]
-			. "</div>";
+		$details .= '<div class="jsdoc-inheritance">Defined by '
+			. $fn["from"]		// TODO: make this hyperlink
+			. '</div>';	//	jsdoc-inheritance
+		if(array_key_exists("description", $fn)){
+			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
+		} else if(array_key_exists("summary", $fn)){
+			$s .= '<div class="jsdoc-summary">' . $fn["summary"] . '</div>';
+		}
+
+		if(count($fn["parameters"])){
+			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
+		}
 	}
 
 	//	examples.
