@@ -1,7 +1,9 @@
 require([
 	"dojo",
 	"dojo/fx/easing",
+	"dojo/on",
 	"dojo/parser",
+	"dojo/query",
 	"dijit/registry",
 	"dojox/fx/_core",
 	"api/ModuleTreeModel",
@@ -12,7 +14,7 @@ require([
 	"dijit/layout/TabContainer",
 	"dijit/layout/ContentPane",
 	"dijit/layout/AccordionContainer"
-], function(dojo, easing, parser, registry, xfx, ModuleTreeModel, ModuleTree){
+], function(dojo, easing, on, parser, query, registry, xfx, ModuleTreeModel, ModuleTree){
 
 // This file contains the top level javascript code to setup the tree, etc.
 
@@ -59,53 +61,46 @@ function smoothScroll(args){
 paneOnLoad = function(data){
 	var context = this.domNode;
 
-	// TODO: instead of dojo.query, just do event delegation from <body>
+	on(context, on.selector("a.jsdoc-link", "click"), function(evt){
+		evt.preventDefault();
 
-	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
-		link.onclick = function(e){
-			dojo.stopEvent(e);
-			var tmp = this.href.replace(window.location.href, "").replace(/#.*/, "").split("/");
-			var version = tmp[0];
-			var page = tmp.slice(1).join(".");
+		// Open tab for specified module
+		var tmp = this.href.replace(window.location.href, "").replace(/#.*/, "").split("/");
+		var version = tmp[0];
+		var page = tmp.slice(1).join("/");
+		var pane = addTabPane(page, version);
 
-			var pane = addTabPane(page, version);
-
-			var anchor = this.href.replace(/.*#/, "");
-			if(anchor){
-				pane.onLoadDeferred.then(function(){
-					// After the page has loaded, scroll to requested anchor in the page
-					var context = pane.domNode,
-						target = dojo.query('a[name="' + anchor + '"]', context);
-					if(target){
-						var anim = smoothScroll({
-							node: target[0],
-							win: context,
-							duration: 600
-						}).play();
-					}
-				});
-			}
-			return false;
-		};
+		// After the page has loaded, scroll to specified anchor in the page
+		var anchor = this.href.replace(/.*#/, "");
+		if(anchor){
+			pane.onLoadDeferred.then(function(){
+				var target = query('a[name="' + anchor + '"]', context);
+				if(target){
+					var anim = smoothScroll({
+						node: target[0],
+						win: context,
+						duration: 600
+					}).play();
+				}
+			});
+		}
 	});
 
-	dojo.query("a.inline-link", this.domNode).forEach(function(link){
-		link.onclick = function(e){
-			dojo.stopEvent(e);
-			var target = dojo.query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
-			if(target){
-				var anim = smoothScroll({
-					node: target[0],
-					win: context,
-					duration: 600
-				}).play();
-			}
-			return false;
-		};
+	// This is for navigating from "method summary" area and scrolling down to the method details.
+	on(context, on.selector("a.inline-link", "click"), function(evt){
+		evt.preventDefault();
+		var target = query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
+		if(target){
+			var anim = smoothScroll({
+				node: target[0],
+				win: context,
+				duration: 600
+			}).play();
+		}
 	});
 
 	//	build the toolbar.
-	var link = null, perm = dojo.query("div.jsdoc-permalink", context), l = window.location;
+	var link = null, perm = query("div.jsdoc-permalink", context), l = window.location;
 	if(perm.length){
 		link = (page.length ? baseUrl : "") + perm[0].innerHTML;
 	}
@@ -125,23 +120,23 @@ paneOnLoad = function(data){
 
 	var privateOn = false, inheritedOn = true;
 	//	hide the private members.
-	dojo.query("div.private, li.private", this.domNode).style("display", "none");
+	query("div.private, li.private", this.domNode).style("display", "none");
 
 	//	make the summary sections collapsible.
-	dojo.query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
+	query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
 		dojo.connect(item, "onclick", function(e){
 			var d = e.target.nextSibling;
 			while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
 			if(d){
 				var dsp = dojo.style(d, "display");
 				dojo.style(d, "display", (dsp=="none"?"":"none"));
-				dojo.query("span.jsdoc-summary-toggle", e.target).forEach(function(item){
+				query("span.jsdoc-summary-toggle", e.target).forEach(function(item){
 					dojo[(dsp=="none"?"removeClass":"addClass")](item, "closed");
 				});
 			}
 		});
 
-		dojo.query("span.jsdoc-summary-toggle", item).addClass("closed");
+		query("span.jsdoc-summary-toggle", item).addClass("closed");
 
 		//	probably should replace this with next or something.
 		var d = item.nextSibling;
@@ -152,13 +147,13 @@ paneOnLoad = function(data){
 	});
 
 	//	set up the buttons in the toolbar.
-	dojo.query("div.jsdoc-toolbar span.trans-icon", this.domNode).forEach(function(node){
+	query("div.jsdoc-toolbar span.trans-icon", this.domNode).forEach(function(node){
 		if(dojo.hasClass(node, "jsdoc-private")){
 			dojo.addClass(node, "off");
 			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
 				privateOn = !privateOn;
 				dojo[(privateOn ? "removeClass" : "addClass")](node, "off");
-				dojo.query("div.private, li.private", this.domNode).forEach(function(n){
+				query("div.private, li.private", this.domNode).forEach(function(n){
 					var state = (privateOn ? "" : "none");
 					dojo.style(n, "display", state);
 				});
@@ -167,7 +162,7 @@ paneOnLoad = function(data){
 			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
 				inheritedOn = !inheritedOn;
 				dojo[(inheritedOn ? "removeClass" : "addClass")](node, "off");
-				dojo.query("div.inherited, li.inherited", this.domNode).forEach(function(n){
+				query("div.inherited, li.inherited", this.domNode).forEach(function(n){
 					var state = (inheritedOn ? "" : "none");
 					if(!(!privateOn && dojo.hasClass(n, "private"))){
 						dojo.style(n, "display", state);
@@ -278,7 +273,7 @@ dojo.addOnLoad(function(){
 		if(p && window.location.hash.length){
 			var h = dojo.connect(p, "onLoad", function(){
 				dojo.disconnect(h);
-				var target = dojo.query('a[name$="' + window.location.hash.substr(window.location.hash.indexOf('#')+1) + '"]', p.domNode);
+				var target = query('a[name$="' + window.location.hash.substr(window.location.hash.indexOf('#')+1) + '"]', p.domNode);
 				if(target.length){
 					var anim = smoothScroll({
 						node: target[0],
