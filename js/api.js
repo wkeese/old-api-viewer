@@ -58,13 +58,33 @@ function smoothScroll(args){
 
 paneOnLoad = function(data){
 	var context = this.domNode;
+
+	// TODO: instead of dojo.query, just do event delegation from <body>
+
 	dojo.query("a.jsdoc-link", this.domNode).forEach(function(link){
 		link.onclick = function(e){
 			dojo.stopEvent(e);
-			var tmp = this.href.replace(window.location.href, "").split("/");
+			var tmp = this.href.replace(window.location.href, "").replace(/#.*/, "").split("/");
 			var version = tmp[0];
 			var page = tmp.slice(1).join(".");
-			addTabPane(page, version);
+
+			var pane = addTabPane(page, version);
+
+			var anchor = this.href.replace(/.*#/, "");
+			if(anchor){
+				pane.onLoadDeferred.then(function(){
+					// After the page has loaded, scroll to requested anchor in the page
+					var context = pane.domNode,
+						target = dojo.query('a[name="' + anchor + '"]', context);
+					if(target){
+						var anim = smoothScroll({
+							node: target[0],
+							win: context,
+							duration: 600
+						}).play();
+					}
+				});
+			}
 			return false;
 		};
 	});
@@ -73,7 +93,7 @@ paneOnLoad = function(data){
 		link.onclick = function(e){
 			dojo.stopEvent(e);
 			var target = dojo.query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
-			if(target.length){
+			if(target){
 				var anim = smoothScroll({
 					node: target[0],
 					win: context,
@@ -175,7 +195,7 @@ addTabPane = function(page, version){
 	for(var i=0; i<c.length; i++){
 		if(c[i].title == title){
 			p.selectChild(c[i]);
-			return;
+			return c[i];
 		}
 	}
 	var pane = new dijit.layout.ContentPane({ 

@@ -66,8 +66,10 @@ function hyperlink($text, $base_url, $suffix = ""){
 	//		Return text as-is if it's something like "Boolean".
 
 	if( strpos($text, "/") ){
-		// TODO: handle trailing stuff, ex:   dijit/gfx/shape.Shape
-		return '<a class="jsdoc-link" href="' . $base_url . $text . $suffix . '">' . $text . '</a>';
+		// Text like dojo/_base/fx.Animation must turn into a URL like dojo/_base/fx#Animation
+		$anchor = strpos($text, ".") ? "#" . preg_replace("/.*\./", "", $text) : "";
+		$url = $base_url . preg_replace("/\..*/", "", $text) . $suffix . $anchor;
+		return '<a class="jsdoc-link" href="' . $url . '">' . $text . '</a>';
 	}else{
 		return $text;
 	}
