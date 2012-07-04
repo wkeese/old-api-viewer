@@ -392,9 +392,28 @@ function generate_object($page, $version, $docs=array()){
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+function trim_summary($summary, $firstSentence){
+	// summary:
+	//		Strip tags and returns the first sentence of specified string
+
+	// Looking for a period followed by a space or newline, and then a capital letter.
+	// But since $summary matches the formatting of the original HTML, maybe we should just
+	// look for a newline... not sure.
+
+	$summary = strip_tags($summary);
+
+	if($firstSentence){
+		$summary = preg_replace("/(\\.|!|\\?)[\s]+[A-Z].*/s", "\\1", $summary);
+	}
+
+	return trim($summary);
+}
+
 //	private functions for pieces
 function _generate_property_output($prop, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single property
+
+	// Property summary section
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
@@ -403,6 +422,8 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
 		. '</a>';
+
+	// Property details section
 	$details = '<div class="jsdoc-field '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
@@ -427,16 +448,21 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 	if(array_key_exists("description", $prop)){
 		$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
 	}
+
 	if(array_key_exists("summary", $prop)){
-		$s .= ' <span>' . $prop["summary"] . '</span>';
+		$s .= ' <span>' . trim_summary($prop["summary"], true) . '</span>';
 	}
 	$s .= '</li>';	//	jsdoc-title
+
 	$details .= '</div>';	//	jsdoc-field
+
 	return array("s"=>$s, "details"=>$details);
 }
 
 function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single method.
+
+	// Method summary section
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
@@ -445,6 +471,8 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
 		. '</a>';
+
+	// Method details sections
 	$details = '<div class="jsdoc-field '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
@@ -509,7 +537,12 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
 	}
 	if(array_key_exists("summary", $method)){
-		$s .= ' <span>' . $method["summary"] . '</span>';
+		// Display abbreviated description.   If user has explicitly specified separate summary and description, then use
+		// the summary.  If user has only specified a summary, then use it, but trim to first sentence
+		$s .=
+			' <span>'
+			. trim_summary($method["summary"], !array_key_exists("description", $method))
+			. '</span>';
 	}
 	$s .= '</li>';	//	jsdoc-title
 
