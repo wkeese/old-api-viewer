@@ -757,7 +757,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
 			. '<span class="keyword">var</span> foo = new '
-			. $page
+			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
 			. '(';
 		if(count($fn["parameters"])){
 			$tmp = array();
