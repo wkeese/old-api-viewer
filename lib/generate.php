@@ -117,8 +117,6 @@ function load_docs($version){
 function read_object_fields($page, $version, $docs=array()){
 	// summary:
 	//		Return methods and properties for given module.
-	//		This used to trace mixins methods and properties, but now that's
-	//		done in the parser.
 
 	if(!count($docs)){
 		$docs = load_docs($version);
@@ -133,25 +131,6 @@ function read_object_fields($page, $version, $docs=array()){
 		//	we got nothing, just return null.
 		return null;
 	}
-
-	//	get any mixins, and ignore if the mixin == superclass.  Note that we're going to ignore any prototype mixins,
-	//	as they are (in general) applied in the same way as instance mixins.
-	$mixinNodes = $xpath->query('mixins/mixin[@scope="instance"]', $context);
-	$mixins = array();
-	foreach($mixinNodes as $m){
-		//	test 1: make sure the mixin is not the superclass.
-		if($m->getAttribute("location") == $context->getAttribute("superclass")){
-			continue;
-		}
-		//	test 2: make sure we can actually read the mixin definition
-		$m_test = $xpath->query("//object[@location='" . $m->getAttribute("location") . "']");
-		if($m_test->length){
-			$mixins[$m->getAttribute("location")] = $m_test->item(0);
-		}
-	}
-
-	//	push in our page.
-	$mixins[$page] = $context;
 
 	//	properties
 	$props = array();
@@ -353,19 +332,11 @@ function generate_object($page, $version, $docs=array()){
 		}
 	}
 
-	//	code below here used to do unwinding of inheritance, but now that's done in the doc parser
+	// Get mixins
 	$obj["mixins"] = array();
-	$obj["properties"] = array();
-	$obj["methods"] = array();
-
-	//	start with getting the mixins.
-	$nl = $xpath->query("mixins/mixin[@scope='instance']", $context);
+	$nl = $xpath->query("mixins/mixin", $context);
 	foreach($nl as $m){
-		//	again, this is ugly.
-		$m_test = $xpath->query("//object[@location='" . $m->getAttribute("location") . "']");
-		if($m_test->length){
-			$obj["mixins"][] = $m->getAttribute("location");
-		}
+		$obj["mixins"][] = $m->getAttribute("location");
 	}
 
 	// Get methods and properties, and sort
@@ -725,19 +696,21 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		. ' <span style="font-size:11px;color:#999;">(version ' . $version . ')</span>'
 		. '</h1>';
 
-	//	prototype chain
-	$s .= '<div class="jsdoc-prototype">';
-	foreach($obj["prototypes"] as $i=>$p){
-		if($i){ $s .= ' &raquo; '; }
-		if($p != $page && $p != "Object"){
-			$name = $p;
-			$s .= '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $p . '</a>';
-		} else {
-			$s .= $p;
+	//	Mixins, including the true prototypal superclass
+	if(array_key_exists("mixins", $obj)){
+		$tmp = array();
+		foreach($obj["mixins"] as $mixin){
+			$name = $mixin;
+			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $mixin . '</a>';
+		}
+		if(count($tmp)){
+			$s .= '<div class="jsdoc-mixins"><label>Extends: </label>'
+				. implode(", ", $tmp)
+				. '</div>';
 		}
 	}
-	$s .= '</div>';
 
+	// TODO: redo for AMD
 	if($page == "dojo"){
 		$s .= '<div class="jsdoc-require">&lt;script src="path/to/dojo.js"&gt;&lt;/script&gt;</div>';
 	} else if(array_key_exists("require", $obj)) {
@@ -791,24 +764,6 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			}
 			$s .= '</div>';
 		}
-	}
-
-	//	mixins
-	if(array_key_exists("mixins", $obj)){
-		$tmp = array();
-		$super = $obj["prototypes"][count($obj["prototypes"])-2];
-		foreach($obj["mixins"] as $mixin){
-			if($mixin != $super){
-				$name = $mixin;
-				$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $mixin . '</a>';
-			}
-		}
-		if(count($tmp)){
-			$s .= '<div class="jsdoc-mixins"><label>mixins: </label>'
-				. implode(", ", $tmp)
-				. '</div>';
-		}
-		
 	}
 
 	//	Properties, methods, events
