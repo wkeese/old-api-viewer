@@ -60,6 +60,39 @@ function icon_url($type, $size=16){
 	return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 }
 
+function hyperlink($text, $base_url, $suffix = ""){
+	// summary:
+	//		Convert text to a hyperlink if it looks like a link to a module.
+	//		Return text as-is if it's something like "Boolean".
+
+	if( strpos($text, "/") ){
+		// TODO: handle trailing stuff, ex:   dijit/gfx/shape.Shape
+		return '<a class="jsdoc-link" href="' . $base_url . $text . $suffix . '">' . $text . '</a>';
+	}else{
+		return $text;
+	}
+}
+
+function hyperlinks($list, $base_url, $suffix = ""){
+	// summary:
+	//		Takes list of types like dijit/_Widget|Object and converts the applicable entries to hyperlinks
+	// $list: String
+	//		Something like "String|Object".
+
+	// Get each type, allowing for syntax like "String|Object" or "String || Object"
+	$ary = preg_split("/ *\\|+ */", $list);
+
+	// Call hyperlink() on each type
+	$links = array();
+	foreach($ary as $single){
+		$links[] = hyperlink($single, $base_url, $suffix);
+	}
+
+	// Return the results as a single string
+	$res = implode(" | ", $links);
+	return $res;
+}
+
 function format_example($text){
 	// summary:
 	//		Convert example formatting so the syntax highlighter can pick it up
@@ -407,9 +440,7 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 		. '</span>'
 		. '</div>';
 
-	$details .= '<div class="jsdoc-inheritance">Defined by '
-		. $prop["from"]		// TODO: make this hyperlink
-	. '</div>';
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($prop["from"], $base_url, $suffix) . '</div>';
 
 	// Normally properties just have a summary, but properties based on an inlined type also have a description which
 	// (unlike methods) *supplements* the summary... so display both.
@@ -471,24 +502,22 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	if(count($method["return-types"])){
 		$tmp = array();
 		foreach($method["return-types"] as $rt){
-			$tmp[] = $rt["type"];
+			$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
 		}
-		$s .= '<span class="jsdoc-returns"> returns ' . implode("", $tmp) . '</span>';	// TODO: make hyperlinks
+		$s .= '<span class="jsdoc-returns"> returns ' . implode(" | ", $tmp) . '</span>';
 	}
 
 	//	inheritance list.
-	$details .= '<div class="jsdoc-inheritance">Defined by '
-		. $method["from"]		// TODO: make this hyperlink
-		. '</div>';	//	jsdoc-inheritance
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $base_url, $suffix). '</div>';
 
 	if(count($method["return-types"])){
 		$tmp = array();
 		foreach($method["return-types"] as $rt){
-			$tmp[] = $rt["type"];
+			$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
 		}
 		$details .= '<div class="jsdoc-return-type">Returns '
 			. '<strong>'
-			. implode("|", $tmp)	// TODO: make hyperlinks
+			. implode(" | ", $tmp)
 			. '</strong>';
 		if(array_key_exists("return-description", $method)){
 			$details .= ': <span class="jsdoc-return-description">'
@@ -548,7 +577,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. $p["name"]
 			. '</td>'
 			. '<td class="jsdoc-param-type">'
-			. (strpos($tester, "__") === 0 ? "Object" : $p["type"])
+			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $base_url, $suffix))
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
@@ -572,7 +601,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 						. $name
 						. '</td>'
 						. '<td class="jsdoc-param-type">'
-						. $value["type"]
+						. hyperlinks($value["type"], $base_url, $suffix)
 						. '</td>'
 						. '<td class="jsdoc-param-description">';
 					if(array_key_exists("description", $value)){
@@ -656,7 +685,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//		The version against which to generate the page.
 	//	$base_url:
 	//		A URL fragment that will be prepended to any link generated.
-	//	$suffx:
+	//	$suffix:
 	//		A string that will be appended to any link generated, i.e. ".html"
 	//	$docs:
 	//		An optional array of XML documents to run the function against.  See spider.php
@@ -705,8 +734,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	if(array_key_exists("mixins", $obj)){
 		$tmp = array();
 		foreach($obj["mixins"] as $mixin){
-			$name = $mixin;
-			$tmp[] = '<a class="jsdoc-link" href="' . $base_url . $name . $suffix . '">' . $mixin . '</a>';
+			$tmp[] = hyperlink($mixin, $base_url, $suffix);
 		}
 		if(count($tmp)){
 			$s .= '<div class="jsdoc-mixins"><label>Extends: </label>'
@@ -735,7 +763,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$tmp = array();
 			foreach($fn["parameters"] as $param){
 				$tmp[] = '<span class="jsdoc-comment-type">/* '
-					. $param["type"]
+					. hyperlinks($param["type"], $base_url, $suffix)
 					. ($param["usage"] == "optional" ? "?":"")
 					. ' */</span> '
 					. $param["name"];
@@ -744,9 +772,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 		$s .= ');</div></div>';
 
-		$details .= '<div class="jsdoc-inheritance">Defined by '
-			. $fn["from"]		// TODO: make this hyperlink
-			. '</div>';	//	jsdoc-inheritance
+		$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
 			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
 		} else if(array_key_exists("summary", $fn)){
