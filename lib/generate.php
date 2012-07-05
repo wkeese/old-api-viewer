@@ -781,11 +781,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		if(count($fn["parameters"])){
 			$tmp = array();
 			foreach($fn["parameters"] as $param){
-				$tmp[] = '<span class="jsdoc-comment-type">/* '
-					. hyperlinks($param["type"], $base_url, $suffix)
-					. ($param["usage"] == "optional" ? "?":"")
-					. ' */</span> '
-					. $param["name"];
+				$tmp[] = $param["name"];
 			}
 			$s .= implode(", ", $tmp);
 		}
@@ -813,11 +809,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		if(count($fn["parameters"])){
 			$tmp = array();
 			foreach($fn["parameters"] as $param){
-				$tmp[] = '<span class="jsdoc-comment-type">/* '
-					. hyperlinks($param["type"], $base_url, $suffix)
-					. ($param["usage"] == "optional" ? "?":"")
-					. ' */</span> '
-					. $param["name"];
+				$tmp[] = $param["name"];
 			}
 			$s .= implode(", ", $tmp);
 		}
