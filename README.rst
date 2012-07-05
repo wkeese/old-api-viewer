@@ -19,7 +19,9 @@ Instructions to run the site:
 
 2. Place the entire API site in the directory where you are pointing the vhost.
 
-3. Set the permissions on the /data directory to be writable; it should have the ability to not only write directly to that directory, but to also create sub-directories and write to them as well.
+3. Set the permissions on the /data directory to be writable; it should have the ability to not only write directly to that directory, but to also create sub-directories and write to them as well.  To do this on Mac OS X::
+
+    $ chmod -R +a 'user:_www allow delete,list,search,add_file,add_subdirectory,read,write' data
 
 4. Open the config.php file, and edit with your specific information (including the ``_base_url`` variable; leave this to be ``/`` if you are running in the root of a vhost).  Note that modules to be displayed should all have a value of ``-1`` (this is set by the class tree generator), and should be in the order in which you want the modules to appear within the class tree.
 
@@ -61,11 +63,11 @@ Windows::
 			dojox: 'dojox',
 			doh: 'util/doh'
 		},
-		...
+		// ...
 		excludePaths: {
-		  ...
-      		    /\\(?:tests|nls|demos)\\/,
-            ...
+            // ...
+            /\\(?:tests|nls|demos)\\/,
+            // ...
 		}
 	}
 
