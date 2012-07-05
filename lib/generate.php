@@ -145,6 +145,118 @@ function load_docs($version){
 	return $docs;
 }
 
+function read_method_info($xpath, $n){
+	// summary:
+	//		Reads the information for a method/function stored inside of $n
+	// $n: DOMElement
+	//		Either a <method> node or an <object> node, containing subnodes like <parameters>, <description>, etc.
+
+	$nm = $n->getAttribute("name");	// TODO: for top level, this should come from location field instead
+	$private = $n->getAttribute("private") == "true";
+	if(!$private && strpos($nm, "_")===0){
+		$private = true;
+	}
+	if(!strlen($nm)){
+		$nm = "constructor";
+	}
+	$method = array(
+		"name"=>$nm,
+		"scope"=>$n->getAttribute("scope"),
+		"from"=>$n->getAttribute("from"),
+		"visibility"=>($private=="true"?"private":"public"),
+		"parameters"=>array(),
+		"return-types"=>array(),
+		"inherited"=>$n->getAttribute("from")!=$page,
+		"constructor"=>$n->getAttribute("constructor")=="constructor"
+	);
+
+	// Get the method's summary, description, etc. taking care to ignore summaries of the method parameters
+	$methodSummaries = $xpath->query("summary", $n);
+	if($methodSummaries->length){
+		$desc = trim($methodSummaries->item(0)->nodeValue);
+		if(strlen($desc)){
+			$method["summary"] = $desc;
+		}
+	}
+	$methodDescriptions = $xpath->query("description", $n);
+	if($methodDescriptions->length){
+		$desc = trim($methodDescriptions->item(0)->nodeValue);
+		if(strlen($desc)){
+			$method["description"] = $desc;
+		}
+	}
+	$ex = $xpath->query("example", $n);
+	if($ex->length){
+		if(!array_key_exists("examples", $method)){
+			$method["examples"] = array();
+		}
+		foreach($ex as $example){
+			$method["examples"][] = $example->nodeValue;
+		}
+	}
+	$methodReturnDescriptions = $xpath->query("return-description", $n);
+	if($methodReturnDescriptions->length){
+		$desc = trim($methodReturnDescriptions->item(0)->nodeValue);
+		if(strlen($desc)){
+			$method["return-description"] = $desc;
+		}
+	}
+
+	//	do up the parameters and the return types.
+	$params = $xpath->query("parameters/parameter", $n);
+	if($params->length){
+		//	TODO: double-check that the XML will always have this.
+		$method["parameters"] = array();
+		foreach($params as $param){
+			$item = array(
+				"name"=>$param->getAttribute("name"),
+				"type"=>$param->getAttribute("type"),
+				"usage"=>$param->getAttribute("usage"),
+				"summary"=>"",
+				"description"=>""
+			);
+			$summaries = $xpath->query("summary", $param);
+			if($summaries->length){
+				$desc = trim($summaries->item(0)->nodeValue);
+				if(strlen($desc)){
+					$item["summary"] = $desc;
+				}
+			}
+			// normally parameters don't have descriptions but Colin is outputting description for kwArgs params
+			$descriptions = $xpath->query("description", $param);
+			if($descriptions->length){
+				$desc = trim($descriptions->item(0)->nodeValue);
+				if(strlen($desc)){
+					$item["description"] = $desc;
+				}
+			}
+			$method["parameters"][] = $item;
+		}
+	}
+
+	if($nm == "constructor"){
+		$method["return-types"] = array();
+		$method["return-types"][] = array(
+			"type"=>$page,
+			"description"=>""
+		);
+	} else {
+		$rets = $xpath->query("return-types/return-type", $n);
+		if($rets->length){
+			$method["return-types"] = array();
+			foreach($rets as $type){
+				//	TODO: double-check that the XML will always have this.
+				$method["return-types"][] = array(
+					"type"=>$type->getAttribute("type"),
+					"description"=>""
+				);
+			}
+		}
+	}
+
+	return $method;
+}
+
 function read_object_fields($page, $version, $docs=array()){
 	// summary:
 	//		Return methods and properties for given module.
@@ -202,109 +314,8 @@ function read_object_fields($page, $version, $docs=array()){
 	$methods = array();
 	$nl = $xpath->query("methods/method", $context);
 	foreach($nl as $n){
-		$nm = $n->getAttribute("name");
-		$private = $n->getAttribute("private") == "true";
-		if(!$private && strpos($nm, "_")===0){
-			$private = true;
-		}
-		if(!strlen($nm)){
-			$nm = "constructor";
-		}
-		$methods[$nm] = array(
-			"name"=>$nm,
-			"scope"=>$n->getAttribute("scope"),
-			"from"=>$n->getAttribute("from"),
-			"visibility"=>($private=="true"?"private":"public"),
-			"parameters"=>array(),
-			"return-types"=>array(),
-			"inherited"=>$n->getAttribute("from")!=$page,
-			"constructor"=>$n->getAttribute("constructor")=="constructor"
-		);
-
-		// Get the method's summary, description, etc. taking care to ignore summaries of the method parameters
-		$methodSummaries = $xpath->query("summary", $n);
-		if($methodSummaries->length){
-			$desc = trim($methodSummaries->item(0)->nodeValue);
-			if(strlen($desc)){
-				$methods[$nm]["summary"] = $desc;
-			}
-		}
-		$methodDescriptions = $xpath->query("description", $n);
-		if($methodDescriptions->length){
-			$desc = trim($methodDescriptions->item(0)->nodeValue);
-			if(strlen($desc)){
-				$methods[$nm]["description"] = $desc;
-			}
-		}
-		$ex = $xpath->query("example", $n);
-		if($ex->length){
-			if(!array_key_exists("examples", $methods[$nm])){
-				$methods[$nm]["examples"] = array();
-			}
-			foreach($ex as $example){
-				$methods[$nm]["examples"][] = $example->nodeValue;
-			}
-		}
-		$methodReturnDescriptions = $xpath->query("return-description", $n);
-		if($methodReturnDescriptions->length){
-			$desc = trim($methodReturnDescriptions->item(0)->nodeValue);
-			if(strlen($desc)){
-				$methods[$nm]["return-description"] = $desc;
-			}
-		}
-
-		//	do up the parameters and the return types.
-		$params = $xpath->query("parameters/parameter", $n);
-		if($params->length){
-			//	TODO: double-check that the XML will always have this.
-			$methods[$nm]["parameters"] = array();
-			foreach($params as $param){
-				$item = array(
-					"name"=>$param->getAttribute("name"),
-					"type"=>$param->getAttribute("type"),
-					"usage"=>$param->getAttribute("usage"),
-					"summary"=>"",
-					"description"=>""
-				);
-				$summaries = $xpath->query("summary", $param);
-				if($summaries->length){
-					$desc = trim($summaries->item(0)->nodeValue);
-					if(strlen($desc)){
-						$item["summary"] = $desc;
-					}
-				}
-				// normally parameters don't have descriptions but Colin is outputting description for kwArgs params
-				$descriptions = $xpath->query("description", $param);
-				if($descriptions->length){
-					$desc = trim($descriptions->item(0)->nodeValue);
-					if(strlen($desc)){
-						$item["description"] = $desc;
-					}
-				}
-				$methods[$nm]["parameters"][] = $item;
-			}
-		}
-
-		if($nm == "constructor"){
-			$methods[$nm]["return-types"] = array();
-			$methods[$nm]["return-types"][] = array(
-				"type"=>$page,
-				"description"=>""
-			);
-		} else {
-			$rets = $xpath->query("return-types/return-type", $n);
-			if($rets->length){
-				//	TODO: double-check that the XML will always have this.
-				$methods[$nm]["return-types"] = array();
-				foreach($rets as $ret){
-					$item = array(
-						"type"=>$ret->getAttribute("type"),
-						"description"=>""
-					);
-					$methods[$nm]["return-types"][] = $item;
-				}
-			}
-		}
+		$method = read_method_info($xpath, $n);
+		$methods[$method["name"]] = $method;
 	}
 
 	return array("props"=>$props, "methods"=>$methods);
@@ -751,8 +762,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. "</div>";
 	}
 
-	//	usage.  Go look for a constructor.
-	if(array_key_exists("methods", $obj) && array_key_exists("constructor", $obj["methods"])){
+	//	usage, if this is a class (ex: dojo/dnd/AutoSource)
+	if($obj["type"] == "constructor" && array_key_exists("methods", $obj) && array_key_exists("constructor", $obj["methods"])){
 		$fn = $obj["methods"]["constructor"];
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
@@ -771,6 +782,40 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= implode(", ", $tmp);
 		}
 		$s .= ');</div></div>';
+
+		$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
+		if(array_key_exists("description", $fn)){
+			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
+		} else if(array_key_exists("summary", $fn)){
+			$s .= '<div class="jsdoc-summary">' . $fn["summary"] . '</div>';
+		}
+
+		if(count($fn["parameters"])){
+			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
+		}
+	}
+	//	usage, if this is a function (ex: dojo/query, dojo/on)
+	// TODO: should this share code with _generate_method_output()?
+	if($obj["type"] == "function" && array_key_exists("parameters", $obj)){
+		$fn = $obj;
+		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
+			. '<div class="function-signature">'
+			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
+			. '(';
+		if(count($fn["parameters"])){
+			$tmp = array();
+			foreach($fn["parameters"] as $param){
+				$tmp[] = '<span class="jsdoc-comment-type">/* '
+					. hyperlinks($param["type"], $base_url, $suffix)
+					. ($param["usage"] == "optional" ? "?":"")
+					. ' */</span> '
+					. $param["name"];
+			}
+			$s .= implode(", ", $tmp);
+		}
+		$s .= ');</div></div>';
+
+		// TODO: returns!!!
 
 		$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
