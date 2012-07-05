@@ -1,11 +1,14 @@
 require([
-	"dojo",
+	"dojo/dom",
 	"dojo/dom-class",
+	"dojo/dom-construct",
 	"dojo/dom-style",
-	"dojo/fx/easing",
+	"dojo/_base/fx",
+	"dojo/_base/lang",
 	"dojo/on",
 	"dojo/parser",
 	"dojo/query",
+	"dojo/ready",
 	"dijit/registry",
 	"dojox/fx/_core",
 	"api/ModuleTreeModel",
@@ -16,7 +19,8 @@ require([
 	"dijit/layout/TabContainer",
 	"dijit/layout/ContentPane",
 	"dijit/layout/AccordionContainer"
-], function(dojo, domClass, domStyle, easing, on, parser, query, registry, xfx, ModuleTreeModel, ModuleTree){
+], function(dom, domClass, domConstruct, domStyle, fx, lang, on, parser, query, ready,
+			registry, Line, ModuleTreeModel, ModuleTree){
 
 // This file contains the top level javascript code to setup the tree, etc.
 
@@ -37,27 +41,19 @@ if(page.length){
 }
 
 function smoothScroll(args){
-	//	NB: this is basically dojox.fx.smoothScroll, but for some reason smoothScroll uses target.x/y instead
-	//	of left/top.  dojo.coords is returning a different y than the top for some reason.  Maybe position will
-	//	be better post 1.3.
-	if(!args.target){ 
-		args.target = dojo.coords(args.node, true);
-	}
-	var _anim = function(val){
-		args.win.scrollLeft = val[0];
-		args.win.scrollTop = val[1];
-	};
+	//	NB: this is basically dojox.fx.smoothScroll
 
-	var anim = new dojo._Animation(dojo.mixin({
+	return new fx.Animation(lang.mixin({
 		beforeBegin: function(){
 			if(this.curve){ delete this.curve; }
 			var current = { x: args.win.scrollLeft, y: args.win.scrollTop };
-			anim.curve = new dojox.fx._Line([ current.x, current.y ], [ args.target.l, args.target.t - 12 ]);
-			console.log(anim.curve);
+			this.curve = new Line([ current.x, current.y ], [ args.node.offsetLeft, args.node.offsetTop ]);
 		},
-		onAnimate: _anim
+		onAnimate: function(val){
+			args.win.scrollLeft = val[0];
+			args.win.scrollTop = val[1];
+		}
 	}, args));
-	return anim;
 }
 
 paneOnLoad = function(data){
@@ -136,7 +132,7 @@ paneOnLoad = function(data){
 		+ '<label>View options: </label>'
 		+ '<span class="trans-icon jsdoc-private"><img src="' + baseUrl + 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
 		+ '<span class="trans-icon jsdoc-inherited"><img src="' + baseUrl + 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>';
-	var toolbar = dojo.create("div", {
+	var toolbar = domConstruct.create("div", {
 		className: "jsdoc-toolbar",
 		innerHTML: tbc		
 	}, this.domNode, "first");
@@ -169,14 +165,14 @@ paneOnLoad = function(data){
 
 	//	make the summary sections collapsible.
 	query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
-		dojo.connect(item, "onclick", function(e){
+		on(item, "click", function(e){
 			var d = e.target.nextSibling;
 			while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
 			if(d){
-				var dsp = dojo.style(d, "display");
-				dojo.style(d, "display", (dsp=="none"?"":"none"));
+				var dsp = domStyle.get(d, "display");
+				domStyle.set(d, "display", (dsp=="none"?"":"none"));
 				query("span.jsdoc-summary-toggle", e.target).forEach(function(item){
-					dojo[(dsp=="none"?"removeClass":"addClass")](item, "closed");
+					domClass.toggle(item, "closed", dsp=="none");
 				});
 			}
 		});
@@ -187,7 +183,7 @@ paneOnLoad = function(data){
 		var d = item.nextSibling;
 		while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
 		if(d){
-			dojo.style(d, "display", "none");
+			domStyle.set(d, "display", "none");
 		}
 	});
 
@@ -196,7 +192,7 @@ paneOnLoad = function(data){
 	document.title = w.title + " - " + (siteName || "The Dojo Toolkit");
 	
 	//	set the content of the printBlock.
-	dojo.byId("printBlock").innerHTML = w.domNode.innerHTML;
+	dom.byId("printBlock").innerHTML = w.domNode.innerHTML;
 };
 
 addTabPane = function(page, version){
@@ -217,7 +213,7 @@ addTabPane = function(page, version){
 		title: title, 
 		closable: true,
 		parseOnLoad: false,
-		onLoad: dojo.hitch(pane, paneOnLoad)
+		onLoad: lang.hitch(pane, paneOnLoad)
 	});
 	p.addChild(pane);
 	p.selectChild(pane);
@@ -270,18 +266,17 @@ versionChange = function(e){
 	buildTree();
 };
 
-dojo.addOnLoad(function(){
+ready(function(){
 	parser.parse(document.body);
 	var w = registry.byId("content");
 	if(w){
-		dojo.subscribe(w.id + "-selectChild", w, function(arr){
-			document.title = this.selectedChildWidget.title + " - " + (siteName || "The Dojo Toolkit");
-			dojo.byId("printBlock").innerHTML = this.selectedChildWidget.domNode.innerHTML;
+		w.watch("selectedChildWidget", function(attr, oldVal, selectedChildWidget){
+			document.title = selectedChildWidget.title + " - " + (siteName || "The Dojo Toolkit");
 		});
 	}
 
-	var s = dojo.byId("versionSelector");
-	s.onchange = dojo.hitch(s, versionChange);
+	var s = dom.byId("versionSelector");
+	s.onchange = lang.hitch(s, versionChange);
 
 	buildTree();
 
@@ -290,8 +285,7 @@ dojo.addOnLoad(function(){
 
 		//	handle any URL hash marks.
 		if(p && window.location.hash.length){
-			var h = dojo.connect(p, "onLoad", function(){
-				dojo.disconnect(h);
+			var h = p.onLoadDeferred.then(function(){
 				var target = query('a[name$="' + window.location.hash.substr(window.location.hash.indexOf('#')+1) + '"]', p.domNode);
 				if(target.length){
 					var anim = smoothScroll({
