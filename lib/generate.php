@@ -151,14 +151,17 @@ function read_method_info($xpath, $n){
 	// $n: DOMElement
 	//		Either a <method> node or an <object> node, containing subnodes like <parameters>, <description>, etc.
 
-	$nm = $n->getAttribute("name");	// TODO: for top level, this should come from location field instead
+	// Get name, from either <method name="doit"> or <object location="foo/bar/doit">
+	$nm = $n->hasAttribute("name") ? $n->getAttribute("name") : preg_replace("/.*\//", "", $n->getAttribute("location"));
+	if(!strlen($nm)){
+		$nm = "constructor";
+	}
+
 	$private = $n->getAttribute("private") == "true";
 	if(!$private && strpos($nm, "_")===0){
 		$private = true;
 	}
-	if(!strlen($nm)){
-		$nm = "constructor";
-	}
+
 	$method = array(
 		"name"=>$nm,
 		"scope"=>$n->getAttribute("scope"),
@@ -397,7 +400,12 @@ function generate_object($page, $version, $docs=array()){
 	$obj["methods"] = $methods;
 	$obj["events"] = $events;
 
-	return $obj;	
+	//	if this module is a top level function (like dojo/query), then get info about parameters etc.
+	if($type == "function"){
+		$obj["topfunc"] = read_method_info($xpath, $context);
+	}
+
+	return $obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -794,13 +802,13 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
 		}
 	}
-	//	usage, if this is a function (ex: dojo/query, dojo/on)
-	// TODO: should this share code with _generate_method_output()?
-	if($obj["type"] == "function" && array_key_exists("parameters", $obj)){
-		$fn = $obj;
+	//	usage, if this module returns a top level function (ex: dojo/query, dojo/on)
+	if($obj["topfunc"]){
+		$fn = $obj["topfunc"];
+
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
-			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
+			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
 			. '(';
 		if(count($fn["parameters"])){
 			$tmp = array();
@@ -813,16 +821,31 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			}
 			$s .= implode(", ", $tmp);
 		}
-		$s .= ');</div></div>';
+		$s .= ')</div></div>';
 
-		// TODO: returns!!!
-
-		$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
-		if(array_key_exists("description", $fn)){
-			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
-		} else if(array_key_exists("summary", $fn)){
-			$s .= '<div class="jsdoc-summary">' . $fn["summary"] . '</div>';
+		if(count($fn["return-types"])){
+			$tmp = array();
+			foreach($fn["return-types"] as $rt){
+				$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
+			}
+			$s .= '<div class="jsdoc-return-type">returns '
+				. '<strong>'
+				. implode(" | ", $tmp)
+				. '</strong>';
+			if(array_key_exists("return-description", $fn)){
+				$s .= ': <span class="jsdoc-return-description">'
+					. $fn["return-description"]
+					. '</span>';
+			}
+			$s .= '</div>';
+		}else if(array_key_exists("return-description", $fn)){
+			$s .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
+				. $fn["return-description"]
+				. '</div></div>';
 		}
+
+		// Note: Don't display summary, description, or examples.
+		// They are same as for the module itself and we're already printing those
 
 		if(count($fn["parameters"])){
 			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
