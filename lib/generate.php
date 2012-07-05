@@ -113,14 +113,10 @@ function format_example($text){
 
 //	BEGIN array_filter functions
 function is_event($item){
-	$public = strpos($item["name"], "on");
-	$private = strpos($item["name"], "_on");
-	return $public === 0 || $private === 0;
+	return preg_match("/^_?on[A-Z]/", $item["name"]) >= 1;
 }
 function is_method($item){
-	$public = strpos($item["name"], "on");
-	$private = strpos($item["name"], "_on");
-	return $public !== 0 && $private !== 0;
+	return !is_event($item);
 }
 
 //	END array_filter functions
