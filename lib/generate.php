@@ -417,14 +417,13 @@ function trim_summary($summary, $firstSentence){
 }
 
 //	private functions for pieces
-function _generate_property_output($prop, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
+function _generate_property_output($prop, $name, $docs = array(), $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single property
 
 	// Property summary section
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
-		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
@@ -434,7 +433,6 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 	$details = '<div class="jsdoc-field '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
-		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
 		. '<a name="' . $name . '"></a>'
@@ -464,7 +462,7 @@ function _generate_property_output($prop, $name, $docs = array(), $counter = 0, 
 	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_method_output($method, $name, $docs = array(), $counter = 0, $base_url = "", $suffix = ""){
+function _generate_method_output($method, $name, $docs = array(), $base_url = "", $suffix = ""){
 	// summary:
 	//		Creates and returns the summary and details HTML strings for a single method.
 
@@ -472,7 +470,6 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
-		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
@@ -482,7 +479,6 @@ function _generate_method_output($method, $name, $docs = array(), $counter = 0, 
 	$details = '<div class="jsdoc-field '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
-		. ($counter % 2 == 0 ? ' even':' odd')
 		. '">'
 		. '<div class="jsdoc-title">'
 		. '<a name="' . $name . '"></a>'
@@ -640,24 +636,23 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 		. '</table>';
 }
 
-function _generate_properties_output($properties, $docs = array(), $field_counter = 0, $base_url = "", $suffix = "", $title="Property"){
+function _generate_properties_output($properties, $docs = array(), $base_url = "", $suffix = "", $title="Property"){
 	//	generate all of the properties output
 	$s = '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
 		. '<div class="jsdoc-summary-list">'
 		. '<ul>';
 	$details = '<h2>Properties</h2>';
 	foreach($properties as $name=>$prop){
-		$tmp = _generate_property_output($prop, $name, $docs, $field_counter, $base_url, $suffix);
+		$tmp = _generate_property_output($prop, $name, $docs, $base_url, $suffix);
 		$s .= $tmp["s"];
 		$details .= $tmp["details"];
-		$field_counter++;
 	}
 
 	$s .= '</ul></div>';	//	property-summary
-	return array("s"=>$s, "details"=>$details, "counter"=>$field_counter);
+	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_methods_output($methods, $docs = array(), $field_counter = 0, $base_url = "", $suffix = "", $title="Method"){
+function _generate_methods_output($methods, $docs = array(), $base_url = "", $suffix = "", $title="Method"){
 	//	generate all of the methods output
 	$s = "";
 	$details = "";
@@ -671,14 +666,13 @@ function _generate_methods_output($methods, $docs = array(), $field_counter = 0,
 				// We displayed the constructor already, at the top of the page.
 				continue;
 			}
-			$html = _generate_method_output($method, $name, $docs, $field_counter, $base_url, $suffix);
+			$html = _generate_method_output($method, $name, $docs, $base_url, $suffix);
 			$s .= $html["s"];
 			$details .= $html["details"];
-			$field_counter++;
 		}
 		$s .= '</ul></div>';	//	method-summary
 	}
-	return array("s"=>$s, "details"=>$details, "counter"=>$field_counter);
+	return array("s"=>$s, "details"=>$details);
 }
 
 function generate_object_html($page, $version, $base_url = "", $suffix = "", $versioned = true, $docs = array()){
@@ -816,26 +810,23 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	$s .= '<div class="jsdoc-field-list">';
 	$details = '<div class="jsdoc-children">'
 		. '<div class="jsdoc-fields">';
-	$field_counter = 0;
 
 	$props = $obj["properties"];
 	$methods = $obj["methods"];
 	$events = $obj["events"];
 	if(count($props) || count($methods) || count($events)){
 		if(count($props)){
-			$tmp = _generate_properties_output($props, $docs, $field_counter, $base_url, $suffix, "Properties");
+			$tmp = _generate_properties_output($props, $docs, $base_url, $suffix, "Properties");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
-			$field_counter = $tmp["counter"];
 		}
 		if(count($methods)){
-			$tmp = _generate_methods_output($methods, $docs, $field_counter, $base_url, $suffix, "Method");
+			$tmp = _generate_methods_output($methods, $docs, $base_url, $suffix, "Method");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
-			$field_counter = $tmp["counter"];
 		}
 		if(count($events)){
-			$tmp = _generate_methods_output($events, $docs, $field_counter, $base_url, $suffix, "Event");
+			$tmp = _generate_methods_output($events, $docs, $base_url, $suffix, "Event");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}

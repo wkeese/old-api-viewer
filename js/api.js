@@ -1,5 +1,7 @@
 require([
 	"dojo",
+	"dojo/dom-class",
+	"dojo/dom-style",
 	"dojo/fx/easing",
 	"dojo/on",
 	"dojo/parser",
@@ -14,7 +16,7 @@ require([
 	"dijit/layout/TabContainer",
 	"dijit/layout/ContentPane",
 	"dijit/layout/AccordionContainer"
-], function(dojo, easing, on, parser, query, registry, xfx, ModuleTreeModel, ModuleTree){
+], function(dojo, domClass, domStyle, easing, on, parser, query, registry, xfx, ModuleTreeModel, ModuleTree){
 
 // This file contains the top level javascript code to setup the tree, etc.
 
@@ -99,6 +101,32 @@ paneOnLoad = function(data){
 		}
 	});
 
+
+	function adjustLists(){
+		// summary:
+		//		Hide/show privates and inherited methods according to setting of private and inherited toggle buttons.
+		//		Set/remove "odd" class on alternating rows.
+
+		// The alternate approach is to do this through CSS: Toggle a jsdoc-hide-privates and jsdoc-hide-inherited
+		// class on the pane's DOMNode, and use :nth-child(odd) to get the gray/white shading of table rows.   The
+		// only problem (besides not working on IE6-8) is that the row shading won't account for hidden rows, so you
+		// might get contiguous white rows or contiguous gray rows.
+
+		// number of visible rows so far
+		var cnt = 1;
+
+		query(".jsdoc-summary-list > ul > li", context).forEach(function(li){
+			var hide =
+				(!privateOn && domClass.contains(li, "private")) ||
+					(!inheritedOn && domClass.contains(li, "inherited"));
+			domStyle.set(li, "display", hide ? "none" : "");
+			domClass.toggle(li, "odd", cnt%2);
+			if(!hide){
+				cnt++;
+			}
+		});
+	}
+
 	//	build the toolbar.
 	var link = null, perm = query("div.jsdoc-permalink", context), l = window.location;
 	if(perm.length){
@@ -113,14 +141,31 @@ paneOnLoad = function(data){
 		innerHTML: tbc		
 	}, this.domNode, "first");
 
+	var privateBtn = query(".jsdoc-private", toolbar)[0];
+	domClass.add(privateBtn, "off");
+	on(privateBtn, "click", function(e){
+		privateOn = !privateOn;
+		domClass.toggle(privateBtn, "off", !privateOn);
+		adjustLists();
+	});
+
+	var inheritedBtn =  query(".jsdoc-inherited", toolbar)[0];
+	on(inheritedBtn, "click", function(e){
+		inheritedOn = !inheritedOn;
+		domClass.toggle(inheritedBtn, "off", !inheritedOn);
+		adjustLists();
+	});
+
+
 	//	if SyntaxHighlighter is present, run it in the content
 	if(SyntaxHighlighter){
 		SyntaxHighlighter.highlight();
 	}
 
 	var privateOn = false, inheritedOn = true;
+
 	//	hide the private members.
-	query("div.private, li.private", this.domNode).style("display", "none");
+	adjustLists();
 
 	//	make the summary sections collapsible.
 	query("h2.jsdoc-summary-heading", this.domNode).forEach(function(item){
@@ -143,32 +188,6 @@ paneOnLoad = function(data){
 		while(d.nodeType != 1 && d.nextSibling){ d = d.nextSibling; }
 		if(d){
 			dojo.style(d, "display", "none");
-		}
-	});
-
-	//	set up the buttons in the toolbar.
-	query("div.jsdoc-toolbar span.trans-icon", this.domNode).forEach(function(node){
-		if(dojo.hasClass(node, "jsdoc-private")){
-			dojo.addClass(node, "off");
-			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
-				privateOn = !privateOn;
-				dojo[(privateOn ? "removeClass" : "addClass")](node, "off");
-				query("div.private, li.private", this.domNode).forEach(function(n){
-					var state = (privateOn ? "" : "none");
-					dojo.style(n, "display", state);
-				});
-			}));
-		} else {
-			dojo.connect(node, "onclick", dojo.hitch(this, function(e){
-				inheritedOn = !inheritedOn;
-				dojo[(inheritedOn ? "removeClass" : "addClass")](node, "off");
-				query("div.inherited, li.inherited", this.domNode).forEach(function(n){
-					var state = (inheritedOn ? "" : "none");
-					if(!(!privateOn && dojo.hasClass(n, "private"))){
-						dojo.style(n, "display", state);
-					}
-				});
-			}));
 		}
 	});
 
