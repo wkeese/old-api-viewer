@@ -145,7 +145,7 @@ function load_docs($version){
 	return $docs;
 }
 
-function read_method_info($xpath, $n){
+function read_method_info($page, $xpath, $n){
 	// summary:
 	//		Reads the information for a method/function stored inside of $n
 	// $n: DOMElement
@@ -317,7 +317,7 @@ function read_object_fields($page, $version, $docs=array()){
 	$methods = array();
 	$nl = $xpath->query("methods/method", $context);
 	foreach($nl as $n){
-		$method = read_method_info($xpath, $n);
+		$method = read_method_info($page, $xpath, $n);
 		$methods[$method["name"]] = $method;
 	}
 
@@ -402,7 +402,7 @@ function generate_object($page, $version, $docs=array()){
 
 	//	if this module is a top level function (like dojo/query), then get info about parameters etc.
 	if($type == "function"){
-		$obj["topfunc"] = read_method_info($xpath, $context);
+		$obj["topfunc"] = read_method_info($page, $xpath, $context);
 	}
 
 	return $obj;
