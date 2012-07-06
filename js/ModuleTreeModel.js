@@ -33,38 +33,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/xhr"], function(dec
 		},
 
 		mayHaveChildren: function(item){
-			for(var k in item){
-				if(!/^__/.test(k)){
-					return true;
-				}
-			}
-			return false;
+			return item.children && item.children.length
 		},
 
-		getChildren: function(parentItem, onComplete){
-			var children = [];
-			for(var k in parentItem){
-				if(!/^__/.test(k)){
-					var child = parentItem[k];
-
-					if(child.__type != "namespace" && this.mayHaveChildren(child)){
-						// Child is both a module and a folder for other modules (ex: dojo/date).
-						// Show it as two TreeNodes.
-						children.push({
-							__id: child.__id,
-							__name: child.__name,
-							__type: child.__type
-						});
-						children.push(lang.delegate(child, {
-							__id: child.__id + "_namespace",
-							__type: "namespace"
-						}));
-					}else{
-						children.push(parentItem[k]);
-					}
-				}
-			}
-			onComplete(children);
+		getChildren: function(item, onComplete){
+			onComplete(item.children);
 		},
 
 		// =======================================================================
@@ -79,11 +52,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/xhr"], function(dec
 		},
 
 		getIdentity: function(item){
-			return item.__id;
+			return item.id;
 		},
 
 		getLabel: function(item){
-			return item.__name;
+			// dijit/form/Button --> Button, dijit/Tree.TreeNode --> TreeNode
+			return item.id.replace(/.*[\./]/, "");
 		},
 
 		// =======================================================================
