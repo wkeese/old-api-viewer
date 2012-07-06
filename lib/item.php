@@ -103,9 +103,5 @@ if(!isset($page)){ $page = "dojo"; }
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
 
-// Convert dots in module name to slashes (just in case user specified a weird URL)
-// Not sure if we want this code or not.
-if(strpos($page, ".") > 0){ $page = implode("/", explode(".", $page)); }
-
 echo get_page($version, $page, $use_cache, $_base_url);
 ?>

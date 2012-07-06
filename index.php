@@ -33,11 +33,7 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	}
 
 	if(count($parts)){
-		if(count($parts)>1){
-			$page = implode("/", $parts);
-		} else {
-			$page = str_replace(".", "/", $parts[0]);
-		}
+		$page = $r;
 		$is_page = true;
 	}
 }
@@ -67,7 +63,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 ?><!DOCTYPE html>
 <html>
 	<head>
-	<title><?php echo ($is_page ? implode(".", explode("/", $page)) : "API Documentation") ?> - The Dojo Toolkit</title>
+	<title><?php echo ($is_page ? $page : "API Documentation") ?> - The Dojo Toolkit</title>
 		<meta http-equiv="X-UA-Compatible" content="chrome=1"/>
 		<link rel="stylesheet" href="<?php echo $dojoroot ?>/dojo/resources/dojo.css" />
 		<link rel="stylesheet" href="<?php echo $dojoroot ?>/dijit/themes/claro/claro.css" />
@@ -171,18 +167,6 @@ foreach($versions as $v){
 				<div id="baseTab" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Welcome'">
 <?php include("themes/" . $th . "/index.php"); ?>
 				</div>
-<?php if($is_page && strlen($page)){
-	/*
-	echo '<div id="initialPagePane" dojoType="dijit.layout.ContentPane" title="'
-		. implode(".", explode("/", $page))
-		. '" closable="true" selected="true" onLoad="paneOnLoad" href="'.$basePath.'lib/item.php?v='
-		. $version
-		. '&p='
-		. $page
-		. '">'
-		. '</div>';
-	 // */
-} ?>
 			</div>
 			<div id="foot" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region: 'bottom'">
 <?php include("themes/" . $th . "/footer.php"); ?>
