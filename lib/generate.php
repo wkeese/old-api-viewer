@@ -801,7 +801,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 	}
 	//	usage, if this module returns a top level function (ex: dojo/query, dojo/on)
-	if(in_array("topfunc", $obj)){
+	if($obj["topfunc"]){
 		$fn = $obj["topfunc"];
 
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
