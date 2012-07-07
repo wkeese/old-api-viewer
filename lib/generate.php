@@ -655,13 +655,14 @@ function _generate_properties_output($properties, $docs = array(), $base_url = "
 	//	generate all of the properties output
 	$s = '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
 		. '<div class="jsdoc-summary-list">'
-		. '<ul>';
-	$details = '<h2>Properties</h2>';
+		. '<ul class="jsdoc-property-list">';
+	$details = '<h2>Properties</h2><div class="jsdoc-property-list">';
 	foreach($properties as $name=>$prop){
 		$tmp = _generate_property_output($prop, $name, $docs, $base_url, $suffix);
 		$s .= $tmp["s"];
 		$details .= $tmp["details"];
 	}
+	$details .= "</div>";	// jsdoc-property-list
 
 	$s .= '</ul></div>';	//	property-summary
 	return array("s"=>$s, "details"=>$details);
@@ -674,8 +675,8 @@ function _generate_methods_output($methods, $docs = array(), $base_url = "", $su
 	if(count($methods)){
 		$s .= '<h2 class="jsdoc-summary-heading">' . $title . ' Summary <span class="jsdoc-summary-toggle"></span></h2>'
 			. '<div class="jsdoc-summary-list">'
-			. '<ul>';
-		$details .= '<h2>' . $title . 's</h2>';
+			. '<ul class="jsdoc-property-list">';
+		$details .= '<h2>' . $title . 's</h2><div class="jsdoc-property-list">';
 		foreach($methods as $name=>$method){
 			if($name == "constructor"){
 				// We displayed the constructor already, at the top of the page.
@@ -685,6 +686,7 @@ function _generate_methods_output($methods, $docs = array(), $base_url = "", $su
 			$s .= $html["s"];
 			$details .= $html["details"];
 		}
+		$details .= "</div>";	// jsdoc-property-list
 		$s .= '</ul></div>';	//	method-summary
 	}
 	return array("s"=>$s, "details"=>$details);

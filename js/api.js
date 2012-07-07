@@ -111,7 +111,7 @@ paneOnLoad = function(data){
 		// number of visible rows so far
 		var cnt = 1;
 
-		query(".jsdoc-summary-list > ul > li", context).forEach(function(li){
+		query(".jsdoc-property-list > *", context).forEach(function(li){
 			var hide =
 				(!privateOn && domClass.contains(li, "private")) ||
 					(!inheritedOn && domClass.contains(li, "inherited"));
