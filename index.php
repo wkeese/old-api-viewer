@@ -155,7 +155,6 @@ foreach($versions as $v){
 					<img src="<?php echo $basePath ?>/css/icons/16x16/domnode.png" align="middle" title="DomNode" alt="DomNode" border="0" />
 					<img src="<?php echo $basePath ?>/css/icons/16x16/error.png" align="middle" title="Error" alt="Error" border="0" />
 					<img src="<?php echo $basePath ?>/css/icons/16x16/function.png" align="middle" title="Function" alt="Function" border="0" />
-					<img src="<?php echo $basePath ?>/css/icons/16x16/namespace.png" align="middle" title="Namespace" alt="Namespace" border="0" />
 					<img src="<?php echo $basePath ?>/css/icons/16x16/number.png" align="middle" title="Number" alt="Number" border="0" />
 					<img src="<?php echo $basePath ?>/css/icons/16x16/object.png" align="middle" title="Object" alt="Object" border="0" />
 					<img src="<?php echo $basePath ?>/css/icons/16x16/regexp.png" align="middle" title="RegExp" alt="RegExp" border="0" />
