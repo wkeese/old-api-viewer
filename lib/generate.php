@@ -789,7 +789,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 		$s .= ');</div></div>';
 
-		$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
+		$s .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
 			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
 		} else if(array_key_exists("summary", $fn)){
