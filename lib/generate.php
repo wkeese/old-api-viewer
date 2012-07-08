@@ -188,7 +188,7 @@ function read_method_info($page, $xpath, $n){
 			$method["description"] = $desc;
 		}
 	}
-	$ex = $xpath->query("example", $n);
+	$ex = $xpath->query("examples/example", $n);
 	if($ex->length){
 		if(!array_key_exists("examples", $method)){
 			$method["examples"] = array();
