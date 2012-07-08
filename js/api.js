@@ -155,6 +155,17 @@ paneOnLoad = function(data){
 
 	//	if SyntaxHighlighter is present, run it in the content
 	if(SyntaxHighlighter){
+		// quick hack to convert <pre><code> --> <pre class="brush: js;" lang="javascript">,
+		// as expected by the SyntaxHighlighter
+		var children = query("pre code", context);
+		children.forEach(function(child){
+			var parent = child.parentNode;
+			domConstruct.place("<pre class='brush: js;' lang='javascript'>" + child.innerHTML + "</pre>",
+				parent, "after");
+			domConstruct.destroy(parent);
+		});
+
+		// run highlighter
 		SyntaxHighlighter.highlight();
 	}
 

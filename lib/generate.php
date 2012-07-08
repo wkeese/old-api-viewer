@@ -95,22 +95,6 @@ function hyperlinks($list, $base_url, $suffix = ""){
 	return $res;
 }
 
-function format_example($text){
-	// summary:
-	//		Convert example formatting so the syntax highlighter can pick it up
-
-	// <pre><code> --> <pre class="brush: js;" lang="javascript">
-	// </code></pre> --> </pre>
-	$res = preg_replace(
-		array("/<pre><code>/", "/<\/code><\/pre>/"),
-		array("<pre class=\"brush: js;\" lang=\"javascript\">", "</pre>"),
-		$text
-	);
-	// echo "=========== After example ========" . $res;
-
-	return $res;
-}
-
 //	BEGIN array_filter functions
 function is_event($item){
 	return preg_match("/^_?on[A-Z]/", $item["name"]) >= 1;
@@ -571,7 +555,7 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		foreach($method["examples"] as $example){
 			$details .= '<div class="jsdoc-example">'
 				. '<div><strong>Example ' . $counter++ . '</strong></div>'
-				. format_example($example)
+				. $example
 				. '</div>';
 		}
 		$details .= '</div>';
@@ -856,7 +840,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			foreach($examples as $example){
 				$s .= '<div class="jsdoc-example">'
 					. '<h3>Example ' . $counter++ . '</h3>'
-					. format_example($example)
+					. $example
 					. '</div>';
 			}
 			$s .= '</div>';
