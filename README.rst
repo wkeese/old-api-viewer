@@ -116,13 +116,3 @@ The data files are:
 - details.xml - main information about modules
 
 - tree.json - just the metadata needed to display the tree of modules
-
-Removing Cache
---------------
-
-In order to remove the cache, run the `blat_cache.sh` script, passing the version you wish to remove.
-
-MacOS/Linux::
-
-    $ ./blat_cache.sh 1.8
-
