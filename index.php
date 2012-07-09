@@ -33,7 +33,7 @@ if(array_key_exists("qs", $_GET) && strlen($_GET["qs"])){
 	}
 
 	if(count($parts)){
-		$page = $r;
+		$page = implode("/", $parts);
 		$is_page = true;
 	}
 }

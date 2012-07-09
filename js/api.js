@@ -59,7 +59,15 @@ function smoothScroll(args){
 paneOnLoad = function(data){
 	var context = this.domNode;
 
+	// Setup listener so when you click on links to other modules, it opens a new tab rather than refreshing the
+	// whole page
 	on(context, on.selector("a.jsdoc-link", "click"), function(evt){
+		// Don't do this code for the permalink button, that's handled in a different place
+		if(domClass.contains(this.parentNode, "jsdoc-permalink")){
+			return;
+		}
+
+		// Stop the browser from navigating to a new page
 		evt.preventDefault();
 
 		// Open tab for specified module
