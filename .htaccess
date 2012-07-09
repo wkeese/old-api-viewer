@@ -1,4 +1,4 @@
-# supress php errors
+# suppress php errors
 php_flag display_startup_errors off
 php_flag display_errors on
 php_flag html_errors off
@@ -8,7 +8,7 @@ Options -MultiViews
 RewriteEngine On
 
 #  Set the prefix for all matches
-RewriteBase   /
+RewriteBase   /api/
 
 # convert static/rest-like requests
 RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
