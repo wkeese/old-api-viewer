@@ -203,17 +203,45 @@ div.jsdoc-toolbar .trans-icon {
 	height: 24px;
 	cursor: pointer;
 }
+
+/* for icons next to each property and method */
+.jsdoc-private, .jsdoc-extension, .jsdoc-inherited {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    opacity: 0.5;   /* so icons don't stand out so much */
+}
+.jsdoc-private {
+    background-image: url("icons/16x16/private.png")
+}
+.jsdoc-extension {
+    background-image: url("icons/16x16/extension.png")
+}
+.jsdoc-inherited {
+    background-image: url("icons/16x16/inherited.png")
+}
+
+/* toolbar, to show/hide private, inherited, and extension properties */
 div.jsdoc-toolbar .jsdoc-private {
-	right: 28px;
+    background-image: none;     /* done via actual <img> tag instead */
+    right: 28px;
+}
+div.jsdoc-toolbar .jsdoc-extension {
+    background-image: none;     /* done via actual <img> tag instead */
+    right: 52px;
 }
 div.jsdoc-toolbar .jsdoc-public,
 div.jsdoc-toolbar .jsdoc-inherited {
-	right: 4px;
+    background-image: none;     /* done via actual <img> tag instead */
+    right: 4px;
 }
 div.jsdoc-toolbar label {
 	position: absolute;
 	top: 10px;
-	right: 60px;
+	right: 84px;
+}
+div.jsdoc-toolbar * {
+    opacity:1;
 }
 div.jsdoc-toolbar .off {
 	opacity: 0.25;

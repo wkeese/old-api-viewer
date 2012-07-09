@@ -113,8 +113,9 @@ paneOnLoad = function(data){
 
 		query(".jsdoc-property-list > *", context).forEach(function(li){
 			var hide =
+				(!extensionOn && domClass.contains(li, "extension")) ||
 				(!privateOn && domClass.contains(li, "private")) ||
-					(!inheritedOn && domClass.contains(li, "inherited"));
+				(!inheritedOn && domClass.contains(li, "inherited"));
 			domStyle.set(li, "display", hide ? "none" : "");
 			domClass.toggle(li, "odd", cnt%2);
 			if(!hide){
@@ -130,6 +131,7 @@ paneOnLoad = function(data){
 	}
 	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + link + '">Permalink</a></span>' : '')
 		+ '<label>View options: </label>'
+		+ '<span class="trans-icon jsdoc-extension"><img src="' + baseUrl + 'css/icons/24x24/extension.png" align="middle" border="0" alt="Toggle extension module members" title="Toggle extension module members" /></span>'
 		+ '<span class="trans-icon jsdoc-private"><img src="' + baseUrl + 'css/icons/24x24/private.png" align="middle" border="0" alt="Toggle private members" title="Toggle private members" /></span>'
 		+ '<span class="trans-icon jsdoc-inherited"><img src="' + baseUrl + 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>';
 	var toolbar = domConstruct.create("div", {
@@ -137,8 +139,15 @@ paneOnLoad = function(data){
 		innerHTML: tbc		
 	}, this.domNode, "first");
 
+	var extensionBtn = query(".jsdoc-extension", toolbar)[0];
+	on(extensionBtn, "click", function(e){
+		extensionOn = !extensionOn;
+		domClass.toggle(extensionBtn, "off", !extensionOn);
+		adjustLists();
+	});
+
 	var privateBtn = query(".jsdoc-private", toolbar)[0];
-	domClass.add(privateBtn, "off");
+	domClass.add(privateBtn, "off");	// initially off
 	on(privateBtn, "click", function(e){
 		privateOn = !privateOn;
 		domClass.toggle(privateBtn, "off", !privateOn);
@@ -169,7 +178,7 @@ paneOnLoad = function(data){
 		SyntaxHighlighter.highlight();
 	}
 
-	var privateOn = false, inheritedOn = true;
+	var privateOn = false, inheritedOn = true, extensionOn = true;
 
 	//	hide the private members.
 	adjustLists();

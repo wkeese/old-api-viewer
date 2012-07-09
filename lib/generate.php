@@ -153,7 +153,8 @@ function read_method_info($page, $xpath, $n){
 		"visibility"=>($private=="true"?"private":"public"),
 		"parameters"=>array(),
 		"return-types"=>array(),
-		"inherited"=>$n->getAttribute("from")!=$page,
+		"inherited"=>$n->getAttribute("from")!=$page && !$n->hasAttribute("extension"),
+		"extension"=>$n->hasAttribute("extension"),
 		"constructor"=>$n->getAttribute("constructor")=="constructor"
 	);
 
@@ -278,7 +279,8 @@ function read_object_fields($page, $version, $docs=array()){
 			"from"=>$n->getAttribute("from"),
 			"visibility"=>($private == true ? "private" : "public"),
 			"type"=>$n->getAttribute("type"),
-			"inherited"=>$n->getAttribute("from")!=$page
+			"inherited"=>$n->getAttribute("from")!=$page && !$n->hasAttribute("extension"),
+			"extension"=>$n->hasAttribute("extension"),
 		);
 
 		$summaries = $xpath->query("summary", $n);
@@ -423,6 +425,7 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 	$s = '<li class="' . convert_type($prop["type"]) . 'Icon '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
+		. ($prop["extension"] ? 'extension':'')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
@@ -432,15 +435,23 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 	$details = '<div class="jsdoc-field '
 		. (isset($prop["visibility"]) ? $prop["visibility"] : 'public') . ' '
 		. ($prop["inherited"] ? 'inherited':'')
+		. ($prop["extension"] ? 'extension':'')
 		. '">'
 		. '<div class="jsdoc-title">'
 		. '<a name="' . $name . '"></a>'
 		. '<span class="' . convert_type($prop["type"]) . 'Icon">'
 		. $name
 		. '</span>'
+		. ($prop["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
 		. '</div>';
 
-	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($prop["from"], $base_url, $suffix) . '</div>';
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($prop["from"], $base_url, $suffix);
+	if($prop["extension"]){
+		$details .= "<span class='jsdoc-extension' title='Must manually require() " . $prop["from"] . " to access.'></span>";
+	}else if($prop["inherited"]){
+		$details .= "<span class='jsdoc-inherited' title='inherited'></span>";
+	}
+ 	$details .= '</div>';
 
 	// Normally properties just have a summary, but properties based on an inlined type also have a description which
 	// (unlike methods) *supplements* the summary... so display both.
@@ -454,6 +465,9 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 	if(array_key_exists("summary", $prop)){
 		$s .= ' <span>' . trim_summary($prop["summary"], true) . '</span>';
 	}
+	$s .= ($prop["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
+		. ($prop["inherited"] ? " <span class='jsdoc-inherited' title='inherited from " . $prop["from"] . "'></span>" : "")
+		. ($prop["extension"] ? "<span class='jsdoc-extension' title='Must manually require() " . $prop["from"] . " to access.'></span>" : "");
 	$s .= '</li>';	//	jsdoc-title
 
 	$details .= '</div>';	//	jsdoc-field
@@ -469,6 +483,7 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 	$s = '<li class="functionIcon '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
+		. ($method["extension"] ? 'extension':'')
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
@@ -478,12 +493,14 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 	$details = '<div class="jsdoc-field '
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
+		. ($method["extension"] ? 'extension':'')
 		. '">'
 		. '<div class="jsdoc-title">'
 		. '<a name="' . $name . '"></a>'
 		. '<span class="functionIcon">'
 		. $name
 		. '</span>'
+		. ($method["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
 		. '</div>';
 	if(count($method["parameters"])){
 		$tmp = array();
@@ -506,7 +523,13 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 	}
 
 	//	inheritance list.
-	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $base_url, $suffix). '</div>';
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $base_url, $suffix);
+	if($method["extension"]){
+		$details .= "<span class='jsdoc-extension' title='Must manually require() " . $method["from"] . " to access.'></span>";
+	}else if($method["inherited"]){
+		$details .= "<span class='jsdoc-inherited' title='inherited'></span>";
+	}
+	$details .= '</div>';
 
 	if(count($method["return-types"])){
 		$tmp = array();
@@ -543,6 +566,9 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 			. trim_summary($method["summary"], !array_key_exists("description", $method))
 			. '</span>';
 	}
+	$s .= ($method["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
+		. ($method["inherited"] ? " <span class='jsdoc-inherited' title='inherited from " . $method["from"] ."'></span>" : "")
+		. ($method["extension"] ? "<span class='jsdoc-extension' title='Must manually require() " . $method["from"] . " to access.'></span>" : "");
 	$s .= '</li>';	//	jsdoc-title
 
 	if(count($method["parameters"])){
