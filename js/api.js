@@ -10,6 +10,7 @@ require([
 	"dojo/query",
 	"dojo/ready",
 	"dijit/registry",
+	"dijit/Dialog",
 	"dojox/fx/_core",
 	"api/ModuleTreeModel",
 	"api/ModuleTree",
@@ -20,7 +21,7 @@ require([
 	"dijit/layout/ContentPane",
 	"dijit/layout/AccordionContainer"
 ], function(dom, domClass, domConstruct, domStyle, fx, lang, on, parser, query, ready,
-			registry, Line, ModuleTreeModel, ModuleTree){
+			registry, Dialog, Line, ModuleTreeModel, ModuleTree){
 
 // This file contains the top level javascript code to setup the tree, etc.
 
@@ -29,16 +30,16 @@ if(currentVersion === undefined){
 	var currentVersion = "1.8";
 }
 
+var helpDialog;
+
+page = page || "";
+
 //	redefine the base URL.
-if(page.length){
-	var _href = window.location.href.replace(window.location.protocol + '//' + window.location.hostname + '/','')
-		.replace('jsdoc/', '')	//	to handle legacy api.dojotoolkit.org URL formation
-		.replace(window.location.hash, '');
-	baseUrl = window.location.protocol + "//" + window.location.hostname + "/" 
-		+ _href.replace(currentVersion + "/", "").replace(page, "").replace(page.split("/").join("."), "").replace(".html","");
-	//console.log("The new base URL is ", baseUrl);
-	delete _href;
-}
+var _href = window.location.href.replace(window.location.protocol + '//' + window.location.hostname + '/','')
+	.replace('jsdoc/', '')	//	to handle legacy api.dojotoolkit.org URL formation
+	.replace(window.location.hash, '');
+baseUrl = window.location.protocol + "//" + window.location.hostname + "/"
+	+ _href.replace(currentVersion + "/", "").replace(page, "").replace(page.split("/").join("."), "").replace(".html","");
 
 function smoothScroll(args){
 	//	NB: this is basically dojox.fx.smoothScroll
@@ -133,10 +134,8 @@ paneOnLoad = function(data){
 	}
 
 	//	build the toolbar.
-	var link = null, perm = query("div.jsdoc-permalink", context), l = window.location;
-	if(perm.length){
-		link = (page.length ? baseUrl : "") + perm[0].innerHTML;
-	}
+	var link = query("div.jsdoc-permalink", context)[0].innerHTML;
+
 	var tbc = (link ? '<span class="jsdoc-permalink"><a class="jsdoc-link" href="' + link + '">Permalink</a></span>' : '')
 		+ '<label>View options: </label>'
 		+ '<span class="trans-icon jsdoc-extension"><img src="' + baseUrl + 'css/icons/24x24/extension.png" align="middle" border="0" alt="Toggle extension module members" title="Toggle extension module members" /></span>'
@@ -144,7 +143,7 @@ paneOnLoad = function(data){
 		+ '<span class="trans-icon jsdoc-inherited"><img src="' + baseUrl + 'css/icons/24x24/inherited.png" align="middle" border="0" alt="Toggle inherited members" title="Toggle inherited members" /></span>';
 	var toolbar = domConstruct.create("div", {
 		className: "jsdoc-toolbar",
-		innerHTML: tbc		
+		innerHTML: tbc
 	}, this.domNode, "first");
 
 	var extensionBtn = query(".jsdoc-extension", toolbar)[0];
@@ -187,6 +186,26 @@ paneOnLoad = function(data){
 		SyntaxHighlighter.highlight();
 	}
 
+	// Setup feedback link and dialog
+	var helpLink = domConstruct.create("a", {
+		"class": "feedback",
+		href: "https://docs.google.com/spreadsheet/viewform?hl=en_US&formkey=dFlDcHEyaHMwbEd4MFBObkNrX0E1MFE6MQ&entry_0=" + encodeURIComponent(link),
+		target: "_blank",
+		innerHTML: "Error in the documentation? Can’t find what you are looking for? Let us know!"
+	}, context);
+
+	on(helpLink, "click", function(event){
+		if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){
+			event.preventDefault();
+			helpDialog.set("content", domConstruct.create("iframe", {
+				src: this.href,
+				frameborder: "0",
+				style: "width: 47em; height: 500px; border: 0 none"
+			}));
+			helpDialog.show();
+		}
+	});
+
 	var privateOn = false, inheritedOn = true, extensionOn = true;
 
 	//	hide the private members.
@@ -219,7 +238,7 @@ paneOnLoad = function(data){
 	//	set the title
 	var w = registry.byId("content").selectedChildWidget;
 	document.title = w.title + " - " + (siteName || "The Dojo Toolkit");
-	
+
 	//	set the content of the printBlock.
 	dom.byId("printBlock").innerHTML = w.domNode.innerHTML;
 };
@@ -237,9 +256,9 @@ addTabPane = function(page, version){
 			return c[i];
 		}
 	}
-	var pane = new dijit.layout.ContentPane({ 
-		href: url, 
-		title: title, 
+	var pane = new dijit.layout.ContentPane({
+		href: url,
+		title: title,
 		closable: true,
 		parseOnLoad: false,
 		onLoad: lang.hitch(pane, paneOnLoad)
@@ -304,6 +323,9 @@ ready(function(){
 		});
 	}
 
+	// global:
+	helpDialog = new dijit.Dialog({ title: "Feedback" }).placeAt(document.body);
+	helpDialog.startup();
 	var s = dom.byId("versionSelector");
 	s.onchange = lang.hitch(s, versionChange);
 
