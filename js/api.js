@@ -176,8 +176,9 @@ paneOnLoad = function(data){
 		// as expected by the SyntaxHighlighter
 		var children = query("pre code", context);
 		children.forEach(function(child){
-			var parent = child.parentNode;
-			domConstruct.place("<pre class='brush: js;' lang='javascript'>" + child.innerHTML + "</pre>",
+			var parent = child.parentNode,
+				isXML = lang.trim(child.innerText || child.textContent).charAt(0) == "<";
+			domConstruct.place("<pre class='brush: " + (isXML ? "xml" : "js") + ";'>" + child.innerHTML + "</pre>",
 				parent, "after");
 			domConstruct.destroy(parent);
 		});
