@@ -417,6 +417,72 @@ function trim_summary($summary, $firstSentence){
 	return trim($summary);
 }
 
+function parameter_list($method, $types){
+	// summary:
+	//		Return list of parameters and types for function, suitable to print inside parens.
+	//		Ex: (/*Number*/ a, /*String*/ b)
+	//	$method:
+	//		Holds info about the function (including it's list of parameters
+	//	$types: Boolean
+	//		If true, list parameter types and return type
+
+
+	$params = array();
+	if(count($method["parameters"])){
+		foreach($method["parameters"] as $param){
+			if($types){
+				$params[] = '<span class="jsdoc-comment-type">/* '
+					. $param["type"]
+					. ($param["usage"] == "optional" ? "?":"")
+					. ' */</span> '
+					. $param["name"];
+			}else{
+				$params[] = $param["name"];
+			}
+		}
+	}
+
+	$return = "";
+	if($types && count($method["return-types"])){
+		$returns = array();
+		foreach($method["return-types"] as $rt){
+			$returns[] = hyperlinks($rt["type"], $base_url, $suffix);
+		}
+		$return = '<span class="jsdoc-returns"> returns ' . implode(" | ", $returns) . '</span>';
+	}
+
+	return '<span class="parameters">(' . implode(", ", $params) . ')</span>' . $return;
+}
+
+function return_details($method){
+	// summary:
+	//		Return HTML listing return types and return description
+
+	$details = "";
+
+	if(count($method["return-types"]) || array_key_exists("return-description", $method)){
+		$details .= '<div><strong>Returns:</strong>';
+
+		if(count($method["return-types"])){
+			$tmp = array();
+			foreach($method["return-types"] as $rt){
+				$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
+			}
+			$details .= ' <span class="jsdoc-return-type">' . implode(" | ", $tmp) . '</span>';
+		}
+
+		$details .= '</div>';
+
+		if(array_key_exists("return-description", $method)){
+			$details .= '<div class="jsdoc-return-description">'
+				. $method["return-description"]
+				. '</div>';
+		}
+	}
+
+	return $details;
+}
+
 //	private functions for pieces
 function _generate_property_output($prop, $name, $docs = array(), $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single property
@@ -487,7 +553,8 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. '">'
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
-		. '</a>';
+		. '</a>'
+		. parameter_list($method, false);
 
 	// Method details sections
 	$details = '<div class="jsdoc-field '
@@ -500,27 +567,10 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. '<span class="functionIcon">'
 		. $name
 		. '</span>'
+		. parameter_list($method, false)
 		. ($method["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
 		. '</div>';
-	if(count($method["parameters"])){
-		$tmp = array();
-		foreach($method["parameters"] as $p){
-			$tmp[] = $p["name"];
-		}
-		$s .= '<span class="parameters">('
-			. implode(', ', $tmp)
-			. ')</span>';
-	} else {
-		$s .= '<span class="parameters">()</span>';
-	}
 
-	if(count($method["return-types"])){
-		$tmp = array();
-		foreach($method["return-types"] as $rt){
-			$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
-		}
-		$s .= '<span class="jsdoc-returns"> returns ' . implode(" | ", $tmp) . '</span>';
-	}
 
 	//	inheritance list.
 	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $base_url, $suffix);
@@ -530,28 +580,6 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		$details .= "<span class='jsdoc-inherited' title='inherited'></span>";
 	}
 	$details .= '</div>';
-
-	if(count($method["return-types"])){
-		$tmp = array();
-		foreach($method["return-types"] as $rt){
-			$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
-		}
-		$details .= '<div class="jsdoc-return-type">Returns '
-			. '<strong>'
-			. implode(" | ", $tmp)
-			. '</strong>';
-		if(array_key_exists("return-description", $method)){
-			$details .= ': <span class="jsdoc-return-description">'
-				. $method["return-description"]
-				. '</span>';
-		}
-		$details .= '</div>';
-	} 
-	else if(array_key_exists("return-description", $method)){
-		$details .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
-			. $method["return-description"]
-			. '</div></div>';
-	}
 
 	if(array_key_exists("description", $method)){
 		$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
@@ -571,9 +599,12 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. ($method["extension"] ? "<span class='jsdoc-extension' title='Must manually require() " . $method["from"] . " to access.'></span>" : "");
 	$s .= '</li>';	//	jsdoc-title
 
+	// Parameter details table
 	if(count($method["parameters"])){
 		$details .= _generate_param_table($method["parameters"], $docs, $base_url, $suffix);
 	}
+
+	$details .= return_details($method);
 
 	if(array_key_exists("examples", $method)){
 		$details .= '<div class="jsdoc-examples">';
@@ -789,15 +820,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. '<div class="function-signature">'
 			. '<span class="keyword">var</span> foo = new '
 			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
-			. '(';
-		if(count($fn["parameters"])){
-			$tmp = array();
-			foreach($fn["parameters"] as $param){
-				$tmp[] = $param["name"];
-			}
-			$s .= implode(", ", $tmp);
-		}
-		$s .= ');</div></div>';
+			. parameter_list($obj, false)
+			. '</div></div>';
 
 		$s .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
@@ -817,36 +841,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
 			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
-			. '(';
-		if(count($fn["parameters"])){
-			$tmp = array();
-			foreach($fn["parameters"] as $param){
-				$tmp[] = $param["name"];
-			}
-			$s .= implode(", ", $tmp);
-		}
-		$s .= ')</div></div>';
-
-		if(count($fn["return-types"])){
-			$tmp = array();
-			foreach($fn["return-types"] as $rt){
-				$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
-			}
-			$s .= '<div class="jsdoc-return-type">returns '
-				. '<strong>'
-				. implode(" | ", $tmp)
-				. '</strong>';
-			if(array_key_exists("return-description", $fn)){
-				$s .= ': <span class="jsdoc-return-description">'
-					. $fn["return-description"]
-					. '</span>';
-			}
-			$s .= '</div>';
-		}else if(array_key_exists("return-description", $fn)){
-			$s .= '<div class="jsdoc-return-type"><div class="jsdoc-return-description">'
-				. $fn["return-description"]
-				. '</div></div>';
-		}
+			. parameter_list($fn, false)
+			. '</div></div>';
 
 		// Note: Don't display summary, description, or examples.
 		// They are same as for the module itself and we're already printing those
@@ -854,6 +850,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		if(count($fn["parameters"])){
 			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
 		}
+
+		$s .= return_details($fn);
 	}
 
 	//	examples.

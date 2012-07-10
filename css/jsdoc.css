@@ -336,21 +336,19 @@ div.jsdoc-field div.jsdoc-title span img {
 
 div.jsdoc-field div.jsdoc-return-type {
 	font-size: 0.95em;
-	margin-bottom: 1em;
 	padding: 0.25em;
 }
-div.jsdoc-field .jsdoc-return-description {
-	font-style: italic;
+.jsdoc-return-description {
+    margin-top: 0.5em;
 }
-div.jsdoc-field .jsdoc-summary {
-	padding-left: 28px;
-	margin: 0.25em 0 1em 0;
+.jsdoc-summary {
+	margin: 1em 0;
 }
 
 table.jsdoc-parameters {
 	font-size: 1em;
 	width: auto;
-	margin: 1em;
+	margin: 1em 0;
 	border-collapse: collapse;
 }
 table.jsdoc-parameters th,
