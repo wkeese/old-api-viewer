@@ -122,7 +122,7 @@ paneOnLoad = function(data){
 
 		query(".jsdoc-property-list > *", context).forEach(function(li){
 			var hide =
-				(!extensionOn && domClass.contains(li, "extension")) ||
+				(!extensionOn && domClass.contains(li, "extension-module")) ||
 				(!privateOn && domClass.contains(li, "private")) ||
 				(!inheritedOn && domClass.contains(li, "inherited"));
 			domStyle.set(li, "display", hide ? "none" : "");
