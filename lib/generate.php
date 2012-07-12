@@ -778,7 +778,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	}
 
 	//	process it and output us some HTML.
-	$s = '<div class="jsdoc-permalink" style="display:none;">' . $base_url . implode('/', explode(".", $page)) . $suffix . '</div>';
+	$s = '<div class="jsdoc-permalink" style="display:none;">' . $base_url . $page . $suffix . '</div>';
 
 	//	page heading.
 	$s .= '<h1 class="jsdoc-title ' . convert_type($obj["type"]) . 'Icon36">'
