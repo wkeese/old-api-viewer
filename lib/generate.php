@@ -60,22 +60,38 @@ function icon_url($type, $size=16){
 	return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 }
 
-function hyperlink($text, $base_url, $suffix = ""){
+function object($page, $docs){
+	// summary:
+	//		Return specified object (<object> node in details.xml), or null if no such page exists
+
+	$xpath = $docs["xpath"];
+	$context = $xpath->query('//object[@location="' . $page . '"]');
+	return $context->length > 0 ? $context->item(0) : null;
+}
+
+function hyperlink($text, $docs, $base_url, $suffix = ""){
 	// summary:
 	//		Convert text to a hyperlink if it looks like a link to a module.
 	//		Return text as-is if it's something like "Boolean".
 
-	if( strpos($text, "/") ){
-		// Text like dojo/_base/fx.Animation must turn into a URL like dojo/_base/fx#Animation
-		$anchor = strpos($text, ".") ? "#" . preg_replace("/.*\./", "", $text) : "";
-		$url = $base_url . preg_replace("/\..*/", "", $text) . $suffix . $anchor;
-		return '<a class="jsdoc-link" href="' . $url . '">' . $text . '</a>';
+	if(strpos($text, "/")){
+		// Assume it's a module.   Too expensive to do xpath to check for every hyperlink.
+
+	 	if(strpos($text, ".") && !object($text, $docs)){
+			// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
+			$url = str_replace(".", "#", $text);
+		}else{
+			$url = $text;
+		}
+
+		return '<a class="jsdoc-link" href="' . $base_url . $url . '">' . $text . '</a>';
 	}else{
+		// Word like "Boolean"
 		return $text;
 	}
 }
 
-function hyperlinks($list, $base_url, $suffix = ""){
+function hyperlinks($list, $docs, $base_url, $suffix = ""){
 	// summary:
 	//		Takes list of types like dijit/_Widget|Object and converts the applicable entries to hyperlinks
 	// $list: String
@@ -87,7 +103,7 @@ function hyperlinks($list, $base_url, $suffix = ""){
 	// Call hyperlink() on each type
 	$links = array();
 	foreach($ary as $single){
-		$links[] = hyperlink($single, $base_url, $suffix);
+		$links[] = hyperlink($single, $docs, $base_url, $suffix);
 	}
 
 	// Return the results as a single string
@@ -257,7 +273,7 @@ function read_object_fields($page, $version, $docs=array()){
 	$xpath = $docs["xpath"];
 
 	//	get the XML for the page.
-	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
+	$context = object($page, $docs);
 	if(!$context){
 		//	we got nothing, just return null.
 		return null;
@@ -322,7 +338,7 @@ function generate_object($page, $version, $docs=array()){
 	$xpath = $docs["xpath"];
 
 	//	get the XML for the page.
-	$context = $xpath->query('//object[@location="' . $page . '"]')->item(0);
+	$context = object($page, $docs);
 	if(!$context){
 		//	we got nothing, just return null.
 		return null;
@@ -417,7 +433,7 @@ function trim_summary($summary, $firstSentence){
 	return trim($summary);
 }
 
-function parameter_list($method, $types){
+function parameter_list($method, $types, $docs, $base_url){
 	// summary:
 	//		Return list of parameters and types for function, suitable to print inside parens.
 	//		Ex: (/*Number*/ a, /*String*/ b)
@@ -446,7 +462,7 @@ function parameter_list($method, $types){
 	if($types && count($method["return-types"])){
 		$returns = array();
 		foreach($method["return-types"] as $rt){
-			$returns[] = hyperlinks($rt["type"], $base_url, $suffix);
+			$returns[] = hyperlinks($rt["type"], $docs, $base_url, $suffix);
 		}
 		$return = '<span class="jsdoc-returns"> returns ' . implode(" | ", $returns) . '</span>';
 	}
@@ -454,7 +470,7 @@ function parameter_list($method, $types){
 	return '<span class="parameters">(' . implode(", ", $params) . ')</span>' . $return;
 }
 
-function return_details($method){
+function return_details($method, $docs, $base_url){
 	// summary:
 	//		Return HTML listing return types and return description
 
@@ -466,7 +482,7 @@ function return_details($method){
 		if(count($method["return-types"])){
 			$tmp = array();
 			foreach($method["return-types"] as $rt){
-				$tmp[] = hyperlinks($rt["type"], $base_url, $suffix);
+				$tmp[] = hyperlinks($rt["type"], $docs, $base_url, $suffix);
 			}
 			$details .= ' <span class="jsdoc-return-type">' . implode(" | ", $tmp) . '</span>';
 		}
@@ -511,7 +527,7 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 		. ($prop["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
 		. '</div>';
 
-	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($prop["from"], $base_url, $suffix);
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($prop["from"], $docs, $base_url, $suffix);
 	if($prop["extension-module"]){
 		$details .= "<span class='jsdoc-extension' title='Must manually require() " . $prop["from"] . " to access.'></span>";
 	}else if($prop["inherited"]){
@@ -554,7 +570,7 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. '<a class="inline-link" href="#' . $name . '">'
 		. $name
 		. '</a>'
-		. parameter_list($method, false);
+		. parameter_list($method, false, $docs, $base_url);
 
 	// Method details sections
 	$details = '<div class="jsdoc-field '
@@ -567,13 +583,13 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. '<span class="functionIcon">'
 		. $name
 		. '</span>'
-		. parameter_list($method, false)
+		. parameter_list($method, false, $docs, $base_url)
 		. ($method["visibility"] == "private" ? " <span class='jsdoc-private' title='private'></span>" : "")
 		. '</div>';
 
 
 	//	inheritance list.
-	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $base_url, $suffix);
+	$details .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($method["from"], $docs, $base_url, $suffix);
 	if($method["extension-module"]){
 		$details .= "<span class='jsdoc-extension' title='Must manually require() " . $method["from"] . " to access.'></span>";
 	}else if($method["inherited"]){
@@ -604,7 +620,7 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		$details .= _generate_param_table($method["parameters"], $docs, $base_url, $suffix);
 	}
 
-	$details .= return_details($method);
+	$details .= return_details($method, $docs, $base_url);
 
 	if(array_key_exists("examples", $method)){
 		$details .= '<div class="jsdoc-examples">';
@@ -632,7 +648,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. $p["name"]
 			. '</td>'
 			. '<td class="jsdoc-param-type">'
-			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $base_url, $suffix))
+			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $docs, $base_url, $suffix))
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
@@ -656,7 +672,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 						. $name
 						. '</td>'
 						. '<td class="jsdoc-param-type">'
-						. hyperlinks($value["type"], $base_url, $suffix)
+						. hyperlinks($value["type"], $docs, $base_url, $suffix)
 						. '</td>'
 						. '<td class="jsdoc-param-description">';
 					if(array_key_exists("description", $value)){
@@ -790,7 +806,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	if(array_key_exists("mixins", $obj)){
 		$tmp = array();
 		foreach($obj["mixins"] as $mixin){
-			$tmp[] = hyperlink($mixin, $base_url, $suffix);
+			$tmp[] = hyperlink($mixin, $docs, $base_url, $suffix);
 		}
 		if(count($tmp)){
 			$s .= '<div class="jsdoc-mixins"><label>Extends: </label>'
@@ -820,10 +836,10 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. '<div class="function-signature">'
 			. '<span class="keyword">var</span> foo = new '
 			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
-			. parameter_list($obj, false)
+			. parameter_list($obj, false, $docs, $base_url)
 			. '</div></div>';
 
-		$s .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $base_url, $suffix) . '</div>';
+		$s .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $docs, $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
 			$s .= '<div class="jsdoc-summary">' . $fn["description"] . '</div>';
 		} else if(array_key_exists("summary", $fn)){
@@ -841,7 +857,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
 			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
-			. parameter_list($fn, false)
+			. parameter_list($fn, false, $docs, $base_url)
 			. '</div></div>';
 
 		// Note: Don't display summary, description, or examples.
@@ -851,7 +867,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
 		}
 
-		$s .= return_details($fn);
+		$s .= return_details($fn, $docs, $base_url);
 	}
 
 	//	examples.
