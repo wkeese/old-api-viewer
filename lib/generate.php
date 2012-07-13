@@ -171,7 +171,7 @@ function read_method_info($page, $xpath, $n){
 		"return-types"=>array(),
 		"inherited"=>$n->getAttribute("from")!=$page && !$n->hasAttribute("extension-module"),
 		"extension-module"=>$n->hasAttribute("extension-module"),
-		"constructor"=>$n->getAttribute("constructor")=="constructor"
+		"constructor"=>$n->getAttribute("type")=="constructor"
 	);
 
 	// Get the method's summary, description, etc. taking care to ignore summaries of the method parameters
@@ -561,8 +561,11 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 	// summary:
 	//		Creates and returns the summary and details HTML strings for a single method.
 
+	// is this a constructor (i.e. a nested class)?
+	$constructor = $method["constructor"];
+
 	// Method summary section
-	$s = '<li class="functionIcon '
+	$s = '<li class="' . ($constructor ? 'constructorIcon ' : 'functionIcon ')
 		. (isset($method["visibility"]) ? $method["visibility"] : 'public') . ' '
 		. ($method["inherited"] ? 'inherited':'')
 		. ($method["extension-module"] ? 'extension-module':'')
@@ -580,7 +583,7 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		. '">'
 		. '<div class="jsdoc-title">'
 		. '<a name="' . $name . '"></a>'
-		. '<span class="functionIcon">'
+		. '<span class="' . ($constructor ? 'constructorIcon' : 'functionIcon') .'">'
 		. $name
 		. '</span>'
 		. parameter_list($method, false, $docs, $base_url)
