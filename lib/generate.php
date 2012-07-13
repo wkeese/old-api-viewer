@@ -500,7 +500,7 @@ function return_details($method, $docs, $base_url){
 }
 
 //	private functions for pieces
-function _generate_property_output($prop, $name, $docs = array(), $base_url = "", $suffix = ""){
+function _generate_property_output($page, $prop, $name, $docs = array(), $base_url = "", $suffix = ""){
 	//	create the HTML strings for a single property
 
 	// Property summary section
@@ -537,11 +537,21 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 
 	// Normally properties just have a summary, but properties based on an inlined type also have a description which
 	// (unlike methods) *supplements* the summary... so display both.
+	$description = "";
 	if(array_key_exists("summary", $prop)){
-		$details .= '<div class="jsdoc-summary">' . $prop["summary"] . '</div>';
+		$description .= $prop["summary"];
 	}
 	if(array_key_exists("description", $prop)){
-		$details .= '<div class="jsdoc-summary">' . $prop["description"] . '</div>';
+		$description .= $prop["description"];
+	}
+
+	// If this property is an object it has its own page
+	if($prop["type"] == "object"){
+		$description .= '<p>See ' . hyperlink($page . "." . $name, $docs, $base_url, $suffix) . ' for details</p>';
+	}
+
+	if(strlen($description)){
+		$details .= '<div class="jsdoc-summary">' . $description . '</div>';
 	}
 
 	if(array_key_exists("summary", $prop)){
@@ -557,7 +567,7 @@ function _generate_property_output($prop, $name, $docs = array(), $base_url = ""
 	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_method_output($method, $name, $docs = array(), $base_url = "", $suffix = ""){
+function _generate_method_output($page, $method, $name, $docs = array(), $base_url = "", $suffix = ""){
 	// summary:
 	//		Creates and returns the summary and details HTML strings for a single method.
 
@@ -637,7 +647,13 @@ function _generate_method_output($method, $name, $docs = array(), $base_url = ""
 		$details .= '</div>';
 	}
 
+	// If this method is a constructor it has its own page
+	if($constructor){
+		$details .= '<div class="jsdoc-summary">See ' . hyperlink($page . "." . $name, $docs, $base_url, $suffix) . ' for details</div>';
+	}
+
 	$details .= '</div>';	//	jsdoc-field
+
 	return array("s"=>$s, "details"=>$details);
 }
 
@@ -711,14 +727,14 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 		. '</table>';
 }
 
-function _generate_properties_output($properties, $docs = array(), $base_url = "", $suffix = "", $title="Property"){
+function _generate_properties_output($page, $properties, $docs = array(), $base_url = "", $suffix = "", $title="Property"){
 	//	generate all of the properties output
 	$s = '<h2 class="jsdoc-summary-heading">Property Summary <span class="jsdoc-summary-toggle"></span></h2>'
 		. '<div class="jsdoc-summary-list">'
 		. '<ul class="jsdoc-property-list">';
 	$details = '<h2>Properties</h2><div class="jsdoc-property-list">';
 	foreach($properties as $name=>$prop){
-		$tmp = _generate_property_output($prop, $name, $docs, $base_url, $suffix);
+		$tmp = _generate_property_output($page, $prop, $name, $docs, $base_url, $suffix);
 		$s .= $tmp["s"];
 		$details .= $tmp["details"];
 	}
@@ -728,7 +744,7 @@ function _generate_properties_output($properties, $docs = array(), $base_url = "
 	return array("s"=>$s, "details"=>$details);
 }
 
-function _generate_methods_output($methods, $docs = array(), $base_url = "", $suffix = "", $title="Method"){
+function _generate_methods_output($page, $methods, $docs = array(), $base_url = "", $suffix = "", $title="Method"){
 	//	generate all of the methods output
 	$s = "";
 	$details = "";
@@ -742,7 +758,7 @@ function _generate_methods_output($methods, $docs = array(), $base_url = "", $su
 				// We displayed the constructor already, at the top of the page.
 				continue;
 			}
-			$html = _generate_method_output($method, $name, $docs, $base_url, $suffix);
+			$html = _generate_method_output($page, $method, $name, $docs, $base_url, $suffix);
 			$s .= $html["s"];
 			$details .= $html["details"];
 		}
@@ -901,17 +917,17 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	$events = $obj["events"];
 	if(count($props) || count($methods) || count($events)){
 		if(count($props)){
-			$tmp = _generate_properties_output($props, $docs, $base_url, $suffix, "Properties");
+			$tmp = _generate_properties_output($page, $props, $docs, $base_url, $suffix, "Properties");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}
 		if(count($methods)){
-			$tmp = _generate_methods_output($methods, $docs, $base_url, $suffix, "Method");
+			$tmp = _generate_methods_output($page, $methods, $docs, $base_url, $suffix, "Method");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}
 		if(count($events)){
-			$tmp = _generate_methods_output($events, $docs, $base_url, $suffix, "Event");
+			$tmp = _generate_methods_output($page, $events, $docs, $base_url, $suffix, "Event");
 			$s .= $tmp["s"];
 			$details .= $tmp["details"];
 		}
