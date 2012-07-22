@@ -69,48 +69,6 @@ function object($page, $docs){
 	return $context->length > 0 ? $context->item(0) : null;
 }
 
-function hyperlink($text, $docs, $base_url, $suffix = ""){
-	// summary:
-	//		Convert text to a hyperlink if it looks like a link to a module.
-	//		Return text as-is if it's something like "Boolean".
-
-	if(strpos($text, "/")){
-		// Assume it's a module.   Too expensive to do xpath to check for every hyperlink.
-
-	 	if(strpos($text, ".") && !object($text, $docs)){
-			// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
-			$url = str_replace(".", "#", $text);
-		}else{
-			$url = $text;
-		}
-
-		return '<a class="jsdoc-link" href="' . $base_url . $url . '">' . $text . '</a>';
-	}else{
-		// Word like "Boolean"
-		return $text;
-	}
-}
-
-function hyperlinks($list, $docs, $base_url, $suffix = ""){
-	// summary:
-	//		Takes list of types like dijit/_Widget|Object and converts the applicable entries to hyperlinks
-	// $list: String
-	//		Something like "String|Object".
-
-	// Get each type, allowing for syntax like "String|Object" or "String || Object"
-	$ary = preg_split("/ *\\|+ */", $list);
-
-	// Call hyperlink() on each type
-	$links = array();
-	foreach($ary as $single){
-		$links[] = hyperlink($single, $docs, $base_url, $suffix);
-	}
-
-	// Return the results as a single string
-	$res = implode(" | ", $links);
-	return $res;
-}
-
 //	BEGIN array_filter functions
 function is_event($item){
 	return preg_match("/^_?on[A-Z]/", $item["name"]) >= 1;
@@ -415,6 +373,48 @@ function generate_object($page, $version, $docs=array()){
 //	BEGIN HTML OUTPUT GENERATION
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////
+
+function hyperlink($text, $docs, $base_url, $suffix = ""){
+	// summary:
+	//		Convert text to a hyperlink if it looks like a link to a module.
+	//		Return text as-is if it's something like "Boolean".
+
+	if(strpos($text, "/")){
+		// Assume it's a module.   Too expensive to do xpath to check for every hyperlink.
+
+	 	if(strpos($text, ".") && !object($text, $docs)){
+			// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
+			$url = str_replace(".", "#", $text);
+		}else{
+			$url = $text;
+		}
+
+		return '<a class="jsdoc-link" href="' . $base_url . $url . '">' . $text . '</a>';
+	}else{
+		// Word like "Boolean"
+		return $text;
+	}
+}
+
+function hyperlinks($list, $docs, $base_url, $suffix = ""){
+	// summary:
+	//		Takes list of types like dijit/_Widget|Object and converts the applicable entries to hyperlinks
+	// $list: String
+	//		Something like "String|Object".
+
+	// Get each type, allowing for syntax like "String|Object" or "String || Object"
+	$ary = preg_split("/ *\\|+ */", $list);
+
+	// Call hyperlink() on each type
+	$links = array();
+	foreach($ary as $single){
+		$links[] = hyperlink($single, $docs, $base_url, $suffix);
+	}
+
+	// Return the results as a single string
+	$res = implode(" | ", $links);
+	return $res;
+}
 
 function trim_summary($summary, $firstSentence){
 	// summary:
