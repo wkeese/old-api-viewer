@@ -21,64 +21,64 @@ Generating the documentation and running API viewer locally
 
 3. edit config.js to give path to dojo (your path may vary from example below):
 
-MacOS::
+	MacOS::
 
-    environmentConfig: {
-        basePath: '../trunk/',
-        packages: {
-            dojo: 'dojo',
-            dijit: 'dijit',
-            dojox: 'dojox',
-            doh: 'util/doh'
-        },
-        // ...
-    }
-
-Windows::
-
-	environmentConfig: {
-		basePath: 'c:\\users\\me\\trunk\\',
-		packages: {
-			dojo: 'dojo',
-			dijit: 'dijit',
-			dojox: 'dojox',
-			doh: 'util/doh'
-		},
-		// ...
-		excludePaths: {
-            // ...
-            /\\(?:tests|nls|demos)\\/,
-            // ...
+		environmentConfig: {
+			basePath: '../trunk/',
+			packages: {
+				dojo: 'dojo',
+				dijit: 'dijit',
+				dojox: 'dojox',
+				doh: 'util/doh'
+			},
+			// ...
 		}
-	}
+
+	Windows::
+
+		environmentConfig: {
+			basePath: 'c:\\users\\me\\trunk\\',
+			packages: {
+				dojo: 'dojo',
+				dijit: 'dijit',
+				dojox: 'dojox',
+				doh: 'util/doh'
+			},
+			// ...
+			excludePaths: {
+				// ...
+				/\\(?:tests|nls|demos)\\/,
+				// ...
+			}
+		}
 
 4. run parser on ``dojo`` source
 
-MacOS::
+	MacOS::
 
-    $ ./parse.sh ../trunk/dojo ../trunk/dijit ../trunk/dojox
+		$ ./parse.sh ../trunk/dojo ../trunk/dijit ../trunk/dojox
 
-Windows::
+	Windows::
 
-    C:\> parse.bat c:\\users\\me\\trunk
+		C:\> parse.bat c:\\users\\me\\trunk
 
-This will generate ``details.xml`` and ``tree.json``.
+	This will generate ``details.xml`` and ``tree.json``.
 
 5. check out api-viewer
 
-Check out this project into a directory called "api", under your web root, so that it's accessible via
-http://localhost/api:
+	Check out this project into a directory called "api", under your web root, so that it's accessible via
+	http://localhost/api::
 
-    $ cd `your web root`
-    $ git clone git@github.com:wkeese/api-viewer.git api
+		$ cd `your web root`
+		$ git clone git@github.com:wkeese/api-viewer.git api
 
-If you put it in a different location instead, then you need to update config.php and .htaccess to point
-to the other location.
+	If you put it in a different location instead, then you need to update config.php and .htaccess to point
+	to the other location.
 
 6. move files here
 
-Create ``data/1.8`` directory (or whatever the current version is), and move the ``details.xml`` and ``tree.json``
-from the step #4 above to that ``data/1.8`` directory.
+	Create ``data/1.8`` directory (or whatever the current version is), and move the ``details.xml`` and ``tree.json``
+	from the step #4 above to that ``data/1.8`` directory.
 
 
 Instructions to run the site
