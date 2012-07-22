@@ -787,10 +787,10 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//		for example usage.
 
 	if(!isset($page)){
-		throw new Exception("generate_html: you must pass an object name!");
+		throw new Exception("generate_object_html: you must pass an object name!");
 	}
 	if(!isset($version)){
-		throw new Exception("generate_html: you must pass a version!");
+		throw new Exception("generate_object_html: you must pass a version!");
 	}
 
 	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
@@ -892,6 +892,16 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		}
 
 		$s .= return_details($fn, $docs, $base_url);
+	}
+	//	display note for kwargs pseudo-classes that aren't real classes
+	$prop = array_pop(explode(".", $page));
+	if(strpos($prop, "__") === 0){
+		$s .= '<p><strong>Note:</strong>'
+			. 'This is not a real constructor, but just a description of the type of object that should be passed as'
+			. ' a parameter to some method(s), and/or the return value from some method(s).'
+			. ' In other words, the type exists only for documentation purposes, and you cannot call new '
+			. $prop . '().'
+			. '</p>';
 	}
 
 	//	examples.
