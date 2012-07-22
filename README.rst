@@ -13,7 +13,7 @@ Generating the documentation and running API viewer locally
 
 1. get latest Node.js from http://nodejs.org/#download
 
-2. check out js-doc-parse from bill (it has various fixes/enhancements needed for the viewer):
+2. check out js-doc-parse from bill (it has various fixes/enhancements needed for the viewer)::
 
     $ git clone --recursive https://github.com/wkeese/js-doc-parse.git
     $ cd js-doc-parse
