@@ -187,24 +187,26 @@ paneOnLoad = function(data){
 	}
 
 	// Setup feedback link and dialog
-	var helpLink = domConstruct.create("a", {
-		"class": "feedback",
-		href: "https://docs.google.com/spreadsheet/viewform?hl=en_US&formkey=dFlDcHEyaHMwbEd4MFBObkNrX0E1MFE6MQ&entry_0=" + encodeURIComponent(link),
-		target: "_blank",
-		innerHTML: "Error in the documentation? Can’t find what you are looking for? Let us know!"
-	}, context);
+	if(bugdb){
+		var helpLink = domConstruct.create("a", {
+			"class": "feedback",
+			href: bugdb + encodeURIComponent(link),
+			target: "_blank",
+			innerHTML: "Error in the documentation? Can’t find what you are looking for? Let us know!"
+		}, context);
 
-	on(helpLink, "click", function(event){
-		if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){
-			event.preventDefault();
-			helpDialog.set("content", domConstruct.create("iframe", {
-				src: this.href,
-				frameborder: "0",
-				style: "width: 47em; height: 500px; border: 0 none"
-			}));
-			helpDialog.show();
-		}
-	});
+		on(helpLink, "click", function(event){
+			if(!event.button && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey){
+				event.preventDefault();
+				helpDialog.set("content", domConstruct.create("iframe", {
+					src: this.href,
+					frameborder: "0",
+					style: "width: 47em; height: 500px; border: 0 none"
+				}));
+				helpDialog.show();
+			}
+		});
+	}
 
 	var privateOn = false, inheritedOn = true, extensionOn = true;
 

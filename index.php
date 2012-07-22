@@ -122,6 +122,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 
 			var page = '<?php echo ($is_page?$page:"") ?>';
 			var currentVersion = '<?php echo $version; ?>';
+			var bugdb = '<?php echo $bugdb; ?>';
 		</script>
 	</head>
 	<body class="claro">
