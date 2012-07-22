@@ -667,7 +667,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. $p["name"]
 			. '</td>'
 			. '<td class="jsdoc-param-type">'
-			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $docs, $base_url, $suffix))	// see kwargs processing below
+			. hyperlinks($p["type"], $docs, $base_url, $suffix)
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
@@ -678,46 +678,6 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 				$pstr .= "<br/>" . $p["description"];
 			}
 
-		// When the type of a kwargs parameter is specified as an MID+property combo, like dijit/place.__Position,
-		// display it as a nested table inside the description cell for the given parameter.  See
-		// http://localhost/api/1.8/dijit/place#at for example.
-		//
-		// It's not used much anymore since the doc parser inlines Object descriptions from both local variables, ex:
-		// __IOArgs, and global variables, ex: dojo.__IOArgs
-
-		if(strpos($tester, "__")===0){
-			//	try to find the object in question, and if found list out the props.
-			$pconfig = generate_object($p["type"], null, $docs);
-			if($pconfig && array_key_exists("properties", $pconfig)){
-				$p_param = array();
-				foreach($pconfig["properties"] as $name=>$value){
-					$tmp_str = '<tr>'
-						. '<td class="jsdoc-param-name">'
-						. $name
-						. '</td>'
-						. '<td class="jsdoc-param-type">'
-						. hyperlinks($value["type"], $docs, $base_url, $suffix)
-						. '</td>'
-						. '<td class="jsdoc-param-description">';
-					if(array_key_exists("description", $value)){
-						$tmp_str .= $value["description"];
-					} else if (array_key_exists("summary", $value)){
-						$tmp_str .= $value["summary"];
-					} else {
-						$tmp_str .= '&nbsp;';
-					}
-					$p_param[] = $tmp_str . '</td></tr>';
-				}
-				$pstr .= '<table class="jsdoc-parameters" style="margin-left:0;margin-right:0;margin-bottom:0;">'
-					. '<tr>'
-					. '<th>Parameter</th>'
-					. '<th>Type</th>'
-					. '<th>Description</th>'
-					. '</tr>'
-					. implode('', $p_param)
-					. '</table>';
-			}
-		}
 		$pstr .= '</td>'
 			. '</tr>';
 		$tmp_details[] = $pstr;
