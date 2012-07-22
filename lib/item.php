@@ -15,7 +15,7 @@ include(dirname(__FILE__) . "/../config.php");
 include("cache.php");
 include("generate.php");
 
-function get_page($version, $page, $use_cache=true, $_base_url = ""){
+function get_page($version, $page, $use_cache=true, $_base_url = "", $refdoc=""){
 	//	test to see if this has been cached first.
 	if($use_cache){
 		$html = cache_get($version, $page);
@@ -87,7 +87,7 @@ Commented out for now since generate_object() is likely broken.
 ******/
 
 	//	if we got here, we're not cached so generate our HTML.
-	$html = generate_object_html($page, $version, $_base_url);
+	$html = generate_object_html($page, $version, $_base_url, "", true, array(), $refdoc);
 
 	if($use_cache){
 		$success = cache_set($version, $page, $html);
@@ -103,5 +103,5 @@ if(!isset($page)){ $page = "dojo"; }
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
 
-echo get_page($version, $page, $use_cache, $_base_url);
+echo get_page($version, $page, $use_cache, $_base_url, $refdoc);
 ?>

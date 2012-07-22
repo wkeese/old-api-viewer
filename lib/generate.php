@@ -733,7 +733,8 @@ function _generate_methods_output($page, $methods, $docs = array(), $base_url = 
 	return array("s"=>$s, "details"=>$details);
 }
 
-function generate_object_html($page, $version, $base_url = "", $suffix = "", $versioned = true, $docs = array()){
+function generate_object_html($page, $version, $base_url = "", $suffix = "", $versioned = true, $docs = array(),
+		$refdoc = null){
 	//	$page:
 	//		The object to render, i.e. "dojox/charting/Chart2D"
 	//	$version:
@@ -745,6 +746,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	$docs:
 	//		An optional array of XML documents to run the function against.  See spider.php
 	//		for example usage.
+	//	$refdoc:
+	//		Root directory of reference doc, so this page can link to the reference doc.
 
 	if(!isset($page)){
 		throw new Exception("generate_object_html: you must pass an object name!");
@@ -878,6 +881,28 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 					. '</div>';
 			}
 			$s .= '</div>';
+		}
+	}
+
+	//	hyperlink to relevant reference doc page, if one exists
+	if($refdoc){
+		// Get the module.   Usually the same as $page, except sometimes $page is sub-object, ex: dijit/Tree._TreeNode.
+		$module = preg_replace("/\\..*/", "", $page);
+
+		// Compute base path to possible module reference doc (ex: dijit/Tree --> 1.8/dijit/Tree.html)
+		$path = $version . "/" . $module . $refdoc["suffix"];
+
+		if(!file_exists($refdoc["dir"] . $path) && count(explode("/", $path)) >= 3){
+			// Apparently no reference doc for this module, but let's go up a level; ex: since there's no
+			// dojox/charting/Chart.html page, try dojox/charting.html
+			$module = preg_replace("/\/[^\/]+$/", "", $module);
+			$path = $version . "/" . $module . $refdoc["suffix"];	// same as above
+		}
+
+		if(file_exists($refdoc["dir"] . $path)){
+			// If there's a reference doc file for $module, then insert a link
+			$url = $refdoc["url"] . $path;
+			$s .= "<p>See the <a href='$url' target='_blank'>$module reference documentation</a> for more information.</p>";
 		}
 	}
 
