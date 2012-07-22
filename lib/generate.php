@@ -667,7 +667,7 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. $p["name"]
 			. '</td>'
 			. '<td class="jsdoc-param-type">'
-			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $docs, $base_url, $suffix))
+			. (strpos($tester, "__") === 0 ? "Object" : hyperlinks($p["type"], $docs, $base_url, $suffix))	// see kwargs processing below
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
@@ -678,8 +678,13 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 				$pstr .= "<br/>" . $p["description"];
 			}
 
-		// This is vestigial code to look up kwArgs definitions (ex: __IoArgs), and display them as a nested table
-		// inside the description cell for the given parameter.   With the new doc parser this isn't run.
+		// When the type of a kwargs parameter is specified as an MID+property combo, like dijit/place.__Position,
+		// display it as a nested table inside the description cell for the given parameter.  See
+		// http://localhost/api/1.8/dijit/place#at for example.
+		//
+		// It's not used much anymore since the doc parser inlines Object descriptions from both local variables, ex:
+		// __IOArgs, and global variables, ex: dojo.__IOArgs
+
 		if(strpos($tester, "__")===0){
 			//	try to find the object in question, and if found list out the props.
 			$pconfig = generate_object($p["type"], null, $docs);
