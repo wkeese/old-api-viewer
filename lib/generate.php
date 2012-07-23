@@ -640,7 +640,7 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 		$counter = 1;
 		foreach($method["examples"] as $example){
 			$details .= '<div class="jsdoc-example">'
-				. '<div><strong>Example ' . $counter++ . '</strong></div>'
+				. '<div><strong>Example ' . (count($method["examples"]) > 1 ? $counter++ : "") . '</strong></div>'
 				. $example
 				. '</div>';
 		}
@@ -841,7 +841,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	if(array_key_exists("topfunc", $obj)){
 		$fn = $obj["topfunc"];
 
-		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
+		$s .= '<div class="jsdoc-function-information"><h2>Usage</h2>'
 			. '<div class="function-signature">'
 			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
 			. parameter_list($fn, false, $docs, $base_url)
@@ -872,11 +872,11 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$examples = $obj["examples"];
 		if(count($examples)){
 			$s .= '<div class="jsdoc-examples">'
-				. '<h2>Examples:</h2>';
+				. (count($examples) > 1 ? '<h2>Examples</h2>' : '<h2>Example</h2>');
 			$counter = 1;
 			foreach($examples as $example){
 				$s .= '<div class="jsdoc-example">'
-					. '<h3>Example ' . $counter++ . '</h3>'
+					. (count($examples) > 1 ? '<h3>Example ' . $counter++ . '</h3>' : '')
 					. $example
 					. '</div>';
 			}
