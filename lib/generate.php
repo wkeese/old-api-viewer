@@ -60,6 +60,13 @@ function icon_url($type, $size=16){
 	return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
 }
 
+function object_exists($name, $docs){
+	// summary:
+	//		Returns true if there's a page for the specified object, ex: "dijit/form/Button" or "dijit/Tree.TreeNode"
+
+	return array_key_exists($name, $docs["objects"]);
+}
+
 function object($page, $docs){
 	// summary:
 	//		Return specified object (<object> node in details.xml), or null if no such page exists
@@ -83,7 +90,7 @@ function load_docs($version){
 	//	helper function to load up the XML doc and make it xpath-accessible
 	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
-	//	load up the doc.
+	//	load up the module descriptions
 	$details = "details.xml";
 	$f = $data_dir . $details;
 	if(!file_exists($f)){
@@ -96,9 +103,18 @@ function load_docs($version){
 
 	$xpath = new DOMXPath($xml);
 
+	// put names of all the objects in a hash
+	$objects = $xpath->query('//object/@location');
+	$objhash = array();
+	for($i = 0; $i < $objects->length; $i++){
+		$name = $objects->item($i)->nodeValue;
+		$objhash[$name] = true;
+	}
+
 	$docs = array(
 		"xml"=>$xml,
-		"xpath"=>$xpath
+		"xpath"=>$xpath,
+		"objects"=>$objhash
 	);
 	return $docs;
 }
@@ -379,17 +395,16 @@ function hyperlink($text, $docs, $base_url, $suffix = ""){
 	//		Convert text to a hyperlink if it looks like a link to a module.
 	//		Return text as-is if it's something like "Boolean".
 
-	if(strpos($text, "/")){
-		// Assume it's a module.   Too expensive to do xpath to check for every hyperlink.
-
-	 	if(strpos($text, ".") && !object($text, $docs)){
-			// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
-			$url = str_replace(".", "#", $text);
-		}else{
-			$url = $text;
-		}
-
-		return '<a class="jsdoc-link" href="' . $base_url . $url . '">' . $text . '</a>';
+	if(object_exists($text, $docs)){
+		$url = $text;
+	}else if(strpos($text, ".") && object_exists(preg_replace("/\..*/", "", $text), $docs)){
+		// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
+		$url = str_replace(".", "#", $text);
+	}
+	if($url){
+		return '<a class="jsdoc-link" href="' . $base_url . $url . '">'
+			. $text
+			. '</a>';
 	}else{
 		// Word like "Boolean"
 		return $text;
