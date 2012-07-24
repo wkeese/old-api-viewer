@@ -42,5 +42,5 @@ $filter_privates = true;
 
 # Set to false to regenerate the page for a module every time you view it.
 # Useful while working on documentation, or the doc parser and api viewers themselves.
-$use_cache = true;
+$use_cache = false;
 

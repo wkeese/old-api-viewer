@@ -390,10 +390,12 @@ function generate_object($page, $version, $docs=array()){
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-function hyperlink($text, $docs, $base_url, $suffix = ""){
+function hyperlink($text, $docs, $base_url, $suffix = "", $label = ""){
 	// summary:
 	//		Convert text to a hyperlink if it looks like a link to a module.
 	//		Return text as-is if it's something like "Boolean".
+	// $label: String
+	//		If specified, use this as the hyperlink label, rather than $text
 
 	if(object_exists($text, $docs)){
 		$url = $text;
@@ -403,7 +405,7 @@ function hyperlink($text, $docs, $base_url, $suffix = ""){
 	}
 	if($url){
 		return '<a class="jsdoc-link" href="' . $base_url . $url . '">'
-			. $text
+			. (strlen($label) > 0 ? $label : $text)
 			. '</a>';
 	}else{
 		// Word like "Boolean"
@@ -446,6 +448,64 @@ function trim_summary($summary, $firstSentence){
 	}
 
 	return trim($summary);
+}
+
+
+function auto_hyperlink_replacer($matches){
+	// helper function for auto_hyperlink()
+
+	// trick to pass additional parameters to callback; server is php 5.2 so can't use anonymous functions/closures
+	global $global_docs, $global_base_url, $global_suffix;
+
+	// $matches is:
+	//		$matches[0]: the whole string
+	//		$matches[1]: "<code>" or ""
+	//		$matches[2]: the link, ex: dijit/form/Button.set
+	//		$matches[3]: .set (ignore this)
+	//		$matches[4]:	parameter string like "(a, b)", or ""
+	//		$matches[5]: "</code>" or ""
+
+	// the label for the hyperlink should be the original text, but without the <code> wrapper
+	$label = $matches[2] . $matches[4];
+	$path = $matches[2];
+
+	// try to convert matched string to a hyperlink to another module
+	$link = hyperlink($path, $global_docs, $global_base_url, $global_suffix, $label);
+
+	if(link != $matches[2]){
+		// replaced <code>foo/bar</code> with <a ...>foo/bar<a>
+		return $link;
+	}else{
+		// hyperlink() didn't do a conversion, so this is probably something else, so don't change it, leave <code>
+		return $matches[0];
+	}
+}
+function auto_hyperlink($text, $docs, $base_url, $suffix = ""){
+	// summary:
+	//		Search summary/description for patterns like dojo/hccss, dijit/Tree.TreeNode, or acme/myfunc(a, b, c),
+	//		 and convert to hyperlinks
+
+	// trick to pass additional parameters to callback; server is php 5.2 so can't use anonymous functions/closures, and
+	// http://stackoverflow.com/questions/2680982/is-there-a-way-to-pass-another-parameter-in-the-preg-replace-callback-callback-f
+	// not working for me either
+	global $global_docs, $global_base_url, $global_suffix;
+	$global_docs = $docs;
+	$global_base_url = $base_url;
+	$global_suffix = $suffix;
+
+	// Find likely module references, ex:
+	//		dijit/Tree
+	//		dijit/Tree.TreeNode
+	//		dojo/dom-style.set(a, b)
+	// .. or any of the above surrounded by <code>...</code>
+	//
+	// Regex designed to not include the period ending a sentence, ex:
+	//		For more info, see dijit/Tree.
+	return preg_replace_callback(
+		'&(<code>|)([a-zA-Z0-9]+/[-a-zA-Z0-9_]+([\./][-a-zA-Z0-9_]+)*)(\([^(]*\)|)(</code>|)&',
+		"auto_hyperlink_replacer",
+		$text
+	);
 }
 
 function parameter_list($method, $types, $docs, $base_url){
@@ -506,7 +566,7 @@ function return_details($method, $docs, $base_url){
 
 		if(array_key_exists("return-description", $method)){
 			$details .= '<div class="jsdoc-return-description">'
-				. $method["return-description"]
+				. auto_hyperlink($method["return-description"], $docs, $base_url)
 				. '</div>';
 		}
 	}
@@ -554,10 +614,10 @@ function _generate_property_output($page, $prop, $name, $docs = array(), $base_u
 	// (unlike methods) *supplements* the summary... so display both.
 	$description = "";
 	if(array_key_exists("summary", $prop)){
-		$description .= $prop["summary"];
+		$description .= auto_hyperlink($prop["summary"], $docs, $base_url, $suffix);
 	}
 	if(array_key_exists("description", $prop)){
-		$description .= $prop["description"];
+		$description .= auto_hyperlink($prop["description"], $docs, $base_url, $suffix);
 	}
 
 	// If this property is an object it has its own page
@@ -625,11 +685,15 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 	}
 	$details .= '</div>';
 
-	if(array_key_exists("description", $method)){
-		$details .= '<div class="jsdoc-summary">' . $method["description"] . '</div>';
-	} else if(array_key_exists("summary", $method)){
-		$details .= '<div class="jsdoc-summary">' . $method["summary"] . '</div>';
+	$description =
+		array_key_exists("description", $method) ? $method["description"] :
+		array_key_exists("summary", $method) ? $method["summary"] :
+		"";
+	if($description){
+		$description = auto_hyperlink($description, $docs, $base_url, $suffix);
+		$details .= '<div class="jsdoc-summary">' . $description . '</div>';
 	}
+
 	if(array_key_exists("summary", $method)){
 		// Display abbreviated description.   If user has explicitly specified separate summary and description, then use
 		// the summary.  If user has only specified a summary, then use it, but trim to first sentence
@@ -656,7 +720,7 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 		foreach($method["examples"] as $example){
 			$details .= '<div class="jsdoc-example">'
 				. '<div><strong>Example ' . (count($method["examples"]) > 1 ? $counter++ : "") . '</strong></div>'
-				. $example
+				. $example	// auto_hyperlink() too dangerous here?
 				. '</div>';
 		}
 		$details .= '</div>';
@@ -686,11 +750,11 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 			. '</td>'
 			. '<td class="jsdoc-param-description">'
 			. (strlen($p["usage"]) ? (($p["usage"] == "optional") ? '<div><em>Optional.</em></div>' : (($p["usage"] == "one-or-more") ? '<div><em>One or more can be passed.</em></div>' : '')) : '')
-			. $p["summary"];
+			. auto_hyperlink($p["summary"], $docs, $base_url, $suffix);
 
 			// parameters from inlined types have a description that supplements the summary
 			if(strlen($p["description"])){
-				$pstr .= "<br/>" . $p["description"];
+				$pstr .= "<br/>" . auto_hyperlink($p["description"], $docs, $base_url, $suffix);
 			}
 
 		$pstr .= '</td>'
@@ -820,14 +884,14 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	summary.
 	if(array_key_exists("summary", $obj)){
 		$s .= '<div class="jsdoc-full-summary">'
-			. $obj["summary"]
+			. auto_hyperlink($obj["summary"], $docs, $base_url, $suffix)
 			. "</div>";
 	}
 
 	//	description.
 	if(array_key_exists("description", $obj)){
 		$s .= '<div class="jsdoc-full-summary">'
-			. $obj["description"]
+			. auto_hyperlink($obj["description"], $docs, $base_url, $suffix)
 			. "</div>";
 	}
 
@@ -892,7 +956,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			foreach($examples as $example){
 				$s .= '<div class="jsdoc-example">'
 					. (count($examples) > 1 ? '<h3>Example ' . $counter++ . '</h3>' : '')
-					. $example
+					. $example		// auto_hyperlink() too dangerous here?
 					. '</div>';
 			}
 			$s .= '</div>';
