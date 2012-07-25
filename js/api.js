@@ -313,7 +313,7 @@ addTabPane = function(page, version){
 		}
 	}
 	var pane = new dijit.layout.ContentPane({
-		id: title,
+		id: title.replace(/[\/.]/g, "_"),
 		href: url,
 		title: title,
 		closable: true,
@@ -334,7 +334,7 @@ buildTree = function(){
 	}
 
 	//	load the module tree data.
-	moduleModel = new ModuleTreeModel(baseUrl + 'data/' + currentVersion + '/tree.json');
+	moduleModel = new ModuleTreeModel(baseUrl + 'lib/tree.php?v=' + currentVersion);
 
 	moduleTree = new ModuleTree({
 		model: moduleModel,

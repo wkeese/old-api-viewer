@@ -88,7 +88,8 @@ function is_method($item){
 
 function load_docs($version){
 	//	helper function to load up the XML doc and make it xpath-accessible
-	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
+	global $dataDir;
+	$data_dir = $dataDir . $version . "/";
 
 	//	load up the module descriptions
 	$details = "details.xml";
