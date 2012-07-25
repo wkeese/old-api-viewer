@@ -19,7 +19,7 @@ $defVersion = "1.8";
 
 # Location of data files for each version.   This directory should contain a subdirectory for each product version,
 # and the subdirectory should contain details.xml and tree.json
-$dataDir = dirname(__FILE__) . "/data/";
+$dataDir = dirname(__FILE__) . "/../api_data/";
 
 # Bug database: if $bugdb is specified as a non-empty string, add an "error in the documentation?" link to the
 # bottom of each tab that will navigate to specified link appended with the tab's URL

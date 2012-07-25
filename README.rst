@@ -75,10 +75,13 @@ http://localhost/api:
 If you put it in a different location instead, then you need to update config.php and .htaccess to point
 to the other location.
 
-6. move files here
+6. move files to data directory
 
-Create ``data/1.8`` directory (or whatever the current version is), and move the ``details.xml`` and ``tree.json``
-from the step #4 above to that ``data/1.8`` directory.
+Create ``api_data/1.8`` directory (or whatever the current version is), as a *sibling* of the api directory,
+and move the ``details.xml`` and ``tree.json`` from the step #4 above to that directory.
+
+Alternately, you can set the directory to somewhere else by editing config.php.
+
 
 
 Instructions to run the site
