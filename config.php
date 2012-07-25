@@ -9,7 +9,7 @@ $_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath . "/";
 //$_base_url = "./";
 
 # Location of dojo
-$dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.7";
+$dojoroot = "http://download.dojotoolkit.org/release-1.8.0rc1/dojo-release-1.8.0rc1/";
 # $dojoroot = "/trunk";	// local build
 
 $_site_name = "The Dojo Toolkit";
