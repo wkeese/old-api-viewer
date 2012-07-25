@@ -340,7 +340,8 @@ buildTree = function(){
 
 	moduleTree = new ModuleTree({
 		model: moduleModel,
-		showRoot: false
+		showRoot: false,
+		persist: false		// tree item ids have slashes, which confuses the persist code
 	});
 	moduleTree.placeAt("moduleTreePane");
 
