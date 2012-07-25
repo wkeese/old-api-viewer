@@ -49,12 +49,6 @@ function smoothScroll(args){
 	var node = args.node,
 		win = args.win;
 
-	// If node is already in view, then don't try to do any scrolling.   Particularly important when clicking a
-	// TreeNode selects (or opens) a tab, which then triggers code for the TreeNode to scroll into view.
-	if(node.offsetTop >= win.scrollTop && node.offsetTop + node.clientHeight <= win.scrollTop + win.clientHeight){
-		return null;
-	}
-
 	// Run animation to bring the node to the top of the pane (if possible).   Is that what we want?
 	// Or should it move to the center?   Or scroll the minimal amount possible to bring the
 	// node into view?
@@ -62,7 +56,15 @@ function smoothScroll(args){
 		beforeBegin: function(){
 			if(this.curve){ delete this.curve; }
 			var current = { x: win.scrollLeft, y: win.scrollTop };
-			this.curve = new Line([ current.x, current.y ], [ node.offsetLeft, node.offsetTop ]);
+
+			// If node is already in view, don't do any scrolling.   Particularly important when clicking a
+			// TreeNode selects (or opens) a tab, which then triggers code for the TreeNode to scroll into view.
+			var target = [node.offsetLeft, node.offsetTop];
+			if(node.offsetTop >= win.scrollTop && node.offsetTop + node.clientHeight <= win.scrollTop + win.clientHeight){
+				target = [current.x, current.y];
+			}
+
+			this.curve = new Line([ current.x, current.y ], target);
 		},
 		onAnimate: function(val){
 			win.scrollLeft = val[0];
@@ -365,6 +367,9 @@ buildTree = function(){
 					win: dom.byId("moduleTreePane"),
 					duration: 300
 				}).play();
+			},
+			function(err){
+				console.log("tree: error setting path to " + parts.join("/"));
 			});
 		}, true);
 	}
