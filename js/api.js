@@ -1,4 +1,5 @@
 require([
+	"dojo/_base/array",
 	"dojo/dom",
 	"dojo/dom-class",
 	"dojo/dom-construct",
@@ -20,8 +21,8 @@ require([
 	"dijit/layout/TabContainer",
 	"dijit/layout/ContentPane",
 	"dijit/layout/AccordionContainer"
-], function(dom, domClass, domConstruct, domStyle, fx, lang, on, parser, query, ready,
-			registry, Dialog, Line, ModuleTreeModel, ModuleTree){
+], function(array, dom, domClass, domConstruct, domStyle, fx, lang, on, parser, query, ready,
+			registry, Dialog, Line, ModuleTreeModel, ModuleTree, BorderContainer, TabContainer){
 
 // This file contains the top level javascript code to setup the tree, etc.
 
@@ -44,15 +45,27 @@ baseUrl = window.location.protocol + "//" + window.location.hostname + "/"
 function smoothScroll(args){
 	//	NB: this is basically dojox.fx.smoothScroll
 
+	var node = args.node,
+		win = args.win;
+
+	// If node is already in view, then don't try to do any scrolling.   Particularly important when clicking a
+	// TreeNode selects (or opens) a tab, which then triggers code for the TreeNode to scroll into view.
+	if(node.offsetTop >= win.scrollTop && node.offsetTop + node.clientHeight <= win.scrollTop + win.clientHeight){
+		return null;
+	}
+
+	// Run animation to bring the node to the top of the pane (if possible).   Is that what we want?
+	// Or should it move to the center?   Or scroll the minimal amount possible to bring the
+	// node into view?
 	return new fx.Animation(lang.mixin({
 		beforeBegin: function(){
 			if(this.curve){ delete this.curve; }
-			var current = { x: args.win.scrollLeft, y: args.win.scrollTop };
-			this.curve = new Line([ current.x, current.y ], [ args.node.offsetLeft, args.node.offsetTop ]);
+			var current = { x: win.scrollLeft, y: win.scrollTop };
+			this.curve = new Line([ current.x, current.y ], [ node.offsetLeft, node.offsetTop ]);
 		},
 		onAnimate: function(val){
-			args.win.scrollLeft = val[0];
-			args.win.scrollTop = val[1];
+			win.scrollLeft = val[0];
+			win.scrollTop = val[1];
 		}
 	}, args));
 }
@@ -286,6 +299,33 @@ buildTree = function(){
 		showRoot: false
 	});
 	moduleTree.placeAt("moduleTreePane");
+
+	var w = registry.byId("content");
+	if(w){
+		// Code to run when a pane is selected by clicking a tab label (although it also unwantedly runs when a pane is
+		// selected by clicking a node in the tree)
+		w.watch("selectedChildWidget", function(attr, oldVal, selectedChildWidget){
+			// If we are still scrolling the Tree from a previous run, cancel that animation
+			if(moduleTree.scrollAnim){
+				moduleTree.scrollAnim.stop();
+			}
+
+			// Select the TreeNode corresponding to this tab's object.   For dijit/form/Button the path must be
+			// ["root", "dijit", "dijit/form", "dijit/form/Button"]
+			var parts = selectedChildWidget.title.split(/[\./]/),
+				path = ["root"].concat(array.map(parts, function(part, idx){
+					return parts.slice(0, idx+1).join("/");
+				}));
+			moduleTree.set("path", path).then(function(){
+				// And then scroll it into view.
+				moduleTree.scrollAnim = smoothScroll({
+					node: moduleTree.selectedNodes[0].domNode,
+					win: dom.byId("moduleTreePane"),
+					duration: 300
+				}).play();
+			});
+		}, true);
+	}
 };
 
 versionChange = function(e){
@@ -320,6 +360,7 @@ ready(function(){
 	parser.parse(document.body);
 	var w = registry.byId("content");
 	if(w){
+		// Code to run when a pane is selected
 		w.watch("selectedChildWidget", function(attr, oldVal, selectedChildWidget){
 			document.title = selectedChildWidget.title + " - " + (siteName || "The Dojo Toolkit");
 		});
