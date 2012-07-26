@@ -8,7 +8,7 @@ $d = dir($dataDir);
 $versions = array();
 $has_version = false;
 while(($entry = $d->read()) !== false){
-	if(!(strpos($entry, ".")===0) && file_exists("data/".$entry."/details.xml")){
+	if(strpos($entry, ".")!==0){
 		$versions[] = $entry;
 	}
 }
