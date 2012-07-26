@@ -30,9 +30,9 @@ $bugdb = "https://docs.google.com/spreadsheet/viewform?hl=en_US&formkey=dFlDcHEy
 # The reference doc directory structure needs to be similar to api URLs, with version numbers for the top level
 # directories.
 $refdoc = array(
-	dir => dirname(__FILE__) . "/../reference-guide/",
-	url => "/reference-guide/",
-	suffix => ".html"
+	"dir" => dirname(__FILE__) . "/../reference-guide/",
+	"url" => "/reference-guide/",
+	"suffix" => ".html"
 );
 
 $defPage = "";
