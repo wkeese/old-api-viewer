@@ -398,12 +398,14 @@ function hyperlink($text, $docs, $base_url, $suffix = "", $label = ""){
 	// $label: String
 	//		If specified, use this as the hyperlink label, rather than $text
 
+	$url = null;
 	if(object_exists($text, $docs)){
 		$url = $text;
 	}else if(strpos($text, ".") && object_exists(preg_replace("/\..*/", "", $text), $docs)){
 		// Text like dojo/on.emit where there is no separate page for emit(), so turn into a URL like dojo/on#emit
 		$url = str_replace(".", "#", $text);
 	}
+
 	if($url){
 		return '<a class="jsdoc-link" href="' . $base_url . $url . '">'
 			. (strlen($label) > 0 ? $label : $text)
@@ -473,7 +475,7 @@ function auto_hyperlink_replacer($matches){
 	// try to convert matched string to a hyperlink to another module
 	$link = hyperlink($path, $global_docs, $global_base_url, $global_suffix, $label);
 
-	if(link != $matches[2]){
+	if($link != $matches[2]){
 		// replaced <code>foo/bar</code> with <a ...>foo/bar<a>
 		return $link;
 	}else{
@@ -713,7 +715,7 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 		$details .= _generate_param_table($method["parameters"], $docs, $base_url, $suffix);
 	}
 
-	$details .= return_details($method, $docs, $base_url);
+	$details .= return_details($method, $docs, $base_url, $suffix);
 
 	if(array_key_exists("examples", $method)){
 		$details .= '<div class="jsdoc-examples">';
@@ -934,7 +936,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			$s .= _generate_param_table($fn["parameters"], $docs, $base_url, $suffix);
 		}
 
-		$s .= return_details($fn, $docs, $base_url);
+		$s .= return_details($fn, $docs, $base_url, $suffix);
 	}
 	//	display note for kwargs pseudo-classes that aren't real classes
 	$prop = array_pop(explode(".", $page));
