@@ -12,15 +12,3 @@ RewriteBase   /api/
 # convert static/rest-like requests
 RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
 RewriteRule ^json/([0-9.]+)/class-tree\.json$ lib/class-tree.php?v=$1 [L,QSA]
-
-# bottom line: we're going to simply pop the rest off and parse it in PHP.
-RewriteRule ^css/(.*)$ css/$1 [L,QSA]
-RewriteRule ^data/(.*)$ data/$1 [L,QSA]
-RewriteRule ^lib/(.*)$ lib/$1 [L,QSA]
-RewriteRule ^images/(.*)$ images/$1 [L,QSA]
-RewriteRule ^js/(.*)$ js/$1 [L,QSA]
-RewriteRule ^rpc/(.*)$ rpc/index.php?qs=$1 [L,QSA]
-RewriteRule ^themes/(.*)$ themes/$1 [L,QSA]
-RewriteRule ^install/(.*)$ install/$1 [L,QSA]
-RewriteRule ^tests/(.*)$ tests/$1 [L,QSA]
-RewriteRule ^(.*)$ index.php?qs=$1 [L,QSA]

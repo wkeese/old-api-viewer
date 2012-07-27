@@ -303,7 +303,12 @@ paneOnLoad = function(data){
 
 addTabPane = function(page, version){
 	var p = registry.byId("content");
-	var url = baseUrl + "lib/item.php?p=" + page + "&v=" + (version || currentVersion);
+
+	// Get the URL to get the tab content.
+	// Use old item.php and generate.php for version <= 1.7, new item.php otherwise.
+	// Should have a more general way to do this to make the api-viewer code usable for other projects.
+	var url = baseUrl + (version <= 1.7 ? "lib.old" : "lib") + "/item.php?p=" + page + "&v=" + (version || currentVersion);
+
 	var title = page;
 
 	//	get the children and make sure we haven't opened this yet.
@@ -341,7 +346,8 @@ buildTree = function(){
 	moduleTree = new ModuleTree({
 		model: moduleModel,
 		showRoot: false,
-		persist: false		// tree item ids have slashes, which confuses the persist code
+		persist: false,		// tree item ids have slashes, which confuses the persist code
+		version: currentVersion
 	});
 	moduleTree.placeAt("moduleTreePane");
 
@@ -379,8 +385,6 @@ buildTree = function(){
 versionChange = function(e){
 	// summary:
 	//		Change the version displayed.
-	//		TODO.   This currently doesn't work because we need to switch to the old API doc viewer
-	//		to see old versions of the API.
 
 	var cv = currentVersion, v = this.options[this.selectedIndex].value;
 	if(v.length){
@@ -417,6 +421,8 @@ ready(function(){
 	// global:
 	helpDialog = new dijit.Dialog({ title: "Feedback" }).placeAt(document.body);
 	helpDialog.startup();
+
+	// When user selects a choice in the version <select>, switch to that version
 	var s = dom.byId("versionSelector");
 	s.onchange = lang.hitch(s, versionChange);
 

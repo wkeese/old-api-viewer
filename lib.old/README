@@ -1,0 +1,2 @@
+This directory contains code to read/display the old format of the data files.
+It's basically a copy of generate.php and item.php from 1.7.

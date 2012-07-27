@@ -29,7 +29,7 @@ define(["dojo/_base/declare", "dijit/Tree"], function(declare, Tree){
 				this._onExpandoClick({node:nodeWidget});
 			}else{
 				// Open the page for this module.
-				addTabPane(item.id, currentVersion);
+				addTabPane(item.id, this.version);
 			}
 		}
 	});
