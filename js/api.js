@@ -27,21 +27,9 @@ require([
 
 // This file contains the top level javascript code to setup the tree, etc.
 
-if(currentVersion === undefined){
-	//	fallback.
-	var currentVersion = "1.8";
-}
-
 var helpDialog;
 
 page = page || "";
-
-//	redefine the base URL.
-var _href = window.location.href.replace(window.location.protocol + '//' + window.location.hostname + '/','')
-	.replace('jsdoc/', '')	//	to handle legacy api.dojotoolkit.org URL formation
-	.replace(window.location.hash, '');
-baseUrl = window.location.protocol + "//" + window.location.hostname + "/"
-	+ _href.replace(currentVersion + "/", "").replace(page, "").replace(page.split("/").join("."), "").replace(".html","");
 
 function smoothScroll(args){
 	//	NB: this is basically dojox.fx.smoothScroll

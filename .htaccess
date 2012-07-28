@@ -12,3 +12,9 @@ RewriteBase   /api/
 # convert static/rest-like requests
 RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
 RewriteRule ^json/([0-9.]+)/class-tree\.json$ lib/class-tree.php?v=$1 [L,QSA]
+
+# pass through these URL's, which are accessed from the index.html page rather than directly by the user
+RewriteRule ^(css|data|lib|lib.old|images|js|rpc|themes|install|tests)/(.*)$ $1/$2 [L,QSA]
+
+# but for anything else (ex: 1.8/dijit/Dialog), handle it from index.php
+RewriteRule ^(.*)$ index.php?qs=$1 [L,QSA]
