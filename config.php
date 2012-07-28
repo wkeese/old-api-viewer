@@ -8,8 +8,8 @@ $basePath = "/api";
 $_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath . "/";
 //$_base_url = "./";
 
-# Location of dojo
-$dojoroot = "http://download.dojotoolkit.org/release-1.8.0rc1/dojo-release-1.8.0rc1/";
+# Location of dojo, without trailing slash
+$dojoroot = "http://download.dojotoolkit.org/release-1.8.0rc1/dojo-release-1.8.0rc1";
 # $dojoroot = "/trunk";	// local build
 
 $_site_name = "The Dojo Toolkit";
