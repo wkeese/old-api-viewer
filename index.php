@@ -15,6 +15,7 @@ while(($entry = $d->read()) !== false){
 $d->close();
 sort($versions);
 
+// Get the version from a URL like dojotoolkit.org/api?qs=dijit.Dialog&v=1.7
 $parts = array();
 $is_page = false;
 $page = $defPage;
@@ -120,8 +121,10 @@ if(isset($_GET["clearcache"]) && $use_cache){
 				});
 			});
 
+			// Set currentVersion as a global variable, since it's accessed from api.js
+			currentVersion = '<?php echo $version; ?>';
+
 			var page = '<?php echo ($is_page?$page:"") ?>';
-			var currentVersion = '<?php echo $version; ?>';
 			var bugdb = '<?php echo $bugdb; ?>';
 		</script>
 	</head>
