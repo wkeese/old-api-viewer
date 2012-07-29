@@ -366,8 +366,8 @@ function generate_object($page, $version, $docs=array()){
 	$foo = read_object_fields($page, $version, $docs);
 	$props = $foo["props"];
 	$methods = $foo["methods"];
-	ksort($methods);
-	ksort($props);
+	uksort($props, 'strcasecmp');
+	uksort($methods, 'strcasecmp');
 
 	// reclassify methods with names starting with "on" as events
 	$events = array_filter($methods, "is_event");
