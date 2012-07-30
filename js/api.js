@@ -45,11 +45,14 @@ function smoothScroll(args){
 			if(this.curve){ delete this.curve; }
 			var current = { x: win.scrollLeft, y: win.scrollTop };
 
-			// If node is already in view, don't do any scrolling.   Particularly important when clicking a
-			// TreeNode selects (or opens) a tab, which then triggers code for the TreeNode to scroll into view.
-			var target = [node.offsetLeft, node.offsetTop];
+			var target;
 			if(node.offsetTop >= win.scrollTop && node.offsetTop + node.clientHeight <= win.scrollTop + win.clientHeight){
+				// If node is already in view, don't do any scrolling.   Particularly important when clicking a
+				// TreeNode selects (or opens) a tab, which then triggers code for the TreeNode to scroll into view.
 				target = [current.x, current.y];
+			}else{
+				// Otherwise, scroll to near top of containing div
+				target = [node.offsetLeft, Math.max(node.offsetTop - 30, 0)];
 			}
 
 			this.curve = new Line([ current.x, current.y ], target);
