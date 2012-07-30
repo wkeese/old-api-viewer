@@ -522,7 +522,8 @@ function parameter_list($method, $types, $docs, $base_url){
 
 
 	$params = array();
-	if(count($method["parameters"])){
+
+	if(array_key_exists("parameters", $method) && count($method["parameters"])){
 		foreach($method["parameters"] as $param){
 			if($types){
 				$params[] = '<span class="jsdoc-comment-type">/* '
@@ -548,7 +549,7 @@ function parameter_list($method, $types, $docs, $base_url){
 	return '<span class="parameters">(' . implode(", ", $params) . ')</span>' . $return;
 }
 
-function return_details($method, $docs, $base_url){
+function return_details($method, $docs, $base_url, $suffix){
 	// summary:
 	//		Return HTML listing return types and return description
 
