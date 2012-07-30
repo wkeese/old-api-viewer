@@ -56,8 +56,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/xhr"], function(dec
 		},
 
 		getLabel: function(item){
-			// dijit/form/Button --> Button, dijit/Tree.TreeNode --> TreeNode
-			return item.id.replace(/.*[\./]/, "");
+			return item.name;
 		},
 
 		// =======================================================================

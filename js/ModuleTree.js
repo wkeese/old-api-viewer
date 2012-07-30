@@ -26,10 +26,10 @@ define(["dojo/_base/declare", "dijit/Tree"], function(declare, Tree){
 			if(type == "folder"){
 				// Since folders have no associated pages, expand the TreeNode instead, to hint the user
 				// that they need to descendant on a child of this node.
-				this._onExpandoClick({node:nodeWidget});
+				this._onExpandoClick({node: nodeWidget});
 			}else{
 				// Open the page for this module.
-				addTabPane(item.id, this.version);
+				addTabPane(item.fullname, this.version);
 			}
 		}
 	});

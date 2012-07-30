@@ -332,6 +332,7 @@ buildTree = function(){
 	moduleModel = new ModuleTreeModel(baseUrl + 'lib/tree.php?v=' + currentVersion);
 
 	moduleTree = new ModuleTree({
+		id: "moduleTree",
 		model: moduleModel,
 		showRoot: false,
 		persist: false,		// tree item ids have slashes, which confuses the persist code
@@ -344,17 +345,17 @@ buildTree = function(){
 		// Code to run when a pane is selected by clicking a tab label (although it also unwantedly runs when a pane is
 		// selected by clicking a node in the tree)
 		w.watch("selectedChildWidget", function(attr, oldVal, selectedChildWidget){
-			// If we are still scrolling the Tree from a previous run, cancel that animation
+			// If we aredojo still scrolling the Tree from a previous run, cancel that animation
 			if(moduleTree.scrollAnim){
 				moduleTree.scrollAnim.stop();
 			}
 
 			// Select the TreeNode corresponding to this tab's object.   For dijit/form/Button the path must be
-			// ["root", "dijit", "dijit/form", "dijit/form/Button"]
-			var parts = selectedChildWidget.title.split(/[\./]/),
+			// ["root", "dijit/", "dijit/form/", "dijit/form/Button"]
+			var parts = selectedChildWidget.title.match(/[^/\.]+[/\.]?/g),
 				path = ["root"].concat(array.map(parts, function(part, idx){
-					return parts.slice(0, idx+1).join("/");
-				}));
+				return parts.slice(0, idx+1).join("").replace(/\.$/, "");
+			}));
 			moduleTree.set("path", path).then(function(){
 				// And then scroll it into view.
 				moduleTree.scrollAnim = smoothScroll({
@@ -364,7 +365,7 @@ buildTree = function(){
 				}).play();
 			},
 			function(err){
-				console.log("tree: error setting path to " + parts.join("/"));
+				console.log("tree: error setting path to " + path);
 			});
 		}, true);
 	}
