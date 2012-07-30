@@ -296,9 +296,8 @@ addTabPane = function(page, version){
 	var p = registry.byId("content");
 
 	// Get the URL to get the tab content.
-	// Use old item.php and generate.php for version <= 1.7, new item.php otherwise.
-	// Should have a more general way to do this to make the api-viewer code usable for other projects.
-	var url = baseUrl + (version <= 1.7 ? "lib.old" : "lib") + "/item.php?p=" + page + "&v=" + (version || currentVersion);
+	// versions[] lists what directory (lib or lib.old) contains the item.php script used to display this page
+	var url = baseUrl + versions[version] + "/item.php?p=" + page + "&v=" + (version || currentVersion);
 
 	var title = page;
 

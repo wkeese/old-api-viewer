@@ -6,10 +6,12 @@ include("lib/cache.php");
 //	find out what versions of the docs we have; if the given version isn't available, switch to the most recent.
 $d = dir($dataDir);
 $versions = array();
+$versionHandler = array();	// hash mapping each version to handler directory, lib/ or lib.old/
 $has_version = false;
 while(($entry = $d->read()) !== false){
 	if(strpos($entry, ".")!==0){
 		$versions[] = $entry;
+		$versionHandler[$entry] = file_exists($dataDir . $entry . "/api.xml") ? "lib.old" : "lib";
 	}
 }
 $d->close();
@@ -96,6 +98,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<script type="text/javascript">
 			var baseUrl = "<?php echo $_base_url; ?>";
 			var siteName = 'The Dojo Toolkit';
+			versions = <?php echo json_encode($versionHandler); ?>;		// intentional global
 			require({
 				packages: [{
 					name: "api",
