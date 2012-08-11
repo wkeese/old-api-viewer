@@ -299,7 +299,7 @@ addTabPane = function(page, version){
 	// versions[] lists what directory (lib or lib.old) contains the item.php script used to display this page
 	var url = baseUrl + versions[version] + "/item.php?p=" + page + "&v=" + (version || currentVersion);
 
-	var title = page;
+	var title = page + " (" + version + ")";
 
 	//	get the children and make sure we haven't opened this yet.
 	var c = p.getChildren();
@@ -310,7 +310,7 @@ addTabPane = function(page, version){
 		}
 	}
 	var pane = new dijit.layout.ContentPane({
-		id: title.replace(/[\/.]/g, "_"),
+		id: page.replace(/[\/.]/g, "_") + "_" + version,
 		href: url,
 		title: title,
 		closable: true,
