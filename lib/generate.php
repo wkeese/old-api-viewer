@@ -906,8 +906,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. '<div class="function-signature">'
 			. '<span class="keyword">var</span> foo = new '
 			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
-			. parameter_list($obj, false, $docs, $base_url)
-			. '</div></div>';
+			. parameter_list($fn, false, $docs, $base_url)
+			. ';</div></div>';
 
 		$s .= '<div class="jsdoc-inheritance">Defined by ' . hyperlink($fn["from"], $docs, $base_url, $suffix) . '</div>';
 		if(array_key_exists("description", $fn)){
@@ -928,7 +928,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 			. '<div class="function-signature">'
 			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
 			. parameter_list($fn, false, $docs, $base_url)
-			. '</div></div>';
+			. ';</div></div>';
 
 		// Note: Don't display summary, description, or examples.
 		// They are same as for the module itself and we're already printing those
