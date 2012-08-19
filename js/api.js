@@ -311,6 +311,7 @@ addTabPane = function(page, version){
 	}
 	var pane = new dijit.layout.ContentPane({
 		id: page.replace(/[\/.]/g, "_") + "_" + version,
+		page: page,		// save page because when we select a tab we locate the corresponding TreeNode
 		href: url,
 		title: title,
 		closable: true,
@@ -356,7 +357,7 @@ buildTree = function(){
 
 			// Select the TreeNode corresponding to this tab's object.   For dijit/form/Button the path must be
 			// ["root", "dijit/", "dijit/form/", "dijit/form/Button"]
-			var parts = selectedChildWidget.title.match(/[^/\.]+[/\.]?/g),
+			var parts = selectedChildWidget.page.match(/[^/\.]+[/\.]?/g),
 				path = ["root"].concat(array.map(parts, function(part, idx){
 				return parts.slice(0, idx+1).join("").replace(/\.$/, "");
 			}));
