@@ -322,7 +322,9 @@ addTabPane = function(page, version){
 	return pane;
 };
 
-var moduleTree, moduleModel;
+// Intentional globals (accessed from welcome tab)
+moduleModel = null;
+moduleTree = null;
 
 buildTree = function(){
 	//	handle changing the tree versions.
@@ -347,7 +349,7 @@ buildTree = function(){
 		// Code to run when a pane is selected by clicking a tab label (although it also unwantedly runs when a pane is
 		// selected by clicking a node in the tree)
 		w.watch("selectedChildWidget", function(attr, oldVal, selectedChildWidget){
-			// If we aredojo still scrolling the Tree from a previous run, cancel that animation
+			// If we are still scrolling the Tree from a previous run, cancel that animation
 			if(moduleTree.scrollAnim){
 				moduleTree.scrollAnim.stop();
 			}

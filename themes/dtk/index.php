@@ -12,7 +12,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojo">dojo</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojo/"]);'>dojo</a>
 		</div>
 		<div class="dtk-object-description">
 			The granddaddy of the Dojo Toolkit.  Look here for common methods such as dojo.byId or dojo.style.
@@ -21,7 +21,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dijit">dijit</a>
+			<a href='javascript:moduleTree.selectAndClick(["dijit/"]);'>dijit</a>
 		</div>
 		<div class="dtk-object-description">
 			The user interface framework built on top of Dojo.
@@ -30,7 +30,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojox">dojox</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojox/"]);'>dojox</a>
 		</div>
 		<div class="dtk-object-description">
 			The namespace of additional Dojo Toolkit projects, including things like Charting, the Grid and DTL.
@@ -41,7 +41,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo-query"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojo/query">dojo/query</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojo/", "dojo/query"]);'>dojo/query</a>
 		</div>
 		<div class="dtk-object-description">
 			The CSS3 query selector engine of the Dojo Toolkit.
@@ -50,7 +50,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo-NodeList"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojo/NodeList">dojo/query::NodeList</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojo/", "dojo/NodeList"]);'>dojo/NodeList</a>
 		</div>
 		<div class="dtk-object-description">
 			The return from any dojo/query call, with lots of goodies.
@@ -59,7 +59,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit-form"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dijit/form">dijit/form</a>
+			<a href='javascript:moduleTree.selectAndClick(["dijit/", "dijit/form/"]);'>dijit/form</a>
 		</div>
 		<div class="dtk-object-description">
 			The form elements of Dijit, including TextBox, Button, FilteringSelect and a lot more.
@@ -68,7 +68,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit-layout"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dijit/layout">dijit/layout</a>
+			<a href='javascript:moduleTree.selectAndClick(["dijit/", "dijit/layout/"]);'>dijit/layout</a>
 		</div>
 		<div class="dtk-object-description">
 			Layout widgets to help you design your Dijit-based interface, including BorderContainer and ContentPane.
@@ -77,7 +77,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox-chart2d"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojox/charting/Chart">dojox/charting/Chart</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojox/", "dojox/charting/", "dojox/charting/Chart"]);'>dojox/charting</a>
 		</div>
 		<div class="dtk-object-description">
 			The main object of the Dojo Toolkit's amazing Charting library.
@@ -86,7 +86,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox-grid"></div>
 		<div class="dtk-object-title">
-			<a href="<?php echo $basePath."/".$version; ?>/dojox/grid/DataGrid">dojox/grid</a>
+			<a href='javascript:moduleTree.selectAndClick(["dojox/", "dojox/grid/", "dojox/grid/DataGrid"]);'>dojox/grid</a>
 		</div>
 		<div class="dtk-object-description">
 			 The Grid classes in the Dojo Toolkit, including the DataGrid, EnhancedGrid and TreeGrid.
@@ -94,9 +94,17 @@
 	</div>
 	<div class="clear"></div>
 </div>
-<!-- <div class="dtk-doc-tools">
-	Want to use these documentation tools for your own project?  <a href="http://dojotoolkit.org/reference-guide/util/doctools.html" target="_blank">Find out how!</a>
-</div> -->
+
+<div class="dtk-doc-tools">
+Want to use these documentation tools for your own project?
+<a href="<?php
+if($version < 1.8){
+	echo '/reference-guide/1.7/util/doctools.html';
+}else{
+	echo 'https://github.com/wkeese/api-viewer/blob/master/README.rst';
+} ?>" target="_blank">Find out how!</a>
+</div>
+
 <style type="text/css">
 .dtk-intro { 
 	margin-top: 1.25em;

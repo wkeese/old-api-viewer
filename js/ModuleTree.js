@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dijit/Tree"], function(declare, Tree){
+define(["dojo/_base/declare", "dojo/_base/lang", "dijit/Tree"], function(declare, lang, Tree){
 
 	return declare("ModuleTree", Tree, {
 		// summary:
@@ -31,6 +31,16 @@ define(["dojo/_base/declare", "dijit/Tree"], function(declare, Tree){
 				// Open the page for this module.
 				addTabPane(item.fullname, this.version);
 			}
+		},
+
+		selectAndClick: function(path){
+			// summary:
+			//		Helper method used from welcome screen, ex: moduleTree.selectAndClick(["dojo/", "dojo/query"])
+
+			this.set("path", ["root"].concat(path)).then(lang.hitch(this, function(){
+				var node = this.get("selectedNode");
+				this.onClick(node.item, node);
+			}));
 		}
 	});
 });
