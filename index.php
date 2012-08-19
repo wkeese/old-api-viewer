@@ -92,7 +92,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		<meta name="keywords" content="The Dojo Toolkit, dojo, JavaScript Framework" />
 		<meta name="description" content="The Dojo Toolkit" />
 		<meta name="author" content="Dojo Foundation" />
-		<meta name="copyright" content="Copyright 2006-2011 by the Dojo Foundation" />
+		<meta name="copyright" content="Copyright 2006-2012 by the Dojo Foundation" />
 		<meta name="company" content="Dojo Foundation" />
 
 		<script type="text/javascript">
