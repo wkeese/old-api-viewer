@@ -40,7 +40,7 @@
  *	<!-- NAVIGATION -->
  */
 
-if(isset($_SERVER['HTTP_HOST'])) {
+if(PHP_SAPI !== 'cli') {
   die('Run from command line');
 }
 
@@ -113,7 +113,7 @@ if(!count($args)){
 
 //	ok, check to see if we have a directory where details.xml is...
 if(!isset($dir)){
-	die("ERROR: a directory where the source XML files are was not specified.");
+	die("ERROR: a directory where the source XML files are was not specified.\n");
 }
 
 $start = microtime(true);
