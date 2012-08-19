@@ -355,6 +355,11 @@ buildTree = function(){
 				moduleTree.scrollAnim.stop();
 			}
 
+			if(!selectedChildWidget.page){
+				// This tab doesn't have a corresponding entry in the tree.   It must be the welcome tab.
+				return;
+			}
+
 			// Select the TreeNode corresponding to this tab's object.   For dijit/form/Button the path must be
 			// ["root", "dijit/", "dijit/form/", "dijit/form/Button"]
 			var parts = selectedChildWidget.page.match(/[^/\.]+[/\.]?/g),
