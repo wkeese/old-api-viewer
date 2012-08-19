@@ -4,10 +4,13 @@
 	Use the selector to the left to change versions.
 </p>
 <p class="dtk-intro">
-	To find the object you're interested in, use the tree to the left...or use the quick links below.
+	To find the object you&#039;re interested in, use the tree to the left...or use the quick links below.
 	To print the documentation, simply navigate to the object of your choice and hit Print.
 </p>
 <div class="dtk-objects">
+	<?php 
+	if($version < 1.8){
+	 ?>
 	<h2>The main objects of the Dojo Toolkit</h2>
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo"></div>
@@ -37,11 +40,14 @@
 		</div>
 	</div>
 	<div class="clear"></div>
+	<?php
+	}
+	?>
 	<h2>Common objects of the Dojo Toolkit</h2>
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo-query"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dojo/query">dojo.query</a>
+			<a href="/api/<?php echo $version; ?>/dojo/query">dojo/query</a>
 		</div>
 		<div class="dtk-object-description">
 			The CSS3 query selector engine of the Dojo Toolkit.
@@ -50,7 +56,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo-NodeList"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dojo/NodeList">dojo.NodeList</a>
+			<a href="/api/<?php echo $version; ?>/dojo/NodeList">dojo/NodeList</a>
 		</div>
 		<div class="dtk-object-description">
 			The return from any dojo.query call, with lots of goodies.
@@ -59,7 +65,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit-form"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dijit/form">dijit.form</a>
+			<a href="/api/<?php echo $version; ?>/dijit/form">dijit/form</a>
 		</div>
 		<div class="dtk-object-description">
 			The form elements of Dijit, including TextBox, Button, FilteringSelect and a lot more.
@@ -68,7 +74,7 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit-layout"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dijit/layout">dijit.layout</a>
+			<a href="/api/<?php echo $version; ?>/dijit/layout">dijit/layout</a>
 		</div>
 		<div class="dtk-object-description">
 			Layout widgets to help you design your Dijit-based interface, including BorderContainer and ContentPane.
@@ -77,16 +83,16 @@
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox-chart2d"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dojox/charting/Chart">dojox.charting.Chart</a>
+			<a href="/api/<?php echo $version; ?>/dojox/charting/Chart">dojox/charting/Chart</a>
 		</div>
 		<div class="dtk-object-description">
-			The main object of the Dojo Toolkit's amazing Charting library.
+			The main object of the Dojo Toolkit&#039;s amazing Charting library.
 		</div>
 	</div>
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox-grid"></div>
 		<div class="dtk-object-title">
-			<a href="/api/<?php echo $version; ?>/dojox/grid/DataGrid">dojox.grid</a>
+			<a href="/api/<?php echo $version; ?>/dojox/grid/DataGrid">dojox/grid</a>
 		</div>
 		<div class="dtk-object-description">
 			 The Grid classes in the Dojo Toolkit, including the DataGrid, EnhancedGrid and TreeGrid.
@@ -95,7 +101,7 @@
 	<div class="clear"></div>
 </div>
 <div class="dtk-doc-tools">
-	Want to use these documentation tools for your own project?  <a href="/reference-guide/util/doctools.html" target="_blank">Find out how!</a>
+	Want to use these documentation tools for your own project?  <a href="<?php if($version <1.8) { echo '/reference-guide/1.7/util/doctools.html' } else {echo 'https://github.com/wkeese/api-viewer/blob/master/README.rst'}; ?> " target="_blank">Find out how!</a>
 </div>
 <style type="text/css">
 .dtk-intro { 
