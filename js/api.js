@@ -388,25 +388,13 @@ versionChange = function(e){
 	// summary:
 	//		Change the version displayed.
 
-	var cv = currentVersion, v = this.options[this.selectedIndex].value;
-	if(v.length){
-		// switch to the current version and reload the tree.
-		currentVersion = v;
-		//	TODO: reload the trees.
-	} else {
-		//	revert the selection.
-		for(var i=0, l=this.options.length; i<l; i++){
-			if(this.options[i].value == currentVersion){
-				this.selectedIndex = i;
-				v = this.options[this.selectedIndex].value;
-				break;
-			}
-		}
-	}
+	var v = this.options[this.selectedIndex].value;
 
 	//	if we reverted, bug out.
-	if(cv == v){ return; }
+	if(currentVersion == v){ return; }
+
 	currentVersion = v;
+
 	buildTree();
 };
 
