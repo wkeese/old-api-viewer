@@ -333,6 +333,9 @@ buildTree = function(){
 		moduleTree.destroyRecursive();
 	}
 
+	// load welcome tab for this version
+	registry.byId("baseTab").set("href", baseUrl + "themes/" + theme + "/index.php?v=" + currentVersion);
+
 	//	load the module tree data.
 	moduleModel = new ModuleTreeModel(baseUrl + 'lib/tree.php?v=' + currentVersion);
 

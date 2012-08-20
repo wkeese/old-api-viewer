@@ -97,6 +97,7 @@ if(isset($_GET["clearcache"]) && $use_cache){
 
 		<script type="text/javascript">
 			var baseUrl = "<?php echo $_base_url; ?>";
+			var theme = "<?php echo $th; ?>";
 			var siteName = 'The Dojo Toolkit';
 			versions = <?php echo json_encode($versionHandler); ?>;		// intentional global
 			require({
@@ -171,7 +172,6 @@ foreach($versions as $v){
 			</div>
 			<div id="content" data-dojo-type="dijit.layout.TabContainer" data-dojo-props="region: 'center', tabStrip: true">
 				<div id="baseTab" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Welcome'">
-<?php include("themes/" . $th . "/index.php"); ?>
 				</div>
 			</div>
 			<div id="foot" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region: 'bottom'">

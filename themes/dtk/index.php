@@ -1,3 +1,10 @@
+<?php
+//	set up $basePath
+include("../../config.php");
+
+// and get the version number from URL
+$version = $_GET["v"];
+?>
 <h1>The Dojo Toolkit API</h1>
 <p class="dtk-intro">
 	Welcome to the Dojo Toolkit API documentation.  You are browsing version <strong><?php echo $version; ?></strong> of the Dojo Toolkit. 
