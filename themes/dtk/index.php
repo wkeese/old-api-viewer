@@ -19,7 +19,7 @@ $version = $_GET["v"];
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojo"></div>
 		<div class="dtk-object-title">
-			<a href='javascript:moduleTree.selectAndClick([<?php echo ($version < 1.8) ? "dojo" : "dojo/"; ?>]);'>dojo</a>
+			<a href='javascript:moduleTree.selectAndClick(["<?php echo ($version < 1.8) ? "dojo" : "dojo/"; ?>"]);'>dojo</a>
 		</div>
 		<div class="dtk-object-description">
 			The granddaddy of the Dojo Toolkit.  Look here for common methods such as dojo.byId or dojo.style.
@@ -28,7 +28,7 @@ $version = $_GET["v"];
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dijit"></div>
 		<div class="dtk-object-title">
-			<a href='javascript:moduleTree.selectAndClick([<?php echo $version < 1.8 ? "dijit" : "dijit/"; ?>]);'>dijit</a>
+			<a href='javascript:moduleTree.selectAndClick(["<?php echo $version < 1.8 ? "dijit" : "dijit/"; ?>"]);'>dijit</a>
 		</div>
 		<div class="dtk-object-description">
 			The user interface framework built on top of Dojo.
@@ -37,7 +37,7 @@ $version = $_GET["v"];
 	<div class="dtk-object">
 		<div class="dtk-object-image dtk-dojox"></div>
 		<div class="dtk-object-title">
-			<a href='javascript:moduleTree.selectAndClick([<?php echo $version < 1.8 ? "dojox" : "dojox/"; ?>]);'>dojox</a>
+			<a href='javascript:moduleTree.selectAndClick(["<?php echo $version < 1.8 ? "dojox" : "dojox/"; ?>"]);'>dojox</a>
 		</div>
 		<div class="dtk-object-description">
 			The namespace of additional Dojo Toolkit projects, including things like Charting, the Grid and DTL.
