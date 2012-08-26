@@ -64,7 +64,8 @@ function smoothScroll(args){
 	}, args));
 }
 
-// Monkey-patch TabContainer so closing a pane selects the adjacent one, rather than the first one
+// Monkey-patch TabContainer so closing a pane selects the adjacent one, rather than the first one.
+// Remove this for 1.9 since it's fixed in #9776
 TabContainer.prototype.removeChild = function(/*dijit/_WidgetBase*/ page){
 	// Overrides StackContainer.removeChild() so closing the selected tab selects the adjacent tab,
 	// rather than the first one
