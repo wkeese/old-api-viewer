@@ -5,11 +5,11 @@
 # you'll need to make similar changes to the rewrite rules
 $basePath = "/api";
 
-$_base_url = "http://" . $_SERVER["HTTP_HOST"] . $basePath . "/";
+$_base_url = "//" . $_SERVER["HTTP_HOST"] . $basePath . "/";
 //$_base_url = "./";
 
 # Location of dojo, without trailing slash
-$dojoroot = "http://ajax.googleapis.com/ajax/libs/dojo/1.8.0";
+$dojoroot = "//ajax.googleapis.com/ajax/libs/dojo/1.8.0";
 # $dojoroot = "/trunk";	// local build
 
 $_site_name = "The Dojo Toolkit";
