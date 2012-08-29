@@ -120,7 +120,7 @@ paneOnLoad = function(data){
 		evt.preventDefault();
 
 		// Open tab for specified module
-		var tmp = this.href.replace(baseUrl, "").replace(/#.*/, "").split("/");
+		var tmp = this.href.replace(/^[a-z]*:/, "").replace(baseUrl, "").replace(/#.*/, "").split("/");
 		var version = tmp[0];
 		var page = tmp.slice(1).join("/");
 		var pane = addTabPane(page, version);
