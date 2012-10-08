@@ -103,5 +103,9 @@ if(!isset($page)){ $page = "dojo"; }
 if(isset($_GET["p"])){ $page = $_GET["p"]; }
 if(isset($_GET["v"])){ $version = $_GET["v"]; }
 
+//  sanitize $version and $page so user can't specify a string like ../../...
+$version = preg_replace("/\\.\\.+/", "", $version);
+$page = preg_replace("/\\.\\.+/", "", $page);
+
 echo get_page($version, $page, $use_cache, $_base_url, $refdoc);
 ?>
