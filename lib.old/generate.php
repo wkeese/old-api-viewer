@@ -159,7 +159,9 @@ function load_docs($version){
 	$f = $data_dir . $details;
 
 	if(!file_exists($f)){
-		echo "API data does not exist for the version: " . $version . "<br/>";
+        header(":", true, 400);
+        header("Content-type: text/plain");
+		echo "API data does not exist for the version: " . $version;
 		exit();
 	}
 
@@ -959,8 +961,9 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	get our object
 	$obj = generate_object($page, $version, $docs);
 	if(!$obj){
-		$s = '<div style="font-weight: bold;color: #900;">The requested object was not found.</div>';
-		echo $s;
+        header(":", true, 400);
+        header("Content-type: text/plain");
+		echo "The requested object was not found.";
 		exit();
 	}
 
