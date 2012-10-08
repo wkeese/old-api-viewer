@@ -13,7 +13,8 @@ if(file_exists($path)){
     header("Content-Type: application/json");
     echo file_get_contents($path);
 }else{
-    header("HTTP/1.0 400 Bad Request");
+    header(":", true, 400);
+    header("Content-type: text/plain");
     echo "Cannot open file $path";
 }
 
