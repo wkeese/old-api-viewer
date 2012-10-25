@@ -691,15 +691,19 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 	}
 	$details .= '</div>';
 
-	$description =
-		array_key_exists("description", $method) ? $method["description"] :
-		(array_key_exists("summary", $method) ? $method["summary"] : "");
-
-	if($description){
-		$description = auto_hyperlink($description, $docs, $base_url, $suffix);
-		$details .= '<div class="jsdoc-summary">' . $description . '</div>';
+	//	summary and description for details section
+	if(array_key_exists("summary", $method)){
+		$details .= '<div class="jsdoc-full-summary">'
+			. auto_hyperlink($method["summary"], $docs, $base_url, $suffix)
+			. "</div>";
+	}
+	if(array_key_exists("description", $method)){
+		$details .= '<div class="jsdoc-full-summary">'
+			. auto_hyperlink($method["description"], $docs, $base_url, $suffix)
+			. "</div>";
 	}
 
+	// summary for overview section
 	if(array_key_exists("summary", $method)){
 		// Display abbreviated description.   If user has explicitly specified separate summary and description, then use
 		// the summary.  If user has only specified a summary, then use it, but trim to first sentence
