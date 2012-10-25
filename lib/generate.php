@@ -693,8 +693,8 @@ function _generate_method_output($page, $method, $name, $docs = array(), $base_u
 
 	$description =
 		array_key_exists("description", $method) ? $method["description"] :
-		array_key_exists("summary", $method) ? $method["summary"] :
-		"";
+		(array_key_exists("summary", $method) ? $method["summary"] : "");
+
 	if($description){
 		$description = auto_hyperlink($description, $docs, $base_url, $suffix);
 		$details .= '<div class="jsdoc-summary">' . $description . '</div>';
