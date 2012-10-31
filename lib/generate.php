@@ -44,7 +44,7 @@ function icon_url($type, $size=16){
 		case 'DomNode':   $img='domnode'; break;
 		case 'Array':   $img='array'; break;
 		case 'Boolean':   $img='boolean'; break;
-		case 'Date':    $img='date'; break; 
+		case 'Date':    $img='date'; break;
 		case 'Error':     $img='error'; break;
 		case 'Function':  $img='function'; break;
 		case 'Integer':
@@ -52,7 +52,7 @@ function icon_url($type, $size=16){
 		case 'int':
 		case 'Double':
 		case 'integer':
-		case 'Number':    $img='number'; break;   
+		case 'Number':    $img='number'; break;
 		case 'RegExp':    $img='regexp'; break;
 		case 'String':    $img='string'; break;
 		default:      $img='object'; break;
@@ -750,7 +750,6 @@ function _generate_param_table($params, $docs = array(), $base_url = "", $suffix
 	//	create the inline table for parameters; isolated so that nesting may occur on more than one level.
 	$tmp_details = array();
 	foreach($params as $p){
-		$tester = array_pop(explode(".", $p["type"]));
 		$pstr = '<tr>'
 			. '<td class="jsdoc-param-name">'
 			. $p["name"]
@@ -947,7 +946,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= return_details($fn, $docs, $base_url, $suffix);
 	}
 	//	display note for kwargs pseudo-classes that aren't real classes
-	$prop = array_pop(explode(".", $page));
+    $prop = substr(strrchr($page, '.'), 1);
 	if(strpos($prop, "__") === 0){
 		$s .= '<p><strong>Note:</strong>'
 			. 'This is not a real constructor, but just a description of the type of object that should be passed as'
@@ -1121,12 +1120,12 @@ function generate_object_tree($version, $roots=array(), $filter=true, $docs=arra
 				"fullname"=>$name,
 				"type"=>(strlen($type) ? strtolower($type): "object")
 			);
-		} 
+		}
 
 		if(isset($val)){
 			if($filter && strpos($short_name, "_") === 0){
 				unset($val);
-				continue; 
+				continue;
 			}
 			if(count($name_parts)){
 				$finder = implode(".", $name_parts);
@@ -1147,7 +1146,7 @@ function generate_object_tree($version, $roots=array(), $filter=true, $docs=arra
 			unset($val);
 		}
 	}
-	
+
 	//	go through the top-level objects and reset the type on it.
 	$counter = 0;
 	foreach($ret as &$obj){
