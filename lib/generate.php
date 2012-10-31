@@ -846,6 +846,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 
 	$data_dir = dirname(__FILE__) . "/../data/" . $version . "/";
 
+	$object = preg_replace("/.*\//", "", $page);		// dijit/form/DateTextBox --> DateTextBox
+
 	//	get the docs to run against.  this can be optionally provided;
 	//	if they are they ALL need to be there.
 	if(!count($docs)){
@@ -911,7 +913,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= '<div class="jsdoc-function-information"><h3>Usage:</h3>'
 			. '<div class="function-signature">'
 			. '<span class="keyword">var</span> foo = new '
-			. preg_replace("/.*\//", "", $page)		// output "DateTextBox" not "dijit/form/DateTextBox"
+			. $object
 			. parameter_list($fn, false, $docs, $base_url)
 			. ';</div></div>';
 
@@ -932,7 +934,7 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 
 		$s .= '<div class="jsdoc-function-information"><h2>Usage</h2>'
 			. '<div class="function-signature">'
-			. preg_replace("/.*\//", "", $page)		// output "query" not "dojo/query"
+			. $object
 			. parameter_list($fn, false, $docs, $base_url)
 			. ';</div></div>';
 
@@ -946,13 +948,12 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 		$s .= return_details($fn, $docs, $base_url, $suffix);
 	}
 	//	display note for kwargs pseudo-classes that aren't real classes
-    $prop = substr(strrchr($page, '.'), 1);
-	if(strpos($prop, "__") === 0){
+ 	if(preg_match("/^(.*\\.|)__/", $object)){
 		$s .= '<p><strong>Note:</strong>'
 			. 'This is not a real constructor, but just a description of the type of object that should be passed as'
 			. ' a parameter to some method(s), and/or the return value from some method(s).'
 			. ' In other words, the type exists only for documentation purposes, and you cannot call new '
-			. $prop . '().'
+			. $object	 . '().'
 			. '</p>';
 	}
 
