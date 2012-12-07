@@ -130,7 +130,7 @@ paneOnLoad = function(data){
 		if(anchor){
 			pane.onLoadDeferred.then(function(){
 				var target = query('a[name="' + anchor + '"]', context);
-				if(target){
+				if(target[0]){
 					var anim = smoothScroll({
 						node: target[0],
 						win: context,
@@ -145,7 +145,7 @@ paneOnLoad = function(data){
 	on(context, on.selector("a.inline-link", "click"), function(evt){
 		evt.preventDefault();
 		var target = query('a[name="' + this.href.substr(this.href.indexOf('#')+1) + '"]', context);
-		if(target){
+		if(target[0]){
 			var anim = smoothScroll({
 				node: target[0],
 				win: context,
@@ -426,7 +426,7 @@ ready(function(){
 		if(p && window.location.hash.length){
 			var h = p.onLoadDeferred.then(function(){
 				var target = query('a[name$="' + window.location.hash.substr(window.location.hash.indexOf('#')+1) + '"]', p.domNode);
-				if(target.length){
+				if(target[0]){
 					var anim = smoothScroll({
 						node: target[0],
 						win: p.domNode,
