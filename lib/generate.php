@@ -498,19 +498,39 @@ function auto_hyperlink($text, $docs, $base_url, $suffix = ""){
 	$global_base_url = $base_url;
 	$global_suffix = $suffix;
 
-	// Find likely module references, ex:
-	//		dijit/Tree
-	//		dijit/Tree.TreeNode
-	//		dojo/dom-style.set(a, b)
-	// .. or any of the above surrounded by <code>...</code>
-	//
-	// Regex designed to not include the period ending a sentence, ex:
-	//		For more info, see dijit/Tree.
-	return preg_replace_callback(
-		'&(<code>|)([a-zA-Z0-9]+/[-a-zA-Z0-9_]+([\./][-a-zA-Z0-9_]+)*)(\([^(]*\)|)(</code>|)&',
-		"auto_hyperlink_replacer",
-		$text
-	);
+	// Split text into code examples and segments of free text, and then insert hyperlinks in free text segments
+	$parts = preg_split("&(<pre><code>|</code></pre>)&", $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+	$inExample = false;
+	$out = "";
+	foreach($parts as $part){
+		if($part == "<pre><code>"){
+			$inExample = true;
+			$out .= "<pre><code>";
+		}else if($part == "</code></pre>"){
+			$out .= "</pre></code>";
+			$inExample = false;
+		}else if($inExample){
+			// Don't try to stick hyperlinks into code examples
+			$out .= $part;
+		}else{
+			// Find likely module references, ex:
+			//		dijit/Tree
+			//		dijit/Tree.TreeNode
+			//		dojo/dom-style.set(a, b)
+			// .. or any of the above surrounded by <code>...</code>
+			//
+			// Regex designed to not include the period ending a sentence, ex:
+			//		For more info, see dijit/Tree.
+
+			$out .= preg_replace_callback(
+				'&(<code>|)([a-zA-Z0-9]+/[-a-zA-Z0-9_]+([\./][-a-zA-Z0-9_]+)*)(\([^(]*\)|)(</code>|)&',
+				"auto_hyperlink_replacer",
+				$part
+			);
+		}
+	}
+
+	return $out;
 }
 
 function parameter_list($method, $types, $docs, $base_url){
