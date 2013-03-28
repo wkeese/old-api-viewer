@@ -23,44 +23,22 @@ Generating the documentation and running API viewer locally
 
 MacOS::
 
-    environmentConfig: {
         basePath: '../trunk/',
-        packages: {
-            dojo: 'dojo',
-            dijit: 'dijit',
-            dojox: 'dojox',
-            doh: 'util/doh'
-        },
-        // ...
-    }
 
 Windows::
 
-	environmentConfig: {
 		basePath: 'c:\\users\\me\\trunk\\',
-		packages: {
-			dojo: 'dojo',
-			dijit: 'dijit',
-			dojox: 'dojox',
-			doh: 'util/doh'
-		},
-		// ...
-		excludePaths: {
-            // ...
-            /\\(?:tests|nls|demos)\\/,
-            // ...
-		}
-	}
+
 
 4. run parser on ``dojo`` source
 
 MacOS::
 
-    $ ./parse.sh ../trunk/dojo ../trunk/dijit ../trunk/dojox
+    $ ./parse.sh config=./config.js
 
 Windows::
 
-    C:\> parse.bat c:\\users\\me\\trunk
+    C:\> parse.bat config=./config.js
 
 This will generate ``details.xml`` and ``tree.json``.
 
