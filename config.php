@@ -15,7 +15,7 @@ $dojoroot = "//ajax.googleapis.com/ajax/libs/dojo/1.8.0";
 $_site_name = "The Dojo Toolkit";
 
 # Initially display this version
-$defVersion = "1.8";
+$defVersion = "1.9";
 
 # Location of data files for each version.   This directory should contain a subdirectory for each product version,
 # and the subdirectory should contain details.xml and tree.json
