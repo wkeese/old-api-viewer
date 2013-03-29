@@ -101,7 +101,7 @@ PHP files:
 
 - generate.php - utility methods
 
-- spider.php - used to pre-cache web static HTML versions of pages
+- item.php - generates documentation for one module, i.e. the content of one tab
 
 The data files are:
 
