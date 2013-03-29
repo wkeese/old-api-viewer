@@ -33,33 +33,6 @@ function convert_type($type){
 	return $base;
 }
 
-function icon_url($type, $size=16){
-	$img = "object";
-	switch($type){
-		case 'Namespace':
-		case 'namespace': $img='namespace'; break;
-		case 'Constructor': $img='constructor'; break;
-		case 'Node':
-		case 'DOMNode':
-		case 'DomNode':   $img='domnode'; break;
-		case 'Array':   $img='array'; break;
-		case 'Boolean':   $img='boolean'; break;
-		case 'Date':    $img='date'; break;
-		case 'Error':     $img='error'; break;
-		case 'Function':  $img='function'; break;
-		case 'Integer':
-		case 'Float':
-		case 'int':
-		case 'Double':
-		case 'integer':
-		case 'Number':    $img='number'; break;
-		case 'RegExp':    $img='regexp'; break;
-		case 'String':    $img='string'; break;
-		default:      $img='object'; break;
-	}
-	return 'css/icons/' . $size . 'x' . $size . '/' . $img . '.png';
-}
-
 function object_exists($name, $docs){
 	// summary:
 	//		Returns true if there's a page for the specified object, ex: "dijit/form/Button" or "dijit/Tree.TreeNode"

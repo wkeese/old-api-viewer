@@ -396,3 +396,13 @@ div.jsdoc-summary-list ul li span.parameters {
 div.jsdoc-summary-list ul li .jsdoc-returns {
 	font-weight: bold;
 }
+
+/* The legend listing the meanings of each icon */
+ul.jsdoc-legend {
+	list-style-type: none;
+}
+
+ul.jsdoc-legend img, ul.jsdoc-legend li > span:first-child {
+	/* align icon vertically with text; note that icons in second list are <span> nodes */
+	vertical-align: middle;
+}
