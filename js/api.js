@@ -64,47 +64,6 @@ function smoothScroll(args){
 	}, args));
 }
 
-// Monkey-patch TabContainer so closing a pane selects the adjacent one, rather than the first one.
-// Remove this for 1.9 since it's fixed in #9776
-TabContainer.prototype.removeChild = function(/*dijit/_WidgetBase*/ page){
-	// Overrides StackContainer.removeChild() so closing the selected tab selects the adjacent tab,
-	// rather than the first one
-
-	// new line
-	var idx = array.indexOf(this.getChildren(), page);
-
-	// this.inherited(arguments) doesn't work, is there a better way to override TabContainer.removeChild() so it does?
-	require("dijit/_Container").prototype.removeChild.apply(this, arguments);
-
-	if(this._started){
-		// this will notify any tablists to remove a button; do this first because it may affect sizing
-		topic.publish(this.id + "-removeChild", page);	// publish
-	}
-
-	// If all our children are being destroyed than don't run the code below (to select another page),
-	// because we are deleting every page one by one
-	if(this._descendantsBeingDestroyed){ return; }
-
-	// Select new page to display, also updating TabController to show the respective tab.
-	// Do this before layout call because it can affect the height of the TabController.
-	if(this.selectedChildWidget === page){
-		this.selectedChildWidget = undefined;
-		if(this._started){
-			var children = this.getChildren();
-			if(children.length){
-				this.selectChild(children[Math.max(idx-1, 0)]);	// changed line
-			}
-		}
-	}
-
-	if(this._started){
-		// In case the tab titles now take up one line instead of two lines
-		// (note though that ScrollingTabController never overflows to multiple lines),
-		// or the height has changed slightly because of addition/removal of tab which close icon
-		this.layout();
-	}
-};
-
 paneOnLoad = function(data){
 	var context = this.domNode;
 
