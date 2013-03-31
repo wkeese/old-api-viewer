@@ -378,6 +378,9 @@ ready(function(){
 
 	buildTree();
 
+	// If URL pointed to a specific page, load tab for that page.
+	// The data is actually already included on the page (for google's benefit), so we could optimize this by using
+	// that data instead of loading over XHR again.
 	if(page && currentVersion) {
 		var p = addTabPane(page, currentVersion);
 

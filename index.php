@@ -2,6 +2,7 @@
 //	set up all our variables.
 include("config.php");
 include("lib/cache.php");
+include("lib/generate.php");
 
 //	find out what versions of the docs we have; if the given version isn't available, switch to the most recent.
 $d = dir($dataDir);
@@ -113,11 +114,6 @@ if(isset($_GET["clearcache"]) && $use_cache){
 				"api/api"		// main work is done in here
 			], function(dom, fx, ready, registry){
 				ready(function(){
-<?php if($is_page){ ?>
-					// This is disabled
-					// TODO figure out why this doesn't work on permalink or is even needed
-					// registry.byId("initialPagePane").paneOnLoad();
-<?php } ?>
 					setTimeout(function(){
 						var loader = dom.byId("loader");
 						fx.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
@@ -128,7 +124,9 @@ if(isset($_GET["clearcache"]) && $use_cache){
 			// Set currentVersion as a global variable, since it's accessed from api.js
 			currentVersion = '<?php echo $version; ?>';
 
+			// page specified in URL
 			var page = '<?php echo ($is_page?$page:"") ?>';
+
 			var bugdb = '<?php echo $bugdb; ?>';
 		</script>
 	</head>
@@ -193,5 +191,15 @@ foreach($versions as $v){
 <?php include("themes/" . $th . "/footer.php"); ?>
 			</div>
 		</div>
+		<?php if($is_page){ ?>
+			<!-- inline documentation into plain HTML output for benefit of search engines -->
+			<div id="plainHtmlContent">
+				<?php echo generate_object_html($page, $version, $_base_url, "", true, array(), ""); ?>
+			</div>
+			<script>
+				// Hide HTML content except for search engines
+				document.getElementById("plainHtmlContent").style.display = "none";
+			</script>
+		<?php } ?>
 	</body>
 </html>
