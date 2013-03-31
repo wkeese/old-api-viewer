@@ -133,7 +133,11 @@ if(isset($_GET["clearcache"]) && $use_cache){
 		</script>
 	</head>
 	<body class="claro">
-		<div id="loader"><div id="loaderInner"></div></div>
+		<div id="loader" style="display:none"><div id="loaderInner"></div></div>
+		<script>
+			// Don't show loading screen unless scripts are enabled; otherwise it will hang on loading screen forever.
+			document.getElementById("loader").style.display="";
+		</script>
 		<div id="printBlock"></div>
 
 		<div id="main" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="liveSplitters: false">
@@ -152,7 +156,10 @@ foreach($versions as $v){
 					</div>
 				</div>
 				<div data-dojo-type="dijit.layout.AccordionContainer" data-dojo-props="region: 'center'">
-					<div id="moduleTreePane" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Modules', selected: true"></div>
+					<div id="moduleTreePane" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Modules', selected: true">
+						<!-- give link to plain html tree for google, will be replaced by dijit/Tree on browsers -->
+						See <a href="htmlTree.php">plain HTML tree</a> listing modules.
+					</div>
 					<div data-dojo-type="dijit.layout.ContentPane" title="Legend">
 						Types:
 						<ul class="jsdoc-legend">

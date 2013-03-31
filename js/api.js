@@ -347,7 +347,7 @@ buildTree = function(){
 		persist: false,		// tree item ids have slashes, which confuses the persist code
 		version: currentVersion
 	});
-	moduleTree.placeAt("moduleTreePane");
+	registry.byId("moduleTreePane").set("content", moduleTree);
 
 	var w = registry.byId("content");
 	if(w){
