@@ -17,7 +17,6 @@ Generating the documentation and running API viewer locally
 
     $ git clone --recursive https://github.com/wkeese/js-doc-parse.git
     $ cd js-doc-parse
-    $ git checkout all-my-changes
 
 3. edit config.js to give path to dojo (your path may vary from example below):
 
@@ -40,7 +39,7 @@ Windows::
 
     C:\> parse.bat config=./config.js
 
-This will generate ``details.xml`` and ``tree.json``.
+This will generate ``details.xml``, ``tree.json``, and ``tree.html``
 
 5. check out api-viewer
 
@@ -55,7 +54,7 @@ to the other location.
 
 6. move files to data directory
 
-Create ``api_data/1.8`` directory (or whatever the current version is), as a *sibling* of the api directory,
+Create ``api_data/1.9`` directory (or whatever the current version is), as a *sibling* of the api directory,
 and move the ``details.xml`` and ``tree.json`` from the step #4 above to that directory.
 
 Alternately, you can set the directory to somewhere else by editing config.php.
