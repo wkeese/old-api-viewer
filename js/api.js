@@ -255,9 +255,8 @@ paneOnLoad = function(data){
 addTabPane = function(page, version){
 	var p = registry.byId("content");
 
-	// Get the URL to get the tab content.
-	// versions[] lists what directory (lib or lib.old) contains the item.php script used to display this page
-	var url = baseUrl + versions[version] + "/item.php?p=" + page + "&v=" + (version || currentVersion);
+	// URL to get the tab content.
+	var url = baseUrl + "apidata/" + (version || currentVersion) + "/" + page;
 
 	var title = page + " (" + version + ")";
 
@@ -297,7 +296,7 @@ buildTree = function(){
 	registry.byId("baseTab").set("href", baseUrl + "themes/" + theme + "/index.php?v=" + currentVersion);
 
 	//	load the module tree data.
-	moduleModel = new ModuleTreeModel(baseUrl + 'lib/tree.php?v=' + currentVersion);
+	moduleModel = new ModuleTreeModel(baseUrl + 'apidata/' + currentVersion + '/tree.json');
 
 	moduleTree = new ModuleTree({
 		id: "moduleTree",

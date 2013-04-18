@@ -2,20 +2,27 @@ php_flag display_startup_errors on
 php_flag display_errors on
 php_flag html_errors on
 
-Options -MultiViews
+Options -MultiViews +FollowSymLinks
 
 RewriteEngine On
 
 #  Set the prefix for all matches
 RewriteBase   /api/
 
-# convert static/rest-like requests
-RewriteRule ^html/([0-9.]+)/(.*)\.html$ lib/item.php?v=$1&p=$2 [L,QSA]
-RewriteRule ^json/([0-9.]+)/class-tree\.json$ lib/class-tree.php?v=$1 [L,QSA]
+# Pass through these URL's, which are accessed from the index.html page
+RewriteRule ^(css|js|rpc|themes)/(.*)$ $1/$2 [L]
 
-# pass through these URL's, which are accessed from the index.html page rather than directly by the user
-RewriteRule ^(css|data|lib|lib.old|images|js|rpc|themes|install|tests)/(.*)$ $1/$2 [L,QSA]
-RewriteRule ^htmlTree.php$ htmlTree.php [L,QSA]
+# URLs from the application (rather than directly from the user) to get the tree data, or text to display in a tab.
+# Ex: apidata/1.9/dijit/Dialog or apidata/1.3/tree.json. Process modules via item.php.  In the future we will probably
+# pre-generate the data so this will just map to an HTML file.
+RewriteRule ^apidata/([^/]+)/tree.json$ lib/tree.php?v=$1 [L]
+RewriteRule ^apidata/([^/]+)/tree.html$ lib/htmlTree.php?v=$1 [L]
+RewriteRule ^apidata/(1.[3-7])/(.*)$ lib.old/item.php?v=$1&p=$2 [L,QSA]
+RewriteRule ^apidata/([^/]+)/(.*)$ lib/item.php?v=$1&p=$2 [L,QSA]
 
-# but for anything else (ex: 1.8/dijit/Dialog), handle it from index.php
+# Workaround behavior where this file runs again after the RewriteRules above execute.
+# Want to use the END flag instead of L flag but it's only available in Apache 2.4.
+RewriteRule ^(lib|lib.old)/(.*)$ $1/$2 [L]
+
+# For anything else (ex: permalink like 1.8/dijit/Dialog), handle it from index.php
 RewriteRule ^(.*)$ index.php?qs=$1 [L,QSA]
