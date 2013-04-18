@@ -858,10 +858,8 @@ function generate_object_html($page, $version, $base_url = "", $suffix = "", $ve
 	//	get our object
 	$obj = generate_object($page, $version, $docs);
 	if(!$obj){
-        header(":", true, 400);
-        header("Content-type: text/plain");
-		echo "The requested object was not found.";
-		exit();
+        // Want to set page code of 400, but it's too late by the time we get here.
+		return "The requested object was not found.";
 	}
 
 	//	process it and output us some HTML.
