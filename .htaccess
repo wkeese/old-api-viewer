@@ -16,7 +16,7 @@ RewriteRule ^(css|js|rpc|themes)/(.*)$ $1/$2 [L]
 # Ex: apidata/1.9/dijit/Dialog or apidata/1.3/tree.json. Process modules via item.php.  In the future we will probably
 # pre-generate the data so this will just map to an HTML file.
 RewriteRule ^apidata/([^/]+)/tree.json$ lib/tree.php?v=$1 [L]
-RewriteRule ^apidata/([^/]+)/tree.html$ lib/htmlTree.php?v=$1 [L]
+RewriteRule ^([^/]+)/tree.html$ lib/html-tree.php?v=$1 [L]		# note: tree.html contains relative paths to permalink pages
 RewriteRule ^apidata/(1.[3-7])/(.*)$ lib.old/item.php?v=$1&p=$2 [L,QSA]
 RewriteRule ^apidata/([^/]+)/(.*)$ lib/item.php?v=$1&p=$2 [L,QSA]
 

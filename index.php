@@ -158,7 +158,7 @@ foreach($versions as $v){
 					<div id="moduleTreePane" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="title: 'Modules', selected: true">
 						<!-- give link to plain html tree for google, will be replaced by dijit/Tree on browsers -->
 						<p id="plainTree">
-							See <a href="<?php echo $_base_url; ?>apidata/<?php echo $version; ?>/tree.html">plain HTML tree</a> listing modules.
+							See <a href="<?php echo $_base_url; ?><?php echo $version; ?>/tree.html">plain HTML tree</a> listing modules.
 						</p>
 						<script>
 							// Hide link to plain tree except for search engines
