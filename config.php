@@ -9,7 +9,7 @@ $_base_url = "//" . $_SERVER["HTTP_HOST"] . $basePath . "/";
 //$_base_url = "./";
 
 # Location of dojo, without trailing slash
-$dojoroot = "//ajax.googleapis.com/ajax/libs/dojo/1.8.0";
+$dojoroot = "//ajax.googleapis.com/ajax/libs/dojo/1.9.0";
 # $dojoroot = "/trunk";	// local build
 
 $_site_name = "The Dojo Toolkit";
