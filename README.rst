@@ -17,6 +17,7 @@ Generating the documentation and running API viewer locally
 
     $ git clone --recursive https://github.com/wkeese/js-doc-parse.git
     $ cd js-doc-parse
+    $ git checkout 1.0
 
 3. edit config.js to give path to dojo (your path may vary from example below):
 
