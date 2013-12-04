@@ -48,7 +48,7 @@ Check out this project into a directory called "api", under your web root, so th
 http://localhost/api:
 
     $ cd `your web root`
-    $ git clone git@github.com:wkeese/api-viewer.git api
+    $ git clone https://github.com/wkeese/api-viewer.git api
 
 If you put it in a different location instead, then you need to update config.php and .htaccess to point
 to the other location.
